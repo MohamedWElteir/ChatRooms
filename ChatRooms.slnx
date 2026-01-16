@@ -1,8 +1,20 @@
 <Solution>
-  <Folder Name="/shared/" />
+  <Folder Name="/aspire/">
+    <Project Path="ChatRooms.AppHost/ChatRooms.AppHost.csproj" />
+    <Project Path="ChatRooms.ServiceDefaults/ChatRooms.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="ChatRooms.SharedKernel/ChatRooms.SharedKernel.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
-  <Folder Name="/src/" />
-  <Folder Name="/tests/" />
+  <Folder Name="/src/">
+    <Project Path="ChatRooms.API/ChatRooms.API.csproj" />
+    <Project Path="ChatRooms.Domain/ChatRooms.Domain.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />
+    <Project Path="ChatRooms.Domain.Tests/ChatRooms.Domain.Tests.csproj" />
+  </Folder>
 </Solution>
