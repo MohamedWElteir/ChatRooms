@@ -12,5 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChatRooms.API\ChatRooms.API.csproj" />
+    <ProjectReference Include="..\ChatRooms.Blazor\ChatRooms.Blazor.csproj" />
   </ItemGroup>
 </Project>
