@@ -2,11 +2,11 @@
 
 namespace ChatRooms.Domain.Shared;
 
-public abstract class Entity<TId>(TId id, IDateTimeProvider dateTimeProvider) : IEquatable<Entity<TId>> where TId : notnull
+public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : notnull
 {
     public TId Id { get; private init; } = id ?? throw new ArgumentNullException(nameof(id));
-    public DateTime CreatedAt { get; private init; } = dateTimeProvider.UtcNow;
-    public DateTime UpdatedAt { get; set; } = dateTimeProvider.UtcNow;
+    public DateTime CreatedAt { get; private init; } = dateTime;
+    public DateTime UpdatedAt { get; set; } = dateTime;
     private readonly List<DomainEvent> _domainEvents = [];
     public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
