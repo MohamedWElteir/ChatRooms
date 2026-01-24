@@ -1,7 +1,6 @@
-﻿namespace ChatRooms.SharedKernel.Utils
+﻿namespace ChatRooms.SharedKernel.Utils;
+
+public class SystemDateTimeProvider : IDateTimeProvider
 {
-    public class SystemDateTimeProvider : IDateTimeProvider
-    {
-        public DateTime UtcNow => DateTime.UtcNow;
-    }
+    public DateTime UtcNow => DateTime.UtcNow;
 }

@@ -1,10 +1,14 @@
-﻿namespace ChatRooms.Domain.Shared;
+﻿using ChatRooms.SharedKernel.Utils;
 
-public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>> where TId : notnull
+namespace ChatRooms.Domain.Shared;
+
+public abstract class Entity<TId>(TId id, IDateTimeProvider dateTimeProvider) : IEquatable<Entity<TId>> where TId : notnull
 {
     public TId Id { get; private init; } = id ?? throw new ArgumentNullException(nameof(id));
-    public DateTime CreatedAt { get; private init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; private init; } = dateTimeProvider.UtcNow;
+    public DateTime UpdatedAt { get; set; } = dateTimeProvider.UtcNow;
+    private readonly List<DomainEvent> _domainEvents = [];
+    public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
@@ -40,6 +44,8 @@ public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>> where TId : 
         return Equals((object)other);
     }
 
+    protected void Raise(DomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    public void ClearDomainEvents() => _domainEvents.Clear();
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 
 }
