@@ -2,10 +2,12 @@
 using ChatRooms.Domain.Shared;
 namespace ChatRooms.Domain.Rooms;
 
-internal sealed class Room : Entity<RoomId>
+public sealed class Room : Entity<RoomId>
 {
     public Name Name { get; private set; }
     public Capacity Capacity { get; private set; }
+    public string RoomCode => Id.Value.ToString()[..8].ToUpperInvariant();
+    public string RoomLink => $"https://chatrooms.example.com/rooms/{RoomCode}";
     private Room(RoomId id, Name name, Capacity capacity, DateTime createdAt) : base(id, createdAt)
     {
         Name = name;

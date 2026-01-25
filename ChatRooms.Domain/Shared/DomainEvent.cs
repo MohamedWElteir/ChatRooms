@@ -1,6 +1,4 @@
-﻿using ChatRooms.SharedKernel.Utils;
-
-namespace ChatRooms.Domain.Shared;
+﻿namespace ChatRooms.Domain.Shared;
 
 public abstract record DomainEvent
 {

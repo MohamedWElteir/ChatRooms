@@ -1,6 +1,4 @@
-﻿using ChatRooms.SharedKernel.Utils;
-
-namespace ChatRooms.Domain.Shared;
+﻿namespace ChatRooms.Domain.Shared;
 
 public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : notnull
 {
