@@ -12,14 +12,13 @@ public sealed class RoomTests
         var name = Name.Create("GeneralChat");
         var capacity = Capacity.Create(100);
         var createdAt = DateTime.UtcNow;
-        // Act
         var room = Room.Create(name, capacity, createdAt);
         // Assert
         Assert.Equal(name, room.Name);
         Assert.Equal(capacity, room.Capacity);
         Assert.Equal(createdAt, room.CreatedAt);
-        Assert.Equal(room.Id.Value.ToString()[..8].ToUpperInvariant(), room.RoomCode);
-        Assert.Equal($"https://chatrooms.example.com/rooms/{room.RoomCode}", room.RoomLink);
+        Assert.NotNull(room.RoomCode.Value);
+        Assert.Equal(8, room.RoomCode.Value.Length);
     }
 
     [Fact]

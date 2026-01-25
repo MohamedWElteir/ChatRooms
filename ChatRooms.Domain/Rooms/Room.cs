@@ -6,12 +6,12 @@ public sealed class Room : Entity<RoomId>
 {
     public Name Name { get; private set; }
     public Capacity Capacity { get; private set; }
-    public string RoomCode => Id.Value.ToString()[..8].ToUpperInvariant();
-    public string RoomLink => $"https://chatrooms.example.com/rooms/{RoomCode}";
+    public RoomCode RoomCode { get; private set; }
     private Room(RoomId id, Name name, Capacity capacity, DateTime createdAt) : base(id, createdAt)
     {
         Name = name;
         Capacity = capacity;
+        RoomCode = RoomCode.New();
         Raise(new RoomCreatedDomainEvent(id, name, capacity, createdAt));
 
     }
