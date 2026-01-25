@@ -1,5 +1,5 @@
 ﻿using System.Security.Cryptography;
-namespace ChatRooms.Domain.Shared;
+namespace ChatRooms.Domain.Rooms;
 
 public static class RoomCodeGenerator
 {

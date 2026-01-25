@@ -1,5 +1,4 @@
-﻿using ChatRooms.Domain.Shared;
-namespace ChatRooms.Domain.Rooms;
+﻿namespace ChatRooms.Domain.Rooms;
 
 public readonly record struct RoomCode
 {
