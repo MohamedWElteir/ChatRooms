@@ -12,7 +12,7 @@ public readonly record struct RoomId
         Value = value;
     }
 
-    public static RoomId New() => new(Guid.NewGuid());
+    public static RoomId NewID() => new(Guid.NewGuid());
 
     public override string ToString() => Value.ToString();
     public static implicit operator Guid(RoomId roomId) => roomId.Value;

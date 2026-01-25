@@ -8,17 +8,17 @@ public readonly record struct RoomCode
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("RoomCode cannot be null or whitespace.", nameof(value));
-        if(value.Length != 8)
+        if (value.Length != (int)RoomCodeLength.CodeLength)
             throw new ArgumentException("RoomCode must be exactly 8 characters long.", nameof(value));
         Value = value;
     }
 
-    public static RoomCode New()
+    public static RoomCode NewCode()
     {
         var value = RoomCodeGenerator.Generate();
         return new RoomCode(value);
     }
 
-    public override string ToString() => Value;
+    public override string ToString() => Value.ToString();
 
 }

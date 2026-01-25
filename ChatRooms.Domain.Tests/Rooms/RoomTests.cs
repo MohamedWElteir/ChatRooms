@@ -44,7 +44,7 @@ public sealed class RoomTests
     public void RoomId_New_ShouldGenerateNonEmptyGuid()
     {
         // Act
-        var roomId = RoomId.New();
+        var roomId = RoomId.NewID();
         // Assert
         Assert.NotEqual(Guid.Empty, roomId.Value);
     }
@@ -142,7 +142,7 @@ public sealed class RoomTests
     public void RoomId_ToString_ShouldReturnGuidString()
     {
         // Arrange
-        var roomId = RoomId.New();
+        var roomId = RoomId.NewID();
         // Act
         var roomIdString = roomId.ToString();
         // Assert
@@ -165,7 +165,7 @@ public sealed class RoomTests
     public void RoomId_ImplicitConversionToGuid_ShouldWorkCorrectly()
     {
         // Arrange
-        var roomId = RoomId.New();
+        var roomId = RoomId.NewID();
         // Act
         Guid guidValue = roomId;
         // Assert

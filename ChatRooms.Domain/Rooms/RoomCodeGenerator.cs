@@ -4,7 +4,7 @@ namespace ChatRooms.Domain.Rooms;
 public static class RoomCodeGenerator
 {
     private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    private const int CodeLength = 8;
+    private const int CodeLength = (int)RoomCodeLength.CodeLength;
 
     public static string Generate()
     {
