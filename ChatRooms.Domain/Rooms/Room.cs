@@ -3,7 +3,7 @@ using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Shared;
 namespace ChatRooms.Domain.Rooms;
 
-public sealed class Room : Entity<RoomId>
+public sealed class Room : AggregateRoot<RoomId>
 {
     public Name Name { get; private set; }
     public Capacity Capacity { get; private set; }
@@ -36,7 +36,7 @@ public sealed class Room : Entity<RoomId>
     public void Archive(DateTime archivedAt)
     {
         if (Status != RoomStatus.Active)
-            return;
+            throw new InvalidOperationException("Only active rooms can be archived.");
 
         Status = RoomStatus.Archived;
         Raise(new RoomArchivedDomainEvent(Id, archivedAt));
@@ -45,10 +45,10 @@ public sealed class Room : Entity<RoomId>
     public void Delete(DateTime deletedAt, DeleteCause reason)
     {
         if (Status == RoomStatus.Deleted)
-            return;
+            throw new InvalidOperationException("Can't delete a deleted room.");
 
         if (Status == RoomStatus.Active && reason == DeleteCause.Inactivity)
-            throw new Exception("Active rooms cannot be deleted due to inactivity.");
+            throw new InvalidOperationException("Active rooms cannot be deleted due to inactivity.");
 
         Status = RoomStatus.Deleted;
         Raise(new RoomDeletedDomainEvent(Id, reason, deletedAt));
@@ -58,18 +58,11 @@ public sealed class Room : Entity<RoomId>
     {
         if (Capacity == newCapacity)
             return;
-        if(newCapacity.Value < Capacity.Value)
-            throw new ArgumentException("New capacity cannot be less than the current capacity.");
+        // TODO: Add validation logic for decreasing capacity based on current number of participants
+
         Capacity = newCapacity;
         Raise(new RoomCapacityChangedDomainEvent(Id, newCapacity, DateTime.UtcNow));
     }
 
-    public void UpdateTimestamp(DateTime updatedAt)
-    {
-        if (updatedAt <= UpdatedAt)
-            throw new Exception("UpdatedAt can only move forward.");
-
-        UpdatedAt = updatedAt;
-    }
 
 }

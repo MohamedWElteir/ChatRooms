@@ -4,10 +4,7 @@ public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity
 {
     public TId Id { get; private init; } = id;
     public DateTime CreatedAt { get; private init; } = dateTime;
-    public DateTime UpdatedAt { get; protected set; } = dateTime;
-    private readonly List<DomainEvent> _domainEvents = [];
-    public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-
+    public DateTime? UpdatedAt { get; protected set; }
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
         if (ReferenceEquals(left, right))
@@ -33,9 +30,6 @@ public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity
         return EqualityComparer<TId>.Default.Equals(Id, other.Id);
     }
 
-
-    protected void Raise(DomainEvent domainEvent) => _domainEvents.Add(domainEvent);
-    public void ClearDomainEvents() => _domainEvents.Clear();
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 
 }

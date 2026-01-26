@@ -125,21 +125,6 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Room_UpdatedAt_ShouldBeSettable()
-    {
-        // Arrange
-        var name = Name.Create("UpdateTest");
-        var capacity = Capacity.Create(50);
-        var createdAt = DateTime.UtcNow;
-        var room = Room.Create(name, capacity, createdAt);
-        var newUpdatedAt = createdAt.AddHours(1);
-        // Act
-        room.UpdateTimestamp(newUpdatedAt);
-        // Assert
-        Assert.Equal(newUpdatedAt, room.UpdatedAt);
-    }
-
-    [Fact]
     public void RoomId_ToString_ShouldReturnGuidString()
     {
         // Arrange
@@ -308,6 +293,6 @@ public sealed class RoomTests
         var deletedAt = DateTime.UtcNow.AddHours(1);
         var reason = DeleteCause.Inactivity;
         // Act & Assert
-        Assert.Throws<Exception>(() => room.Delete(deletedAt, reason));
+        Assert.Throws<InvalidOperationException>(() => room.Delete(deletedAt, reason));
     }
 }
