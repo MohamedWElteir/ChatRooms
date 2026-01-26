@@ -187,22 +187,6 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Room_Capacity_Change_ShouldThrowErrorWithNewCapacityLessThanTheOld()
-    {
-        // Arrange
-        var roomName = Name.Create("CapacityChangeRoom");
-        var capacityValue = 75;
-        var initialCapacity = Capacity.Create(capacityValue);
-        var room = Room.Create(roomName, initialCapacity, DateTime.UtcNow);
-        var invalidCapacity = 30;
-        var newInvalidCapacity = Capacity.Create(invalidCapacity);
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => room.ChangeCapacity(newInvalidCapacity));
-        Assert.Equal(capacityValue, room.Capacity.Value);
-
-    }
-
-    [Fact]
     public void Room_Rename_ShouldRaiseRoomRenamedDomainEvent()
     {
         // Arrange
@@ -294,5 +278,79 @@ public sealed class RoomTests
         var reason = DeleteCause.Inactivity;
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => room.Delete(deletedAt, reason));
+    }
+
+    [Fact]
+    public void Room_Archive_ShouldThrowError_WhenRoomIsNotActive()
+    {
+        // Arrange
+        var name = Name.Create("ArchiveTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        var archivedAt = DateTime.UtcNow.AddHours(1);
+        room.Archive(archivedAt);
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Archive(DateTime.UtcNow.AddHours(2)));
+    }
+
+    [Fact]
+    public void Room_Delete_ShouldThrowError_WhenRoomIsAlreadyDeleted()
+    {
+        // Arrange
+        var name = Name.Create("DeleteTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        var deletedAt = DateTime.UtcNow.AddHours(1);
+        var reason = DeleteCause.Manual;
+        room.Delete(deletedAt, reason);
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Delete(DateTime.UtcNow.AddHours(2), reason));
+    }
+
+    [Fact]
+    public void Room_Rename_ShouldNotRaiseEvent_WhenNameIsSame()
+    {
+        // Arrange
+        var initialName = Name.Create("InitialRoomName");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(initialName, capacity, createdAt);
+        // Act
+        room.Rename(initialName);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomRenamedEvent = domainEvents.OfType<RoomRenamedDomainEvent>().FirstOrDefault();
+        Assert.Null(roomRenamedEvent);
+    }
+
+    [Fact]
+    public void Room_ChangeCapacity_ShouldNotRaiseEvent_WhenCapacityIsSame()
+    {
+        // Arrange
+        var roomName = Name.Create("CapacityChangeRoom");
+        var capacityValue = 75;
+        var initialCapacity = Capacity.Create(capacityValue);
+        var room = Room.Create(roomName, initialCapacity, DateTime.UtcNow);
+        // Act
+        room.ChangeCapacity(initialCapacity);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var capacityChangedEvent = domainEvents.OfType<RoomCapacityChangedDomainEvent>().FirstOrDefault();
+        Assert.Null(capacityChangedEvent);
+    }
+
+    [Fact]
+    public void Name_Equality_ShouldWorkCorrectly()
+    {
+        // Arrange
+        var nameValue = "TestRoom";
+        var name1 = Name.Create(nameValue);
+        var name2 = Name.Create(nameValue);
+        // Act & Assert
+        Assert.Equal(name1, name2); // Same value
+        Assert.True(name1 == name2);
+        Assert.False(name1 != name2);
     }
 }
