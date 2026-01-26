@@ -1,18 +1,18 @@
 ﻿namespace ChatRooms.Domain.Shared;
 
-public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : notnull
+public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
-    public TId Id { get; private init; } = id ?? throw new ArgumentNullException(nameof(id));
+    public TId Id { get; private init; } = id;
     public DateTime CreatedAt { get; private init; } = dateTime;
-    public DateTime UpdatedAt { get; set; } = dateTime;
+    public DateTime UpdatedAt { get; protected set; } = dateTime;
     private readonly List<DomainEvent> _domainEvents = [];
     public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
+        if (ReferenceEquals(left, right))
+            return true;
         if (left is null || right is null)
-            return false;
-        if (!ReferenceEquals(left, right))
             return false;
 
         return left.Equals(right);
@@ -20,27 +20,19 @@ public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity
 
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !(left == right);
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is not Entity<TId> other)
-            return false;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return EqualityComparer<TId>.Default.Equals(Id, other.Id);
-    }
+    public override bool Equals(object? obj) => obj is Entity<TId> other && Equals(other);
 
     public bool Equals(Entity<TId>? other)
     {
         if (other is null)
             return false;
 
-        if (!ReferenceEquals(this, other))
+        if (other.GetType() != GetType())
             return false;
 
-        return Equals((object)other);
+        return EqualityComparer<TId>.Default.Equals(Id, other.Id);
     }
+
 
     protected void Raise(DomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();

@@ -1,4 +1,5 @@
 ﻿using ChatRooms.Domain.Rooms;
+using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
 
 namespace ChatRooms.Domain.Tests.Rooms;
@@ -17,8 +18,8 @@ public sealed class RoomTests
         Assert.Equal(name, room.Name);
         Assert.Equal(capacity, room.Capacity);
         Assert.Equal(createdAt, room.CreatedAt);
-        Assert.NotNull(room.RoomCode.Value);
-        Assert.Equal(8, room.RoomCode.Value.Length);
+        Assert.NotNull(room.Code.Value);
+        Assert.Equal(8, room.Code.Value.Length);
     }
 
     [Fact]
@@ -133,7 +134,7 @@ public sealed class RoomTests
         var room = Room.Create(name, capacity, createdAt);
         var newUpdatedAt = createdAt.AddHours(1);
         // Act
-        room.UpdatedAt = newUpdatedAt;
+        room.UpdateTimestamp(newUpdatedAt);
         // Assert
         Assert.Equal(newUpdatedAt, room.UpdatedAt);
     }
@@ -182,5 +183,131 @@ public sealed class RoomTests
         var capacityString = capacity.ToString();
         // Assert
         Assert.Equal(capacityValue.ToString(), capacityString);
+    }
+
+    [Fact]
+    public void Room_Capacity_Change_ShouldChangeWithValidCapacity()
+    {
+        // Arrange
+        var roomName = Name.Create("CapacityChangeRoom");
+        var capacityValue = 75;
+        var initialCapacity = Capacity.Create(capacityValue);
+        var room = Room.Create(roomName, initialCapacity, DateTime.UtcNow);
+        var newCapacityValue = 100;
+        var newCapacity = Capacity.Create(newCapacityValue);
+        // Act
+        room.ChangeCapacity(newCapacity);
+        // Assert
+        Assert.Equal(newCapacityValue, room.Capacity.Value);
+    }
+
+    [Fact]
+    public void Room_Capacity_Change_ShouldThrowErrorWithNewCapacityLessThanTheOld()
+    {
+        // Arrange
+        var roomName = Name.Create("CapacityChangeRoom");
+        var capacityValue = 75;
+        var initialCapacity = Capacity.Create(capacityValue);
+        var room = Room.Create(roomName, initialCapacity, DateTime.UtcNow);
+        var invalidCapacity = 30;
+        var newInvalidCapacity = Capacity.Create(invalidCapacity);
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => room.ChangeCapacity(newInvalidCapacity));
+        Assert.Equal(capacityValue, room.Capacity.Value);
+
+    }
+
+    [Fact]
+    public void Room_Rename_ShouldRaiseRoomRenamedDomainEvent()
+    {
+        // Arrange
+        var initialName = Name.Create("InitialRoomName");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(initialName, capacity, createdAt);
+        var newName = Name.Create("RenamedRoom");
+        // Act
+        room.Rename(newName);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomRenamedEvent = domainEvents.OfType<RoomRenamedDomainEvent>().FirstOrDefault();
+        Assert.NotNull(roomRenamedEvent);
+        Assert.Equal(room.Id, roomRenamedEvent.RoomId);
+        Assert.Equal(newName, roomRenamedEvent.NewName);
+    }
+
+    [Fact]
+    public void Room_Archive_ShouldRaiseRoomArchivedDomainEvent()
+    {
+        // Arrange
+        var name = Name.Create("ArchiveTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        var archivedAt = DateTime.UtcNow.AddHours(1);
+        // Act
+        room.Archive(archivedAt);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomArchivedEvent = domainEvents.OfType<RoomArchivedDomainEvent>().FirstOrDefault();
+        Assert.NotNull(roomArchivedEvent);
+        Assert.Equal(room.Id, roomArchivedEvent.RoomId);
+        Assert.Equal(archivedAt, roomArchivedEvent.OccurredOn);
+    }
+
+    [Fact]
+    public void Room_Delete_ShouldRaiseRoomDeletedDomainEvent_AfterIncactivity()
+    {
+        // Arrange
+        var name = Name.Create("DeleteTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        room.Archive(DateTime.UtcNow.AddHours(1));
+        var deletedAt = DateTime.UtcNow.AddHours(2);
+        var reason = DeleteCause.Inactivity;
+        // Act
+        room.Delete(deletedAt, reason);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomDeletedEvent = domainEvents.OfType<RoomDeletedDomainEvent>().FirstOrDefault();
+        Assert.NotNull(roomDeletedEvent);
+        Assert.Equal(room.Id, roomDeletedEvent.RoomId);
+        Assert.Equal(reason, roomDeletedEvent.DeleteReason);
+        Assert.Equal(deletedAt, roomDeletedEvent.OccurredOn);
+    }
+
+    [Fact]
+    public void Room_Delete_ShouldDelete_WhenDeleteReasonIsManual()
+    {
+        // Arrange
+        var name = Name.Create("ActiveDeleteTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        var deletedAt = DateTime.UtcNow.AddHours(1);
+        var reason = DeleteCause.Manual;
+        // Act
+        room.Delete(deletedAt, reason);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomDeletedEvent = domainEvents.OfType<RoomDeletedDomainEvent>().FirstOrDefault();
+        Assert.NotNull(roomDeletedEvent);
+        Assert.Equal(room.Id, roomDeletedEvent.RoomId);
+        Assert.Equal(reason, roomDeletedEvent.DeleteReason);
+        Assert.Equal(deletedAt, roomDeletedEvent.OccurredOn);
+    }
+    [Fact]
+    public void Room_Delete_ShouldThrowError_WhenActiveRoomDeletedDueToInactivity()
+    {
+        // Arrange
+        var name = Name.Create("ActiveDeleteTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTime.UtcNow;
+        var room = Room.Create(name, capacity, createdAt);
+        var deletedAt = DateTime.UtcNow.AddHours(1);
+        var reason = DeleteCause.Inactivity;
+        // Act & Assert
+        Assert.Throws<Exception>(() => room.Delete(deletedAt, reason));
     }
 }
