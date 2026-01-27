@@ -2,9 +2,10 @@
 
 public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
-    public TId Id { get; private init; } = id;
+    public TId Id { get; internal set; } = id;
     public DateTime CreatedAt { get; private init; } = dateTime;
-    public DateTime? UpdatedAt { get; protected set; }
+    public DateTime? UpdatedAt { get; internal set; }
+    public DateTime? DeletedAt { get; internal set; }
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
         if (ReferenceEquals(left, right))

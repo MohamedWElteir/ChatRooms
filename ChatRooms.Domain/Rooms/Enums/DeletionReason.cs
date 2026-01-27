@@ -1,6 +1,6 @@
 ﻿namespace ChatRooms.Domain.Rooms.Enums;
 
-public enum DeleteCause
+public enum DeletionReason
 {
     Manual = 1,
     Inactivity = 2

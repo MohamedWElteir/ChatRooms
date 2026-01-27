@@ -1,13 +1,10 @@
-﻿namespace ChatRooms.Domain.Shared;
+﻿using ChatRooms.Domain.Shared.Contracts;
 
-public abstract record DomainEvent
+namespace ChatRooms.Domain.Shared;
+
+public abstract record DomainEvent(DateTime EventOccurredAt) : IDomainEvent
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public DateTime OccurredOn { get; init; }
 
-    protected DomainEvent(DateTime OccurredOn)
-    {
-        this.OccurredOn = OccurredOn;
-    }
-
+    public DateTime OccurredAt => EventOccurredAt;
 }

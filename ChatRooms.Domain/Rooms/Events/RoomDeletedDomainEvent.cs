@@ -3,4 +3,4 @@ using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events;
 
-public sealed record RoomDeletedDomainEvent(RoomId RoomId, DeleteCause DeleteReason, DateTime DeletedAt) : DomainEvent(DeletedAt);
+public sealed record RoomDeletedDomainEvent(RoomId RoomId, DeletionReason DeletionReason, DateTime DeletedAt) : DomainEvent(DeletedAt);
