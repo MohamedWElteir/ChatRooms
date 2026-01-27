@@ -38,7 +38,7 @@ public sealed class RoomTests
         Assert.Equal(room.Id, roomCreatedEvent.RoomId);
         Assert.Equal(name, roomCreatedEvent.Name);
         Assert.Equal(capacity, roomCreatedEvent.Capacity);
-      //  Assert.Equal(createdAt, roomCreatedEvent.OccurredOn);
+        Assert.Equal(createdAt, roomCreatedEvent.OccurredAt);
     }
 
     [Fact]
@@ -352,5 +352,28 @@ public sealed class RoomTests
         Assert.Equal(name1, name2);
         Assert.True(name1 == name2);
         Assert.False(name1 != name2);
+    }
+
+    [Fact]
+    public void Capacity_Equality_ShouldWorkCorrectly()
+    {
+        // Arrange
+        var capacityValue = 100;
+        var capacity1 = Capacity.Create(capacityValue);
+        var capacity2 = Capacity.Create(capacityValue);
+        // Act & Assert
+        Assert.Equal(capacity1, capacity2);
+        Assert.True(capacity1 == capacity2);
+        Assert.False(capacity1 != capacity2);
+    }
+
+    [Fact]
+    public void RoomCode_New_ShouldGenerateValidCode()
+    {
+        // Act
+        var roomCode = RoomCode.New();
+        // Assert
+        Assert.NotNull(roomCode.Value);
+        Assert.Equal(8, roomCode.Value.Length);
     }
 }
