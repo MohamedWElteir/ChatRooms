@@ -1,5 +1,4 @@
-﻿using ChatRooms.Domain.Rooms.Appliers;
-using ChatRooms.Domain.Rooms.Enums;
+﻿using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Contracts;
@@ -7,32 +6,48 @@ namespace ChatRooms.Domain.Rooms;
 
 public sealed class Room : AggregateRoot<RoomId>
 {
-    public Name Name { get; set; }
-    public Capacity Capacity { get; set; }
-    public RoomCode Code { get; set; }
-    public RoomStatus Status { get; set; } = RoomStatus.Active;
-    public DeletionReason? DeletionReason { get; set; }
-    private static readonly Dictionary<Type, Action<Room, IDomainEvent>> _appliers = new()
-    {
-        {typeof(RoomCreatedDomainEvent), (room, @event) => RoomCreatedDomainEventApplier.Apply(room,(RoomCreatedDomainEvent)@event)},
-        {typeof(RoomRenamedDomainEvent), (room, @event) => RoomRenamedDomainEventApplier.Apply(room,(RoomRenamedDomainEvent)@event)},
-        {typeof(RoomDeletedDomainEvent), (room, @event) => RoomDeletedDomainEventApplier.Apply(room, (RoomDeletedDomainEvent)@event)},
-        {typeof(RoomArchivedDomainEvent), (room, @event) => RoomArchivedDomainEventApplier.Apply(room, (RoomArchivedDomainEvent)@event)},
-        {typeof(RoomCapacityChangedDomainEvent), (room, @event) => RoomCapacityChangedDomainEventApplier.Apply(room, (RoomCapacityChangedDomainEvent)@event)},
-    };
+    public Name Name { get; private set; }
+    public Capacity Capacity { get; private set; }
+    public RoomCode Code { get; private set; }
+    public RoomStatus Status { get; private set; } = RoomStatus.Active;
+    public DeletionReason? DeletionReason { get; private set; }
+
+
     private Room(RoomId id, DateTime createdAt) : base(id, createdAt) { }
     public override void Apply(IDomainEvent @event)
     {
-        if (!_appliers.TryGetValue(@event.GetType(), out var applier))
-            throw new InvalidOperationException($"No applier registered for {@event.GetType().Name}");
+        switch (@event)
+        {
+            case RoomCreatedDomainEvent e:
+                Apply(e);
+                break;
 
-        applier(this, @event);
+            case RoomRenamedDomainEvent e:
+                Apply(e);
+                break;
 
+            case RoomArchivedDomainEvent e:
+                Apply(e);
+                break;
+
+            case RoomDeletedDomainEvent e:
+                Apply(e);
+                break;
+
+            case RoomCapacityChangedDomainEvent e:
+                Apply(e);
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Event '{@event.GetType().Name}' is not supported by {nameof(Room)}");
+        }
     }
+
     public static Room Create(Name name, Capacity capacity, DateTime createdAt)
     {
         var room = new Room(RoomId.New(), createdAt);
-        room.Raise(new RoomCreatedDomainEvent(room.Id, name, capacity, createdAt));
+        room.Raise(new RoomCreatedDomainEvent(room.Id, name, RoomCode.New(), capacity, createdAt));
         return room;
 
     }
@@ -68,5 +83,39 @@ public sealed class Room : AggregateRoot<RoomId>
         // TODO: Add validation logic for decreasing capacity based on current number of participants
 
         Raise(new RoomCapacityChangedDomainEvent(Id, newCapacity, DateTime.UtcNow));
+    }
+
+    private void Apply(RoomCreatedDomainEvent @event)
+    {
+        Id = @event.RoomId;
+        Name = @event.Name;
+        Capacity = @event.Capacity;
+        Code = @event.Code;
+        Status = RoomStatus.Active;
+    }
+
+    private void Apply(RoomArchivedDomainEvent @event)
+    {
+        Status = RoomStatus.Archived;
+        UpdatedAt = @event.OccurredAt;
+    }
+
+    private void Apply(RoomCapacityChangedDomainEvent @event)
+    {
+        Capacity = @event.NewCapacity;
+        UpdatedAt = @event.OccurredAt;
+    }
+
+    private void Apply(RoomDeletedDomainEvent @event)
+    {
+        Status = RoomStatus.Deleted;
+        DeletedAt = @event.DeletedAt;
+        DeletionReason = @event.DeletionReason;
+    }
+
+    private void Apply(RoomRenamedDomainEvent @event)
+    {
+        Name = @event.NewName;
+        UpdatedAt = @event.RenamedOn;
     }
 }
