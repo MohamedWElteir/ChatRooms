@@ -1,5 +1,4 @@
 ﻿using ChatRooms.Domain.Shared;
-using ChatRooms.SharedKernel.Utils;
 
 namespace ChatRooms.Domain.Rooms.Events;
 

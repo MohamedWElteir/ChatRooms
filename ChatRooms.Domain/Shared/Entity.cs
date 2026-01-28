@@ -1,4 +1,5 @@
-﻿namespace ChatRooms.Domain.Shared;
+﻿using ChatRooms.Domain.Rooms.Enums;
+namespace ChatRooms.Domain.Shared;
 
 public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
@@ -6,6 +7,7 @@ public abstract class Entity<TId>(TId id, DateTime dateTime) : IEquatable<Entity
     public DateTime CreatedAt { get; private init; } = dateTime;
     public DateTime? UpdatedAt { get; internal set; }
     public DateTime? DeletedAt { get; internal set; }
+    public DeletionReason? DeletionReason { get; internal set; }
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
         if (ReferenceEquals(left, right))

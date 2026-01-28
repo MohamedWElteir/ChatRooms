@@ -1,6 +1,7 @@
 ﻿using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
+using ChatRooms.Domain.Tests.Rooms.Mocks;
 
 namespace ChatRooms.Domain.Tests.Rooms;
 
@@ -375,5 +376,27 @@ public sealed class RoomTests
         // Assert
         Assert.NotNull(roomCode.Value);
         Assert.Equal(8, roomCode.Value.Length);
+    }
+
+    [Fact]
+    public void Room_Code_ToString_ShouldReturnCodeValue()
+    {
+        // Arrange
+        var roomCode = RoomCode.New();
+        // Act
+        var codeString = roomCode.ToString();
+        // Assert
+        Assert.Equal(roomCode.Value, codeString);
+    }
+
+    [Fact]
+    public void Room_ShouldThrowForUnsupportedEvent()
+    {
+        // Arrange
+        var room = Room.Create(Name.Create("TestRoom"), Capacity.Create(100), DateTime.UtcNow);
+        var unsupportedEvent = new UnsupportedDomainEvent(DateTime.UtcNow);
+        // Act & Assert
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(async () => room.Apply(unsupportedEvent));
+        Assert.Equal($"Event '{unsupportedEvent.GetType().Name}' is not supported by {nameof(Room)}", exception?.Result.Message);
     }
 }

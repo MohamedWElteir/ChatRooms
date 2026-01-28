@@ -10,7 +10,6 @@ public sealed class Room : AggregateRoot<RoomId>
     public Capacity Capacity { get; private set; }
     public RoomCode Code { get; private set; }
     public RoomStatus Status { get; private set; } = RoomStatus.Active;
-    public DeletionReason? DeletionReason { get; private set; }
 
 
     private Room(RoomId id, DateTime createdAt) : base(id, createdAt) { }
@@ -39,8 +38,7 @@ public sealed class Room : AggregateRoot<RoomId>
                 break;
 
             default:
-                throw new InvalidOperationException(
-                    $"Event '{@event.GetType().Name}' is not supported by {nameof(Room)}");
+                throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(Room)}");
         }
     }
 
