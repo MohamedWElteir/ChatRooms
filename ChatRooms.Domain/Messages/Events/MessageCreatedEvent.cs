@@ -6,5 +6,5 @@ using System.Text;
 
 namespace ChatRooms.Domain.Messages.Events
 {
-    public sealed record MessageCreatedDomainEvent( MessageId MessageId,Description description, RoomId RoomId, DateTime DateTime) : DomainEvent(DateTime);
+    public sealed record MessageCreatedDomainEvent( MessageId MessageId,Description description, RoomId RoomId, DateTime CreatedAt) : DomainEvent(CreatedAt);
 }
