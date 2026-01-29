@@ -11,15 +11,16 @@ using System.Text;
 
 namespace ChatRooms.Domain.Messages
 {
-    public sealed class Message : AggregateRoot<MessageId>
+    public sealed class Message : Entity<MessageId>
     {
         public RoomId RoomId { get; private set; }
         public Description Description { get; private set; }
         //to-do user attach to message
         private Message(MessageId id, Description description,RoomId roomid, DateTime createdAt) : base(id, createdAt)
         {
-            Raise(new MessageCreatedDomainEvent(id, description,roomid ,createdAt));
-
+            Id = id;
+            Description = description;
+            RoomId = roomid;
         }
 
         public static Message Create(Description description,RoomId roomId, DateTime createdAt)
@@ -29,25 +30,7 @@ namespace ChatRooms.Domain.Messages
             return message;
 
         }
-
-        public override void Apply(IDomainEvent @event)
-        {
-            switch (@event)
-            {
-                case MessageCreatedDomainEvent e:
-                    Apply(e);
-                    break;
-
-                default:
-                    throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(Message)}");
-            }
-        }
-        private void Apply(MessageCreatedDomainEvent @event)
-        {
-            Id = @event.MessageId;
-            Description = @event.description;
-            RoomId = @event.RoomId;
-        }
+       
     }
 
 }

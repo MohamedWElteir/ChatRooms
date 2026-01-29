@@ -28,23 +28,7 @@ namespace ChatRooms.Domain.Tests.Messages
             Assert.Equal(description, message.Description);
             Assert.Equal(createdAt, message.CreatedAt);
         }
-        [Fact]
-        public void CreateMessage_ShouldRaiseMessageCreatedDomainEvent()
-        {
-            // Arrange
-            var description = Description.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
-            var createdAt = DateTime.UtcNow;
-            // Act
-            var message = Message.Create(description, room.Id, createdAt);
-            // Assert
-            var domainEvents = message.DomainEvents;
-            Assert.Single(domainEvents);
-            var meesageCreatedEvent = Assert.IsType<MessageCreatedDomainEvent>(domainEvents.First());
-            Assert.Equal(message.Id, meesageCreatedEvent.MessageId);
-            Assert.Equal(room.Id, message.RoomId);
-            Assert.Equal(description, message.Description);
-            Assert.Equal(createdAt, message.CreatedAt);
-        }
+        
         [Fact]
         public void MeesageId_New_ShouldGenerateNonEmptyGuid()
         {
@@ -83,19 +67,6 @@ namespace ChatRooms.Domain.Tests.Messages
             Assert.Equal(message1, message3); // Same instance
             Assert.True(message1 == message3);
             Assert.False(message1 != message3);
-        }
-
-        [Fact]
-        public void Room_DomainEvents_ShouldBeClearedCorrectly()
-        {
-            // Arrange
-            var description = Description.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
-            var createdAt = DateTime.UtcNow;
-            var message = Message.Create(description, room.Id, createdAt);
-            // Act
-            message.ClearDomainEvents();
-            // Assert
-            Assert.Empty(message.DomainEvents);
         }
 
         [Fact]
