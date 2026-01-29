@@ -19,13 +19,13 @@ namespace ChatRooms.Domain.Tests.Messages
         public void CreateMessage_ShouldInitializePropertiesCorrectly()
         {
             // Arrange
-            var description = Description.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
+            var content = Content.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
             var createdAt = DateTime.UtcNow;
             // Act
-            var message = Message.Create(description, room.Id, createdAt);
+            var message = Message.Create(content, room.Id, createdAt);
             // Assert
             Assert.Equal(room.Id, message.RoomId);
-            Assert.Equal(description, message.Description);
+            Assert.Equal(content, message.Content);
             Assert.Equal(createdAt, message.CreatedAt);
         }
         
@@ -41,26 +41,26 @@ namespace ChatRooms.Domain.Tests.Messages
         public void Description_Create_ShouldThrowException_ForInvalidNames()
         {
             // Arrange
-            var invalidDescriptions = new[]
+            var invalidContents = new[]
             {
             "", // Empty
             "   ", // Whitespace
         };
             // Act & Assert
-            foreach (var invalidDescription in invalidDescriptions)
+            foreach (var invalidContent in invalidContents)
             {
-                Assert.Throws<ArgumentException>(() => Description.Create(invalidDescription));
+                Assert.Throws<ArgumentException>(() => Content.Create(invalidContent));
             }
         }
         [Fact]
         public void Message_Equality_ShouldWorkCorrectly()
         {
             // Arrange
-            var description = Description.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
+            var content = Content.Create("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin tincidunt elit ac nibh finibus, id elementum nulla tincidunt. Mauris ut tortor quis magna volutpat sagittis vel pellentesque mi. Sed id euismod nibh. Duis suscipit bibendum dictum. In mattis ac enim non blandit. Aliquam ut consequat arcu. Cras blandit gravida consequat. Nam in est ullamcorper ipsum malesuada auctor. Nam mi tortor, porttitor ac mollis ut, egestas interdum risus. In vitae lacus lobortis, viverra risus suscipit, consectetur massa. In dapibus, mauris eget malesuada convallis, nisi eros pellentesque justo, non vestibulum mi massa sed arcu. Aliquam suscipit urna a augue tempor posuere. Donec mattis ullamcorper metus eu dignissim. Pellentesque maximus urna ut metus blandit, eget rutrum tellus porta. Nunc ipsum dolor, pellentesque in lectus quis, tincidunt consectetur est.");
             var createdAt = DateTime.UtcNow;
 
-            var message1 = Message.Create(description, room.Id, createdAt);
-            var message2 = Message.Create(description, room.Id, createdAt);
+            var message1 = Message.Create(content, room.Id, createdAt);
+            var message2 = Message.Create(content, room.Id, createdAt);
             var message3 = message1;
             // Act & Assert
             Assert.NotEqual(message1, message2); // Different instances with different IDs

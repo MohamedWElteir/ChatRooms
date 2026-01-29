@@ -14,18 +14,18 @@ namespace ChatRooms.Domain.Messages
     public sealed class Message : Entity<MessageId>
     {
         public RoomId RoomId { get; private set; }
-        public Description Description { get; private set; }
+        public Content Content { get; private set; }
         //to-do user attach to message
-        private Message(MessageId id, Description description,RoomId roomid, DateTime createdAt) : base(id, createdAt)
+        private Message(MessageId id, Content content,RoomId roomid, DateTime createdAt) : base(id, createdAt)
         {
             Id = id;
-            Description = description;
+            Content = content;
             RoomId = roomid;
         }
 
-        public static Message Create(Description description,RoomId roomId, DateTime createdAt)
+        public static Message Create(Content content,RoomId roomId, DateTime createdAt)
         {
-            var message = new Message(MessageId.New(), description,roomId, createdAt);
+            var message = new Message(MessageId.New(), content,roomId, createdAt);
 
             return message;
 
