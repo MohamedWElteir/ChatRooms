@@ -12,6 +12,10 @@
     <PackageReference Include="xunit.runner.visualstudio" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChatRooms.Domain\ChatRooms.Domain.csproj" />
+    <ProjectReference Include="..\ChatRooms.ServiceDefaults\ChatRooms.ServiceDefaults.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>
