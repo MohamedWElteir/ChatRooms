@@ -2,9 +2,9 @@
 
 namespace ChatRooms.Domain.Shared;
 
-public abstract record DomainEvent(DateTime EventOccurredAt) : IDomainEvent
+public abstract record DomainEvent(DateTimeUtc EventOccurredAt) : IDomainEvent
 {    
     public Guid Id => Guid.NewGuid();
-    public DateTime OccurredAt => EventOccurredAt;
+    public DateTimeUtc OccurredAt => EventOccurredAt;
 
 }

@@ -1,4 +1,5 @@
-﻿using ChatRooms.Domain.Shared;
+﻿using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events;
-public sealed record RoomCapacityChangedDomainEvent(RoomId RoomId, Capacity NewCapacity, DateTime ChangeDatetime) : DomainEvent(ChangeDatetime);
+public sealed record RoomCapacityChangedDomainEvent(RoomId RoomId, Capacity NewCapacity, DateTimeUtc ChangedAt) : DomainEvent(ChangedAt);

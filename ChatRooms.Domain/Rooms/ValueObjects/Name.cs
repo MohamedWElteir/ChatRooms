@@ -1,4 +1,4 @@
-﻿namespace ChatRooms.Domain.Rooms;
+﻿namespace ChatRooms.Domain.Rooms.ValueObjects;
 
 public readonly record struct Name
 {

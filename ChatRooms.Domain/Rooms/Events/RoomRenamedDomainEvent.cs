@@ -1,5 +1,6 @@
-﻿using ChatRooms.Domain.Shared;
+﻿using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events;
 
-public sealed record RoomRenamedDomainEvent(RoomId RoomId, Name NewName, DateTime RenamedOn) : DomainEvent(RenamedOn);
+public sealed record RoomRenamedDomainEvent(RoomId RoomId, Name NewName, DateTimeUtc OccurredAt) : DomainEvent(OccurredAt);
