@@ -505,4 +505,58 @@ public sealed class RoomTests
         // Assert
         Assert.Equal(1, room.CurrentParticipantsCount);
     }
+    [Fact]
+    public void RoomParticipantLeave_ShouldThrowException_WhenNoParticipants()
+    {
+        // Arrange
+        var roomName = Name.Create("LeaveNoParticipantsRoom");
+        var capacity = Capacity.Create(10);
+        var room = Room.Create(roomName, capacity, DateTimeUtc.NowUtc());
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Leave(DateTimeUtc.NowUtc().AddMinutes(1)));
+    }
+    [Fact]
+    public void RoomParticipantJoin_ShouldThrowException_WhenCapacityReached()
+    {
+        // Arrange
+        var roomName = Name.Create("CapacityReachedRoom");
+        var capacity = Capacity.Create(2);
+        var room = Room.Create(roomName, capacity, DateTimeUtc.NowUtc());
+        room.Join(DateTimeUtc.NowUtc().AddMinutes(1));
+        room.Join(DateTimeUtc.NowUtc().AddMinutes(2));
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Join(DateTimeUtc.NowUtc().AddMinutes(3)));
+    }
+
+    [Fact]
+    public void Room_Restore_ShouldRaiseRoomRestoredDomainEvent()
+    {
+        // Arrange
+        var name = Name.Create("RestoreTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTimeUtc.NowUtc();
+        var room = Room.Create(name, capacity, createdAt);
+        room.Archive(DateTimeUtc.NowUtc().AddHours(1));
+        var restoredAt = DateTimeUtc.NowUtc().AddHours(2);
+        // Act
+        room.Restore(restoredAt);
+        // Assert
+        var domainEvents = room.DomainEvents;
+        var roomRestoredEvent = domainEvents.OfType<RoomRestoredDomainEvent>().FirstOrDefault();
+        Assert.NotNull(roomRestoredEvent);
+        Assert.Equal(restoredAt, roomRestoredEvent.OccurredAt);
+    }
+
+    [Fact]
+    public void Room_Restore_ShouldThrowError_WhenRoomIsNotArchived()
+    {
+        // Arrange
+        var name = Name.Create("RestoreTestRoom");
+        var capacity = Capacity.Create(100);
+        var createdAt = DateTimeUtc.NowUtc();
+        var room = Room.Create(name, capacity, createdAt);
+        var restoredAt = DateTimeUtc.NowUtc().AddHours(1);
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Restore(restoredAt));
+    }
 }
