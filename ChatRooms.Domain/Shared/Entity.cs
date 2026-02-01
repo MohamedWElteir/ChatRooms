@@ -1,10 +1,10 @@
 ﻿using ChatRooms.Domain.Rooms.Enums;
 namespace ChatRooms.Domain.Shared;
 
-public abstract class Entity<TId>(TId id, DateTimeUtc dateTime) : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
+public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
-    public TId Id { get; internal set; } = id;
-    public DateTimeUtc CreatedAt { get; private init; } = dateTime;
+    public TId Id { get; internal set; }
+    public DateTimeUtc CreatedAt { get; private init; } = DateTimeUtc.NowUtc();
     public DateTimeUtc? UpdatedAt { get; internal set; }
     public DateTimeUtc? DeletedAt { get; internal set; }
     public DeletionReason? DeletionReason { get; internal set; }
@@ -34,5 +34,6 @@ public abstract class Entity<TId>(TId id, DateTimeUtc dateTime) : IEquatable<Ent
     }
 
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
+    public bool IsTransient() => EqualityComparer<TId>.Default.Equals(Id, default);
 
 }

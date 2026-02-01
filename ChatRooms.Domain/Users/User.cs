@@ -8,11 +8,11 @@ namespace ChatRooms.Domain.Users;
 public sealed class User : AggregateRoot<UserId>
 {
     public Name Name { get; private set; }
-    private User(UserId id, DateTimeUtc createdAt) : base(id, createdAt) { }
-    public static User Create(Name name, DateTimeUtc occurredAt)
+    private User() : base() { }
+    public static User Create(Name name)
     {
-        var user = new User(UserId.New(), occurredAt);
-        user.Raise(new UserCreatedDomainEvent(user.Id, name, occurredAt));
+        var user = new User();
+        user.Raise(new UserCreatedDomainEvent(user.Id, name));
         return user;
     }
 
