@@ -17,6 +17,6 @@ public readonly record struct Name
         Value = value;
     }
 
-    public static Name Create(string value) => new(value);
+    public static Name From(string value) => new(value);
     public override string ToString() => Value;
 }
