@@ -2,7 +2,7 @@
 
 namespace ChatRooms.Domain.Shared;
 
-public abstract class AggregateRoot<TId>(TId id, DateTimeUtc dateTime) : Entity<TId>(id, dateTime) where TId : struct, IEquatable<TId>
+public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct, IEquatable<TId>
 {
     private readonly List<IDomainEvent> _uncommittedDomainEvents = [];
     public int Version { get; private set; } = 0;
@@ -18,4 +18,12 @@ public abstract class AggregateRoot<TId>(TId id, DateTimeUtc dateTime) : Entity<
 
     public abstract void Apply(IDomainEvent @event);
     public void ClearDomainEvents() => _uncommittedDomainEvents.Clear();
+    public void LoadFromHistory(IEnumerable<IDomainEvent> history)
+    {
+        foreach (var @event in history)
+        {
+            Apply(@event);
+            Version++;
+        }
+    }
 }

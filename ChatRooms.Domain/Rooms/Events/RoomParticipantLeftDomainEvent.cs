@@ -2,6 +2,4 @@
 
 namespace ChatRooms.Domain.Rooms.Events;
 
-public sealed record RoomParticipantLeftDomainEvent(
-    DateTimeUtc LeftAt
-) : DomainEvent(LeftAt);
+public sealed record RoomParticipantLeftDomainEvent : DomainEvent;
