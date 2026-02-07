@@ -1,4 +1,4 @@
-using ChatRooms.Domain.Rooms.Events;
+using ChatRooms.Domain.Tests.Mocks;
 using ChatRooms.Domain.Users;
 using ChatRooms.Domain.Users.Events;
 using ChatRooms.Domain.Users.ValueObjects;
@@ -11,7 +11,7 @@ public class UserTests
     public void CreateUser_WithValidName_ShouldSucceed()
     {
         // Arrange
-      var name = Name.From("ValidUserName");
+        var name = Name.From("ValidUserName");
         // Act
         var user = User.Create(name);
         // Assert
@@ -69,7 +69,7 @@ public class UserTests
         // Act
         user.Rename(sameName);
         // Assert
-        Assert.DoesNotContain(user.DomainEvents,e => e is UserRenamedDomainEvent);
+        Assert.DoesNotContain(user.DomainEvents, e => e is UserRenamedDomainEvent);
 
     }
     [Fact]
@@ -80,4 +80,66 @@ public class UserTests
         // Act & Assert
         Assert.Throws<ArgumentException>(() => user.Rename(Name.From(string.Empty)));
     }
+
+    [Fact]
+    public void RenameUser_ShouldRaiseUserRenamedDomainEvent()
+    {
+        // Arrange
+        var user = User.Create(Name.From("InitialName"));
+        var newName = Name.From("NewValidName");
+        // Act
+        user.Rename(newName);
+        // Assert
+        Assert.Contains(user.DomainEvents, e => e is UserRenamedDomainEvent);
+    }
+
+    [Fact]
+    public void RenameUser_Should_UpdateNameProperty()
+    {
+        // Arrange
+        var user = User.Create(Name.From("InitialName"));
+        var newName = Name.From("NewValidName");
+        // Act
+        user.Rename(newName);
+        // Assert
+        Assert.Equal(newName, user.Name);
+    }
+
+    [Fact]
+    public void Apply_UnsupportedEvent_ShouldThrowException()
+    {
+        // Arrange
+        var user = User.Create(Name.From("ValidName"));
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => user.Apply(new UnsupportedDomainEvent()));
+    }
+
+    [Fact]
+    public void Apply_UserCreatedDomainEvent_ShouldSetProperties()
+    {
+        // Arrange
+        var userId = UserId.New();
+        var name = Name.From("TestUser");
+        var user = User.Create(name);
+        var domainEvent = new UserCreatedDomainEvent(userId, name);
+        // Act
+        user.Apply(domainEvent);
+        // Assert
+        Assert.Equal(userId, user.Id);
+        Assert.Equal(name, user.Name);
+    }
+
+    [Fact]
+    public void Apply_UserRenamedDomainEvent_ShouldUpdateName()
+    {
+        // Arrange
+        var user = User.Create(Name.From("InitialName"));
+        var newName = Name.From("UpdatedName");
+        var domainEvent = new UserRenamedDomainEvent(user.Id, newName);
+        // Act
+        user.Apply(domainEvent);
+        // Assert
+        Assert.Equal(newName, user.Name);
+    }
+
 }

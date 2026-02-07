@@ -3,8 +3,7 @@ using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
-using ChatRooms.Domain.Tests.Rooms.Mocks;
-using ChatRooms.Domain.Users;
+using ChatRooms.Domain.Tests.Mocks;
 
 namespace ChatRooms.Domain.Tests.Rooms;
 
@@ -543,5 +542,17 @@ public sealed class RoomTests
         Assert.Throws<InvalidOperationException>(() => room.Restore());
     }
 
-    
+    [Fact]
+    public void Room_Restore_ShouldChangeStatusToActive()
+    {
+        // Arrange
+        var name = Name.From("RestoreStatusTestRoom");
+        var capacity = Capacity.Create(100);
+        var room = Room.Create(name, capacity);
+        room.Archive();
+        // Act
+        room.Restore();
+        // Assert
+        Assert.Equal(RoomStatus.Active, room.Status);
+    }
 }
