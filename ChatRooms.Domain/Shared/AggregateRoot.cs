@@ -12,7 +12,6 @@ public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct, IEqua
     protected void Raise(IDomainEvent @event)
     {
         Apply(@event);
-        Version++;
         _uncommittedDomainEvents.Add(@event);
     }
 
