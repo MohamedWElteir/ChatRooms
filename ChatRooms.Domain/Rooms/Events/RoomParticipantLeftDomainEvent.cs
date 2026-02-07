@@ -1,5 +1,6 @@
-﻿using ChatRooms.Domain.Shared;
+﻿using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events;
 
-public sealed record RoomParticipantLeftDomainEvent : DomainEvent;
+public sealed record RoomParticipantLeftDomainEvent(RoomId RoomId) : DomainEvent;

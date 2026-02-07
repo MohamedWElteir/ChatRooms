@@ -69,7 +69,7 @@ public sealed class Room : AggregateRoot<RoomId>
         if (CurrentParticipantsCount >= Capacity.Value)
             throw new InvalidOperationException("Room capacity reached.");
 
-        Raise(new RoomParticipantJoinedDomainEvent());
+        Raise(new RoomParticipantJoinedDomainEvent(Id));
     }
     public void Leave()
     {
@@ -77,7 +77,7 @@ public sealed class Room : AggregateRoot<RoomId>
             throw new InvalidOperationException("Only active rooms can be left.");
         if (CurrentParticipantsCount <= 0)
             throw new InvalidOperationException("No participants to leave.");
-        Raise(new RoomParticipantLeftDomainEvent());
+        Raise(new RoomParticipantLeftDomainEvent(Id));
     }
     public void Rename(Name newName)
     {
@@ -120,7 +120,7 @@ public sealed class Room : AggregateRoot<RoomId>
     {
         if (Status != RoomStatus.Archived)
             throw new InvalidOperationException("Only archived rooms can be restored.");
-        Raise(new RoomRestoredDomainEvent());
+        Raise(new RoomRestoredDomainEvent(Id));
     }
 
     #region Event Appliers
