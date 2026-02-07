@@ -1,8 +1,6 @@
-﻿using ChatRooms.Domain.Shared;
-
-namespace ChatRooms.SharedKernel.Utils;
+﻿namespace ChatRooms.SharedKernel.Utils;
 
 public class SystemDateTimeProvider : IDateTimeProvider
 {
-    public DateTimeUtc UtcNow => DateTimeUtc.NowUtc();
+    public DateTime UtcNow => DateTime.Now;
 }
