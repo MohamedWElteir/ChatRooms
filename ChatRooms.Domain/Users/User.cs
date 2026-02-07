@@ -12,7 +12,7 @@ public sealed class User : AggregateRoot<UserId>
     public static User Create(Name name)
     {
         var user = new User();
-        user.Raise(new UserCreatedDomainEvent(user.Id, name));
+        user.Raise(new UserCreatedDomainEvent(UserId.New(), name));
         return user;
     }
 
@@ -23,9 +23,18 @@ public sealed class User : AggregateRoot<UserId>
             case UserCreatedDomainEvent e:
                 Apply(e);
                 break;
+            case UserRenamedDomainEvent e:
+                Apply(e);
+                break;
             default:
                 throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(User)}");
         }
+    }
+    public void Rename(Name newName)
+    {
+        if (Name == newName)
+            return;
+        Raise(new UserRenamedDomainEvent(Id, newName));
     }
 
     #region Event Appliers
@@ -33,6 +42,11 @@ public sealed class User : AggregateRoot<UserId>
     {
         Id = @event.UserId;
         Name = @event.Name;
+    }
+
+    private void Apply(UserRenamedDomainEvent @event)
+    {
+        Name = @event.NewName;
     }
     #endregion
 }

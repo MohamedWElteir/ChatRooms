@@ -4,6 +4,7 @@ using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Tests.Rooms.Mocks;
+using ChatRooms.Domain.Users;
 
 namespace ChatRooms.Domain.Tests.Rooms;
 
@@ -21,6 +22,18 @@ public sealed class RoomTests
         Assert.Equal(capacity, room.Capacity);
         Assert.NotNull(room.Code.Value);
         Assert.Equal(8, room.Code.Value.Length);
+    }
+
+    [Fact]
+    public void CreateRoom_Should_CreateRoomWith_A_NoneDefaultId()
+    {
+        // Arrange
+        var name = Name.From("ValidRoomName");
+        var capacity = Capacity.Create(100);
+        var room = Room.Create(name, capacity);
+        Assert.NotNull(room);
+        Assert.Equal(name, room.Name);
+        Assert.NotEqual(default, room.Id);
     }
 
     [Fact]
