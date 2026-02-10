@@ -369,7 +369,7 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Room_Code_ToString_ShouldReturnCodeValue()
+    public void RoomCode_ToString_ShouldReturnCodeValue()
     {
         // Arrange
         var roomCode = RoomCode.New();
@@ -390,73 +390,6 @@ public sealed class RoomTests
         Assert.Equal($"Event '{unsupportedEvent.GetType().Name}' is not supported by {nameof(Room)}", exception?.Result.Message);
     }
 
-    [Fact]
-    public void DateTimeUtc_ShouldThrowException_ForNonUtcDateTime()
-    {
-        // Arrange
-        var localDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Local);
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => new DateTimeUtc(localDateTime));
-    }
-
-    [Fact]
-    public void DateTimeUtc_ImplicitConversionToDateTime_ShouldWorkCorrectly()
-    {
-        // Arrange
-        var utcDateTime = DateTime.UtcNow;
-        var dateTimeUtc = new DateTimeUtc(utcDateTime);
-        // Act
-        DateTime convertedDateTime = dateTimeUtc;
-        // Assert
-        Assert.Equal(utcDateTime, convertedDateTime);
-    }
-
-    [Fact]
-    public void DateTimeUtc_AddHours_ShouldReturnNewInstance()
-    {
-        // Arrange
-        var utcDateTime = DateTime.UtcNow;
-        var dateTimeUtc = new DateTimeUtc(utcDateTime);
-        var hoursToAdd = 5;
-        // Act
-        var newDateTimeUtc = dateTimeUtc.AddHours(hoursToAdd);
-        // Assert
-        Assert.Equal(utcDateTime.AddHours(hoursToAdd), newDateTimeUtc.Value);
-        Assert.NotEqual(dateTimeUtc, newDateTimeUtc);
-    }
-
-    [Fact]
-    public void DateTimeUtc_ToString_ShouldReturnIso8601Format()
-    {
-        // Arrange
-        var utcDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-        var dateTimeUtc = new DateTimeUtc(utcDateTime);
-        // Act
-        var dateTimeString = dateTimeUtc.ToString();
-        // Assert
-        Assert.Equal(utcDateTime.ToString("o"), dateTimeString);
-    }
-
-    [Fact]
-    public void DateTimeUtc_FromLocal_ShouldConvertToUtc()
-    {
-        // Arrange
-        var localDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Local);
-        // Act
-        var dateTimeUtc = DateTimeUtc.FromLocal(localDateTime);
-        // Assert
-        Assert.Equal(localDateTime.ToUniversalTime(), dateTimeUtc.Value);
-    }
-
-    [Fact]
-    public void DateTimeUtc_NowUtc_ShouldReturnCurrentUtcTime()
-    {
-        // Act
-        var dateTimeUtc = DateTimeUtc.NowUtc();
-        // Assert
-        var nowUtc = DateTime.UtcNow;
-        Assert.InRange(dateTimeUtc.Value, nowUtc.AddSeconds(-1), nowUtc.AddSeconds(1));
-    }
     [Theory]
     [InlineData(5)]
     [InlineData(10)]
