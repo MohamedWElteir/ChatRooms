@@ -1,45 +1,62 @@
-﻿namespace ChatRooms.Domain.Shared;
+﻿using System.Diagnostics.Contracts;
+
+namespace ChatRooms.Domain.Shared;
 
 /// <summary>
-/// Value object representing a UTC DateTime.
-/// Ensures that all domain timestamps are always in UTC.
+/// Value object representing an absolute UTC timestamp.
+/// Internally uses DateTimeOffset.
 /// </summary>
 public readonly record struct DateTimeUtc
 {
-    public DateTime Value { get; }
+    public DateTimeOffset Value { get; }
 
-    public DateTimeUtc(DateTime value)
+    private DateTimeUtc(DateTimeOffset value)
     {
-        if (value.Kind != DateTimeKind.Utc)
-            throw new ArgumentException("DateTime must be UTC.", nameof(value));
+        if (value.Offset != TimeSpan.Zero)
+            throw new ArgumentException("DateTimeOffset must be UTC.", nameof(value));
 
         Value = value;
     }
 
     /// <summary>
-    /// Implicitly converts to DateTime for convenience.
+    /// Convenience conversion to DateTime. The returned value is always in UTC.
     /// </summary>
-    public static implicit operator DateTime(DateTimeUtc dt) => dt.Value;
+    public DateTime DateTime => Value.UtcDateTime;
 
     /// <summary>
-    /// Factory method to create a DateTimeUtc from local time (converted to UTC).
+    /// Unix timestamp (stable for comparisons / persistence).
     /// </summary>
-    public static DateTimeUtc FromLocal(DateTime localTime) => new(localTime.ToUniversalTime());
+    public long UnixMilliseconds => Value.ToUnixTimeMilliseconds();
 
     /// <summary>
-    /// Factory method to create a DateTimeUtc representing the current UTC time.
+    /// Factory for current UTC time.
     /// </summary>
-    public static DateTimeUtc NowUtc() => new(DateTime.UtcNow);
+    public static DateTimeUtc NowUtc() => new(DateTimeOffset.UtcNow);
 
     /// <summary>
-    /// Method to add hours to the UTC DateTime.
+    /// Create DateTimeUTC from DateTime.
     /// </summary>
-    /// <param name="hours"></param>
-    /// <returns>
-    /// New DateTimeUtc instance with the added hours.
-    /// </returns>
-    public DateTimeUtc AddHours(double hours) => new (Value.AddHours(hours));
-    public override string ToString() => Value.ToString("o"); // ISO 8601 format
+    public static DateTimeUtc FromDateTime(DateTime dt)
+    {
+        if (dt.Kind != DateTimeKind.Utc)
+            throw new ArgumentException("DateTime must be UTC.", nameof(dt));
 
-    public DateTimeUtc AddMinutes(int minutes) => new (Value.AddMinutes(minutes));
+        return new DateTimeUtc(new DateTimeOffset(dt));
+    }
+
+    /// <summary>
+    /// Create from Unix timestamp.
+    /// </summary>
+    public static DateTimeUtc FromUnixMilliseconds(long ms) => new(DateTimeOffset.FromUnixTimeMilliseconds(ms));
+
+    public DateTimeUtc AddHours(double hours) => new(Value.AddHours(hours));
+    public DateTimeUtc Add(TimeSpan duration) => new(Value.Add(duration));
+    public DateTimeUtc AddMinutes(int minutes) => new(Value.AddMinutes(minutes));
+
+    public override string ToString() => Value.ToString("o");
+
+    public static bool operator <(DateTimeUtc left, DateTimeUtc right) => left.Value < right.Value;
+    public static bool operator >(DateTimeUtc left, DateTimeUtc right) => left.Value > right.Value;
+    public static bool operator <=(DateTimeUtc left, DateTimeUtc right) => left.Value <= right.Value;
+    public static bool operator >=(DateTimeUtc left, DateTimeUtc right) => left.Value >= right.Value;
 }

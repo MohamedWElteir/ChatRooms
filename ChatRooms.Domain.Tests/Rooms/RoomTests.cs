@@ -67,10 +67,10 @@ public sealed class RoomTests
         // Arrange
         var invalidNames = new[]
         {
-            "", // Empty
-            "   ", // Whitespace
-            new string('A', 51), // Exceeds max length
-            "1InvalidStart", // Does not start with a letter
+            "",
+            "   ",
+            new string('A', 51),
+            "1InvalidStart",
         };
         // Act & Assert
         foreach (var invalidName in invalidNames)
