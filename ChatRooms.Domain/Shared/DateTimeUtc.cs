@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-
-namespace ChatRooms.Domain.Shared;
+﻿namespace ChatRooms.Domain.Shared;
 
 /// <summary>
 /// Value object representing an absolute UTC timestamp.
@@ -36,12 +34,19 @@ public readonly record struct DateTimeUtc
     /// <summary>
     /// Create DateTimeUTC from DateTime.
     /// </summary>
-    public static DateTimeUtc FromDateTime(DateTime dt)
+    public static DateTimeUtc FromUtc(DateTime utc)
     {
-        if (dt.Kind != DateTimeKind.Utc)
-            throw new ArgumentException("DateTime must be UTC.", nameof(dt));
+        if (utc.Kind != DateTimeKind.Utc)
+            throw new ArgumentException("DateTime must be UTC.", nameof(utc));
 
-        return new DateTimeUtc(new DateTimeOffset(dt));
+        return new DateTimeUtc(new DateTimeOffset(utc));
+    }
+
+    public static DateTimeUtc FromLocal(DateTime local)
+    {
+        if (local.Kind != DateTimeKind.Local)
+            throw new ArgumentException("DateTime must be local.", nameof(local));
+        return FromUtc(local.ToUniversalTime());
     }
 
     /// <summary>
@@ -53,7 +58,7 @@ public readonly record struct DateTimeUtc
     public DateTimeUtc Add(TimeSpan duration) => new(Value.Add(duration));
     public DateTimeUtc AddMinutes(int minutes) => new(Value.AddMinutes(minutes));
 
-    public override string ToString() => Value.ToString("o");
+    public override string ToString() => Value.UtcDateTime.ToString("o");
 
     public static bool operator <(DateTimeUtc left, DateTimeUtc right) => left.Value < right.Value;
     public static bool operator >(DateTimeUtc left, DateTimeUtc right) => left.Value > right.Value;

@@ -161,7 +161,7 @@ public sealed class SharedTests
         // Arrange
         var localDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Local);
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => DateTimeUtc.FromDateTime(localDateTime));
+        Assert.Throws<ArgumentException>(() => DateTimeUtc.FromUtc(localDateTime));
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public sealed class SharedTests
     {
         // Arrange
         var utcDateTime = DateTime.UtcNow;
-        var dateTimeUtc = DateTimeUtc.FromDateTime(utcDateTime);
+        var dateTimeUtc = DateTimeUtc.FromUtc(utcDateTime);
         // Act
         DateTime convertedDateTime = dateTimeUtc.DateTime;
         // Assert
@@ -181,7 +181,7 @@ public sealed class SharedTests
     {
         // Arrange
         var utcDateTime = DateTime.UtcNow;
-        var dateTimeUtc = DateTimeUtc.FromDateTime(utcDateTime);
+        var dateTimeUtc = DateTimeUtc.FromUtc(utcDateTime);
         var hoursToAdd = 5;
         // Act
         var newDateTimeUtc = dateTimeUtc.AddHours(hoursToAdd);
@@ -195,7 +195,7 @@ public sealed class SharedTests
     {
         // Arrange
         var utcDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-        var dateTimeUtc = DateTimeUtc.FromDateTime(utcDateTime);
+        var dateTimeUtc = DateTimeUtc.FromUtc(utcDateTime);
         // Act
         var dateTimeString = dateTimeUtc.ToString();
         // Assert
@@ -208,7 +208,7 @@ public sealed class SharedTests
         // Arrange
         var localDateTime = new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Local);
         // Act
-        var dateTimeUtc = DateTimeUtc.FromDateTime(localDateTime);
+        var dateTimeUtc = DateTimeUtc.FromLocal(localDateTime);
         // Assert
         Assert.Equal(localDateTime.ToUniversalTime(), dateTimeUtc.Value);
     }
@@ -228,7 +228,7 @@ public sealed class SharedTests
     {
         // Arrange
         var utcDateTime = DateTime.UtcNow;
-        var dateTimeUtc = DateTimeUtc.FromDateTime(utcDateTime);
+        var dateTimeUtc = DateTimeUtc.FromUtc(utcDateTime);
         // Act
         var newDateTimeUtc = dateTimeUtc.AddHours(1);
         // Assert
@@ -242,8 +242,8 @@ public sealed class SharedTests
         // Arrange
         var utcDateTime1 = DateTime.UtcNow;
         var utcDateTime2 = utcDateTime1.AddSeconds(1);
-        var dateTimeUtc1 = DateTimeUtc.FromDateTime(utcDateTime1);
-        var dateTimeUtc2 = DateTimeUtc.FromDateTime(utcDateTime2);
+        var dateTimeUtc1 = DateTimeUtc.FromUtc(utcDateTime1);
+        var dateTimeUtc2 = DateTimeUtc.FromUtc(utcDateTime2);
         // Act & Assert
         Assert.False(dateTimeUtc1.Equals(dateTimeUtc2), "Two different DateTimeUtc instances should not be considered equal.");
         Assert.True(dateTimeUtc1.Equals(dateTimeUtc1), "An instance of DateTimeUtc should be considered equal to itself.");

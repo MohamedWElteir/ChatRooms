@@ -1,13 +1,12 @@
-﻿using ChatRooms.Domain.Rooms.Enums;
+﻿using ChatRooms.Domain.Shared.Contracts;
 namespace ChatRooms.Domain.Shared;
 
-public abstract class Entity<TId> : IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
+public abstract class Entity<TId> : IAuditable, IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
     public TId Id { get; internal set; }
     public DateTimeUtc CreatedAt { get; private init; } = DateTimeUtc.NowUtc();
     public DateTimeUtc? UpdatedAt { get; internal set; }
-    public DateTimeUtc? DeletedAt { get; internal set; }
-    public DeletionReason? DeletionReason { get; internal set; }
+
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)
     {
         if (ReferenceEquals(left, right))

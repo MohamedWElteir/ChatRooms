@@ -149,7 +149,7 @@ public sealed class Room : AggregateRoot<RoomId>
     {
         Status = RoomStatus.Deleted;
         DeletedAt = @event.OccurredAt;
-        DeletionReason = @event.DeletionReason;
+        Reason = @event.DeletionReason;
     }
 
     private void Apply(RoomRenamedDomainEvent @event)

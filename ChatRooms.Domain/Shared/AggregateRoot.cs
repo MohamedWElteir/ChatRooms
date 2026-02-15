@@ -1,13 +1,18 @@
-﻿using ChatRooms.Domain.Shared.Contracts;
+﻿using ChatRooms.Domain.Rooms.Enums;
+using ChatRooms.Domain.Shared.Contracts;
 
 namespace ChatRooms.Domain.Shared;
 
-public abstract class AggregateRoot<TId> : Entity<TId> where TId : struct, IEquatable<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable where TId : struct, IEquatable<TId>
 {
     private readonly List<IDomainEvent> _uncommittedDomainEvents = [];
     public int Version { get; private set; } = 0;
 
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _uncommittedDomainEvents;
+
+    public bool IsDeleted => DeletedAt.HasValue;
+    public DateTimeUtc? DeletedAt { get; internal set; }
+    public DeletionReason? Reason { get; internal set; }
 
     protected void Raise(IDomainEvent @event)
     {

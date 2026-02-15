@@ -263,6 +263,8 @@ public sealed class RoomTests
         Assert.NotNull(roomDeletedEvent);
         Assert.Equal(room.Id, roomDeletedEvent.RoomId);
         Assert.Equal(reason, roomDeletedEvent.DeletionReason);
+        Assert.Equal(RoomStatus.Deleted, room.Status);
+        Assert.True(room.IsDeleted);
     }
     [Fact]
     public void Room_Delete_ShouldThrowError_WhenActiveRoomDeletedDueToInactivity()
