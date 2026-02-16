@@ -1,9 +1,8 @@
 ﻿using ChatRooms.Domain.Shared;
-using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Tests.Mocks;
 using System.Collections.Concurrent;
 
-namespace ChatRooms.Domain.Tests.Shared;
+namespace ChatRooms.Domain.Tests.DomainEvents;
 
 public sealed class DomainEventCreation
 {
@@ -225,7 +224,7 @@ public sealed class DomainEventCreation
         Assert.InRange(dateTimeUtc.Value, nowUtc.AddSeconds(-1), nowUtc.AddSeconds(1));
     }
 
-  [Fact]
+    [Fact]
     public void DateTimeUtc_Should_Be_Immutable()
     {
         // Arrange

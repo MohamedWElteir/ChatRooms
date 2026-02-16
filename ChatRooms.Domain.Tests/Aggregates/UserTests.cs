@@ -3,7 +3,7 @@ using ChatRooms.Domain.Users;
 using ChatRooms.Domain.Users.Events;
 using ChatRooms.Domain.Users.ValueObjects;
 
-namespace ChatRooms.Domain.Tests.Users;
+namespace ChatRooms.Domain.Tests.Aggregates;
 
 public class UserTests
 {

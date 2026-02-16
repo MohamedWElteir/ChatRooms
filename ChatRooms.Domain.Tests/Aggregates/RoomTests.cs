@@ -5,7 +5,7 @@ using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Tests.Mocks;
 
-namespace ChatRooms.Domain.Tests.Rooms;
+namespace ChatRooms.Domain.Tests.Aggregates;
 
 public sealed class RoomTests
 {
