@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace ChatRooms.Domain.Tests.Shared;
 
-public sealed class SharedTests
+public sealed class DomainEventCreation
 {
     [Fact]
     public void DomainEvent_Should_Have_OccurredOn_Set_To_CurrentTime()
