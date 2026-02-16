@@ -319,6 +319,32 @@ public sealed class RoomTests
     }
 
     [Fact]
+    public void Join_ShouldThrowException_WhenRoomIsDeleted()
+    {
+        // Arrange
+        var name = Name.From("DeletedRoom");
+        var capacity = Capacity.Create(100);
+        var room = Room.Create(name, capacity);
+        var reason = DeletionReason.Manual;
+        room.Delete(reason);
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Join());
+    }
+
+    [Fact]
+    public void Leave_ShouldThrowException_WhenRoomIsDeleted()
+    {
+        // Arrange
+        var name = Name.From("DeletedRoom");
+        var capacity = Capacity.Create(100);
+        var room = Room.Create(name, capacity);
+        var reason = DeletionReason.Manual;
+        room.Delete(reason);
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => room.Leave());
+    }
+
+    [Fact]
     public void Room_ChangeCapacity_ShouldNotRaiseEvent_WhenCapacityIsSame()
     {
         // Arrange
@@ -461,7 +487,7 @@ public sealed class RoomTests
         room.Restore();
         // Assert
         var domainEvents = room.DomainEvents;
-        var roomRestoredEvent = domainEvents.OfType<RoomRestoredDomainEvent>().FirstOrDefault();
+        var roomRestoredEvent = domainEvents.OfType<RoomUnArchivedDomainEvent>().FirstOrDefault();
         Assert.NotNull(roomRestoredEvent);
     }
 
@@ -484,10 +510,25 @@ public sealed class RoomTests
         var name = Name.From("RestoreStatusTestRoom");
         var capacity = Capacity.Create(100);
         var room = Room.Create(name, capacity);
-        room.Archive();
         // Act
+        room.Archive();
         room.Restore();
         // Assert
         Assert.Equal(RoomStatus.Active, room.Status);
+    }
+
+    [Fact]
+    public void Room_Rename_ShouldRename_When_Room_IsArchived()
+    {
+        // Arrange
+        var name = Name.From("RenameArchiveTestRoom");
+        var capacity = Capacity.Create(100);
+        var room = Room.Create(name, capacity);
+        var newName = Name.From("NewTestName");
+        // Act
+        room.Archive();
+        room.Rename(newName);
+        // Assert
+        Assert.Equal(room.Name, newName);
     }
 }

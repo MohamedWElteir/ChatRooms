@@ -8,14 +8,6 @@ public readonly record struct DateTimeUtc
 {
     public DateTimeOffset Value { get; }
 
-    private DateTimeUtc(DateTimeOffset value)
-    {
-        if (value.Offset != TimeSpan.Zero)
-            throw new ArgumentException("DateTimeOffset must be UTC.", nameof(value));
-
-        Value = value;
-    }
-
     /// <summary>
     /// Convenience conversion to DateTime. The returned value is always in UTC.
     /// </summary>
@@ -25,6 +17,14 @@ public readonly record struct DateTimeUtc
     /// Unix timestamp (stable for comparisons / persistence).
     /// </summary>
     public long UnixMilliseconds => Value.ToUnixTimeMilliseconds();
+    private DateTimeUtc(DateTimeOffset value)
+    {
+        if (value.Offset != TimeSpan.Zero)
+            throw new ArgumentException("DateTimeOffset must be UTC.", nameof(value));
+
+        Value = value;
+    }
+
 
     /// <summary>
     /// Factory for current UTC time.

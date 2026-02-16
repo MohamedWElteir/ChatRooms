@@ -3,4 +3,4 @@ using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events;
 
-public sealed record RoomRestoredDomainEvent(RoomId RoomId) : DomainEvent;
+public sealed record RoomUnArchivedDomainEvent(RoomId RoomId) : DomainEvent;

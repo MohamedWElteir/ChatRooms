@@ -21,15 +21,12 @@ public sealed class Room : AggregateRoot<RoomId>
             case RoomCreatedDomainEvent e:
                 Apply(e);
                 break;
-
             case RoomRenamedDomainEvent e:
                 Apply(e);
                 break;
-
             case RoomArchivedDomainEvent e:
                 Apply(e);
                 break;
-
             case RoomDeletedDomainEvent e:
                 Apply(e);
                 break;
@@ -42,7 +39,7 @@ public sealed class Room : AggregateRoot<RoomId>
             case RoomParticipantLeftDomainEvent e:
                 Apply(e);
                 break;
-            case RoomRestoredDomainEvent e:
+            case RoomUnArchivedDomainEvent e:
                 Apply(e);
                 break;
 
@@ -64,8 +61,7 @@ public sealed class Room : AggregateRoot<RoomId>
 
     public void Join()
     {
-        if (Status != RoomStatus.Active)
-            throw new InvalidOperationException("Only active rooms can be joined.");
+        EnsureActive();
         if (CurrentParticipantsCount >= Capacity.Value)
             throw new InvalidOperationException("Room capacity reached.");
 
@@ -73,32 +69,28 @@ public sealed class Room : AggregateRoot<RoomId>
     }
     public void Leave()
     {
-        if (Status != RoomStatus.Active)
-            throw new InvalidOperationException("Only active rooms can be left.");
+        EnsureActive();
         if (CurrentParticipantsCount <= 0)
             throw new InvalidOperationException("No participants to leave.");
         Raise(new RoomParticipantLeftDomainEvent(Id));
     }
     public void Rename(Name newName)
     {
+        EnsureNotDeleted(); 
         if (Name == newName)
             return;
         Raise(new RoomRenamedDomainEvent(Id, newName));
     }
     public void Archive()
     {
-        if (Status != RoomStatus.Active)
-            throw new InvalidOperationException("Only active rooms can be archived.");
-
+        EnsureActive();
         Raise(new RoomArchivedDomainEvent(Id));
     }
 
     public void Delete(DeletionReason reason)
     {
-        if (Status == RoomStatus.Deleted)
-            throw new InvalidOperationException("Can't delete a deleted room.");
-
-        if (Status == RoomStatus.Active && reason == Enums.DeletionReason.Inactivity)
+        EnsureNotDeleted();
+        if (Status == RoomStatus.Active && reason == DeletionReason.Inactivity)
             throw new InvalidOperationException("Active rooms cannot be deleted due to inactivity.");
 
         Raise(new RoomDeletedDomainEvent(Id, reason));
@@ -106,10 +98,9 @@ public sealed class Room : AggregateRoot<RoomId>
 
     public void ChangeCapacity(Capacity newCapacity)
     {
+        EnsureActive();
         if (Capacity == newCapacity)
             return;
-        if (Status != RoomStatus.Active)
-            throw new InvalidOperationException("Only active rooms can change capacity.");
         if (newCapacity.Value < CurrentParticipantsCount)
             throw new InvalidOperationException("New capacity cannot be less than current participants count.");
 
@@ -120,7 +111,7 @@ public sealed class Room : AggregateRoot<RoomId>
     {
         if (Status != RoomStatus.Archived)
             throw new InvalidOperationException("Only archived rooms can be restored.");
-        Raise(new RoomRestoredDomainEvent(Id));
+        Raise(new RoomUnArchivedDomainEvent(Id));
     }
 
     #region Event Appliers
@@ -168,10 +159,24 @@ public sealed class Room : AggregateRoot<RoomId>
         CurrentParticipantsCount--;
         UpdatedAt = @event.OccurredAt;
     }
-    private void Apply(RoomRestoredDomainEvent @event)
+    private void Apply(RoomUnArchivedDomainEvent @event)
     {
         Status = RoomStatus.Active;
         UpdatedAt = @event.OccurredAt;
+    }
+    #endregion
+
+    #region Guard Clauses
+    private void EnsureNotDeleted()
+    {
+        if (Status == RoomStatus.Deleted)
+            throw new InvalidOperationException("Operation not allowed on deleted room.");
+    }
+    private void EnsureActive()
+    {
+        EnsureNotDeleted();
+        if (Status != RoomStatus.Active)
+            throw new InvalidOperationException("Operation only allowed on active rooms.");
     }
     #endregion
 }

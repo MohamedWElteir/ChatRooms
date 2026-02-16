@@ -1,4 +1,5 @@
 ﻿using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Tests.Mocks;
 using System.Collections.Concurrent;
 
@@ -51,6 +52,7 @@ public sealed class SharedTests
                     deserialized.OccurredAt.Value);
 
     }
+
 
     [Fact]
     public void DomainEvent_Should_Have_Proper_ToString_Implementation()
@@ -247,5 +249,20 @@ public sealed class SharedTests
         // Act & Assert
         Assert.False(dateTimeUtc1.Equals(dateTimeUtc2), "Two different DateTimeUtc instances should not be considered equal.");
         Assert.True(dateTimeUtc1.Equals(dateTimeUtc1), "An instance of DateTimeUtc should be considered equal to itself.");
+    }
+
+    [Fact]
+    public void DateTimeUtc_Should_Have_Proper_HashCode_Implementation()
+    {
+        // Arrange
+        var utcDateTime1 = DateTime.UtcNow;
+        var utcDateTime2 = utcDateTime1.AddSeconds(1);
+        var dateTimeUtc1 = DateTimeUtc.FromUtc(utcDateTime1);
+        var dateTimeUtc2 = DateTimeUtc.FromUtc(utcDateTime2);
+        // Act
+        var hashCode1 = dateTimeUtc1.GetHashCode();
+        var hashCode2 = dateTimeUtc2.GetHashCode();
+        // Assert
+        Assert.NotEqual(hashCode1, hashCode2);
     }
 }
