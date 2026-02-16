@@ -8,7 +8,7 @@ public readonly record struct RoomCode
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("RoomCode cannot be null or whitespace.", nameof(value));
-        if(value.Length != 8)
+        if (value.Length != 8)
             throw new ArgumentException("RoomCode must be exactly 8 characters long.", nameof(value));
         Value = value;
     }
