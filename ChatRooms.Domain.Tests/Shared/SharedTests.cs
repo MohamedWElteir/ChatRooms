@@ -8,6 +8,25 @@ namespace ChatRooms.Domain.Tests.Shared;
 public sealed class SharedTests
 {
     [Fact]
+    public void Creating_NewEntity_Should_Not_Set_Id()
+    {
+        // Arrange & Act
+        var entity = new TestEntity();
+        
+        // Assert
+        Assert.Equal(Guid.Empty, entity.Id);
+    }
+
+    [Fact]
+    public void Creating_NewEntity_Should_Set_CreatedAt()
+    {
+        // Arrange & Act
+        var entity = new TestEntity();
+        // Assert
+        Assert.True((DateTime.UtcNow - entity.CreatedAt.DateTime).TotalSeconds < 1, "CreatedAt should be set to the current time when the entity is created.");
+    }
+
+    [Fact]
     public void DomainEvent_Should_Have_OccurredOn_Set_To_CurrentTime()
     {
         // Arrange

@@ -1,4 +1,4 @@
-﻿using ChatRooms.Domain.Rooms.Enums;
+﻿using ChatRooms.Domain.Shared.Enums;
 
 namespace ChatRooms.Domain.Shared.Contracts;
 

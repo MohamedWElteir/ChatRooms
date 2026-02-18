@@ -1,4 +1,4 @@
-﻿namespace ChatRooms.Domain.Rooms.Enums;
+﻿namespace ChatRooms.Domain.Shared.Enums;
 
 public enum DeletionReason
 {

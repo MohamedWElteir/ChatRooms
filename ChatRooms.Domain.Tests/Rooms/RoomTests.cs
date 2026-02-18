@@ -3,6 +3,7 @@ using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared.Enums;
 using ChatRooms.Domain.Tests.Mocks;
 
 namespace ChatRooms.Domain.Tests.Rooms;

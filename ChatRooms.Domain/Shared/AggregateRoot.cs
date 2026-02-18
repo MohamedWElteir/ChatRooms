@@ -1,5 +1,5 @@
-﻿using ChatRooms.Domain.Rooms.Enums;
-using ChatRooms.Domain.Shared.Contracts;
+﻿using ChatRooms.Domain.Shared.Contracts;
+using ChatRooms.Domain.Shared.Enums;
 
 namespace ChatRooms.Domain.Shared;
 

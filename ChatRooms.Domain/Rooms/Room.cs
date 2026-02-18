@@ -3,6 +3,7 @@ using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Contracts;
+using ChatRooms.Domain.Shared.Enums;
 namespace ChatRooms.Domain.Rooms;
 
 public sealed class Room : AggregateRoot<RoomId>

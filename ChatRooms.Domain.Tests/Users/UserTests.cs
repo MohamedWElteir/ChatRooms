@@ -1,5 +1,6 @@
 using ChatRooms.Domain.Tests.Mocks;
 using ChatRooms.Domain.Users;
+using ChatRooms.Domain.Users.Enums;
 using ChatRooms.Domain.Users.Events;
 using ChatRooms.Domain.Users.ValueObjects;
 
@@ -12,8 +13,10 @@ public class UserTests
     {
         // Arrange
         var name = Name.From("ValidUserName");
+        var birthDate = BirthDate.From(new DateTime(2025,10,10));
+        var gender = Gender.Male;
         // Act
-        var user = User.Create(name);
+        var user = User.Create(name,gender, birthDate);
         // Assert
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
@@ -23,7 +26,7 @@ public class UserTests
     public void CreateUser_WithEmptyName_ShouldThrowException()
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => User.Create(Name.From(string.Empty)));
+        Assert.Throws<ArgumentException>(() => User.Create(Name.From(string.Empty), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10))));
     }
 
     [Fact]
@@ -31,8 +34,10 @@ public class UserTests
     {
         // Arrange
         var name = Name.From("ValidUserName");
+        var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
+        var gender = Gender.Male;
         // Act
-        var user = User.Create(name);
+        var user = User.Create(name,gender,birthDate);
         // Assert
         Assert.Contains(user.DomainEvents, e => e is UserCreatedDomainEvent);
     }
@@ -42,7 +47,11 @@ public class UserTests
     {
         // Arrange
         var name = Name.From("ValidUserName");
-        var user = User.Create(name);
+        var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
+        var gender = Gender.Male;
+        // Act
+        var user = User.Create(name, gender, birthDate);
+        // Assert
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
         Assert.NotEqual(default, user.Id);
@@ -52,7 +61,7 @@ public class UserTests
     public void RenameUser_WithValidNewName_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(Name.From("InitialName"));
+        var user = User.Create(Name.From("InitialName"),Gender.Male, BirthDate.From(new DateTime(2020,10,10)));
         var newName = Name.From("NewValidName");
         // Act
         user.Rename(newName);
@@ -64,7 +73,7 @@ public class UserTests
     public void RenameUser_WithSameName_ShouldNotRaiseEvent()
     {
         // Arrange
-        var user = User.Create(Name.From("SameName"));
+        var user = User.Create(Name.From("SameName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         var sameName = Name.From("SameName");
         // Act
         user.Rename(sameName);
@@ -76,7 +85,7 @@ public class UserTests
     public void RenameUser_WithEmptyName_ShouldThrowException()
     {
         // Arrange
-        var user = User.Create(Name.From("ValidName"));
+        var user = User.Create(Name.From("ValidName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         // Act & Assert
         Assert.Throws<ArgumentException>(() => user.Rename(Name.From(string.Empty)));
     }
@@ -85,7 +94,7 @@ public class UserTests
     public void RenameUser_ShouldRaiseUserRenamedDomainEvent()
     {
         // Arrange
-        var user = User.Create(Name.From("InitialName"));
+        var user = User.Create(Name.From("InitialName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         var newName = Name.From("NewValidName");
         // Act
         user.Rename(newName);
@@ -97,7 +106,7 @@ public class UserTests
     public void RenameUser_Should_UpdateNameProperty()
     {
         // Arrange
-        var user = User.Create(Name.From("InitialName"));
+        var user = User.Create(Name.From("InitialName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         var newName = Name.From("NewValidName");
         // Act
         user.Rename(newName);
@@ -109,7 +118,7 @@ public class UserTests
     public void Apply_UnsupportedEvent_ShouldThrowException()
     {
         // Arrange
-        var user = User.Create(Name.From("ValidName"));
+        var user = User.Create(Name.From("ValidName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => user.Apply(new UnsupportedDomainEvent()));
     }
@@ -120,20 +129,24 @@ public class UserTests
         // Arrange
         var userId = UserId.New();
         var name = Name.From("TestUser");
-        var user = User.Create(name);
-        var domainEvent = new UserCreatedDomainEvent(userId, name);
+        var gender = Gender.Male;
+        var birthDate = BirthDate.From(new DateTime(2020, 10, 10));
+        var user = User.Create(name, gender, birthDate);
+        var domainEvent = new UserCreatedDomainEvent(userId, name, gender, birthDate);
         // Act
         user.Apply(domainEvent);
         // Assert
         Assert.Equal(userId, user.Id);
         Assert.Equal(name, user.Name);
+        Assert.Equal(gender, user.Gender);
+        Assert.Equal(birthDate, user.BirthDate);
     }
 
     [Fact]
     public void Apply_UserRenamedDomainEvent_ShouldUpdateName()
     {
         // Arrange
-        var user = User.Create(Name.From("InitialName"));
+        var user = User.Create(Name.From("InitialName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         var newName = Name.From("UpdatedName");
         var domainEvent = new UserRenamedDomainEvent(user.Id, newName);
         // Act
