@@ -13,10 +13,10 @@ public class UserTests
     {
         // Arrange
         var name = Name.From("ValidUserName");
-        var birthDate = BirthDate.From(new DateTime(2025,10,10));
+        var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
         var gender = Gender.Male;
         // Act
-        var user = User.Create(name,gender, birthDate);
+        var user = User.Create(name, gender, birthDate);
         // Assert
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
@@ -37,7 +37,7 @@ public class UserTests
         var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
         var gender = Gender.Male;
         // Act
-        var user = User.Create(name,gender,birthDate);
+        var user = User.Create(name, gender, birthDate);
         // Assert
         Assert.Contains(user.DomainEvents, e => e is UserCreatedDomainEvent);
     }
@@ -61,7 +61,7 @@ public class UserTests
     public void RenameUser_WithValidNewName_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(Name.From("InitialName"),Gender.Male, BirthDate.From(new DateTime(2020,10,10)));
+        var user = User.Create(Name.From("InitialName"), Gender.Male, BirthDate.From(new DateTime(2020, 10, 10)));
         var newName = Name.From("NewValidName");
         // Act
         user.Rename(newName);
@@ -153,6 +153,20 @@ public class UserTests
         user.Apply(domainEvent);
         // Assert
         Assert.Equal(newName, user.Name);
+    }
+
+    [Theory]
+    [InlineData("2020-10-10", 5)]
+    [InlineData("2000-01-01", 26)]
+    public void AgeCalculation_Should_ReturnCorrectAge(string birthDateString, int expectedYears)
+    {
+        // Arrange
+        var birthDate = BirthDate.From(DateTime.Parse(birthDateString));
+        var user = User.Create(Name.From("Test"), Gender.Male, birthDate);
+        // Act
+        var age = user.Age;
+        // Assert
+        Assert.Equal(expectedYears, age.Years);
     }
 
 }

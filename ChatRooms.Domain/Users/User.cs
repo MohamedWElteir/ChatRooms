@@ -13,6 +13,7 @@ public sealed class User : AggregateRoot<UserId>
     public Email Email { get; private set; }
     public Gender Gender { get; private set; }
     public BirthDate BirthDate { get; private set; }
+    public Age Age => BirthDate.CalculateAge();
     private User() : base() { }
     public static User Create(Name name, Gender gender, BirthDate birthDate)
     {

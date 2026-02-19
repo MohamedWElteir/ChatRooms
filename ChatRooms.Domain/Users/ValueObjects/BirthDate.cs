@@ -14,22 +14,22 @@ public readonly record struct BirthDate
 
     public static BirthDate From(DateTime value) => new(value);
 
-    public Age AgeAt(DateTime today)
+    public Age CalculateAge(DateTime? from = null)
     {
-        today = today.Date;
+        var effectiveDate = (from ?? DateTime.UtcNow).Date;
 
-        if (today < Value)
+        if (effectiveDate < Value)
             throw new InvalidOperationException("Invalid age calculation.");
 
-        int years = today.Year - Value.Year;
-        int months = today.Month - Value.Month;
-        int days = today.Day - Value.Day;
+        int years = effectiveDate.Year - Value.Year;
+        int months = effectiveDate.Month - Value.Month;
+        int days = effectiveDate.Day - Value.Day;
 
         if (days < 0)
         {
             months--;
 
-            var previousMonth = today.AddMonths(-1);
+            var previousMonth = effectiveDate.AddMonths(-1);
             days += DateTime.DaysInMonth(previousMonth.Year, previousMonth.Month);
         }
 
