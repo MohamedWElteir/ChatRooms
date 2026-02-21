@@ -3,5 +3,5 @@ using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Domain.Rooms.Events
 {
-    public sealed record RoomClosedDomainEvent(RoomId RoomId) : DomainEvent;
+    public sealed record RoomClosedDomainEvent(RoomId RoomId, DateTimeUtc OccurredAt) : DomainEvent(OccurredAt);
 }

@@ -3,4 +3,4 @@ using ChatRooms.Domain.Users.ValueObjects;
 
 namespace ChatRooms.Domain.Users.Events;
 
-public sealed record UserRenamedDomainEvent(UserId UserId, Name NewName) : DomainEvent;
+public sealed record UserRenamedDomainEvent(UserId UserId, Name NewName, DateTimeUtc OccurredAt) : DomainEvent(OccurredAt);

@@ -15,10 +15,10 @@ public sealed class User : AggregateRoot<UserId>
     public BirthDate BirthDate { get; private set; }
     public Age Age => BirthDate.CalculateAge();
     private User() : base() { }
-    public static User Create(Name name, Gender gender, BirthDate birthDate)
+    public static User Create(Name name,Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
     {
         var user = new User();
-        user.Raise(new UserCreatedDomainEvent(UserId.New(), name, gender, birthDate));
+        user.Raise(new UserCreatedDomainEvent(UserId.New(), name,email, gender, birthDate, OccurredAt));
         return user;
     }
 
@@ -39,17 +39,17 @@ public sealed class User : AggregateRoot<UserId>
                 throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(User)}");
         }
     }
-    public void Rename(Name newName)
+    public void Rename(Name newName, DateTimeUtc occurredAt)
     {
         if (Name == newName)
             return;
-        Raise(new UserRenamedDomainEvent(Id, newName));
+        Raise(new UserRenamedDomainEvent(Id, newName, occurredAt));
     }
-    public void Delete(DeletionReason reason)
+    public void Delete(DeletionReason reason, DateTimeUtc occurredAt)
     {
         if (IsDeleted)
             throw new InvalidOperationException("User is already deleted.");
-        Raise(new UserDeletedDomainEvent(Id, reason));
+        Raise(new UserDeletedDomainEvent(Id, reason, occurredAt));
     }
     #region Event Appliers
     private void Apply(UserCreatedDomainEvent @event)
@@ -58,6 +58,7 @@ public sealed class User : AggregateRoot<UserId>
         Name = @event.Name;
         Gender = @event.Gender;
         BirthDate = @event.BirthDate;
+        UpdatedAt = @event.OccurredAt;
     }
 
     private void Apply(UserRenamedDomainEvent @event)
@@ -70,6 +71,7 @@ public sealed class User : AggregateRoot<UserId>
     {
         DeletedAt = @event.OccurredAt;
         Reason = @event.Reason;
+        UpdatedAt = @event.OccurredAt;
     }
     #endregion
 }

@@ -1,0 +1,13 @@
+﻿using ChatRooms.Application.Abstractions.Messaging;
+using ChatRooms.Application.Rooms.DTOs;
+
+namespace ChatRooms.Application.Rooms.Queries.GetRoomByCode;
+
+public sealed class GetRoomByCodeQueryHandler(IRoomQuery query) : IQueryHandler<GetRoomByCodeQuery, RoomDto>
+{
+    public async Task<RoomDto> Handle(GetRoomByCodeQuery request, CancellationToken cancellationToken)
+    {
+        var dto = await query.GetByCode(request.Code, cancellationToken) ?? throw new KeyNotFoundException(nameof(request.Code));
+        return dto;
+    }
+}

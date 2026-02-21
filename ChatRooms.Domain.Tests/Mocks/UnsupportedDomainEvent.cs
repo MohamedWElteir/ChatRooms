@@ -2,5 +2,5 @@
 
 namespace ChatRooms.Domain.Tests.Mocks
 {
-    public sealed record UnsupportedDomainEvent : DomainEvent;
+    public sealed record UnsupportedDomainEvent(DateTimeUtc OccurredAt) : DomainEvent(OccurredAt);
 }

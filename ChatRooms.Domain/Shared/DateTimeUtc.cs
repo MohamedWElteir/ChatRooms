@@ -24,7 +24,7 @@ public readonly record struct DateTimeUtc
 
         Value = value;
     }
-
+    public static DateTimeKind Kind => DateTimeKind.Utc;
 
     /// <summary>
     /// Factory for current UTC time.
@@ -32,7 +32,7 @@ public readonly record struct DateTimeUtc
     public static DateTimeUtc NowUtc() => new(DateTimeOffset.UtcNow);
 
     /// <summary>
-    /// Create DateTimeUTC from DateTime.
+    /// From DateTimeUTC from DateTime.
     /// </summary>
     public static DateTimeUtc FromUtc(DateTime utc)
     {
@@ -50,7 +50,7 @@ public readonly record struct DateTimeUtc
     }
 
     /// <summary>
-    /// Create from Unix timestamp.
+    /// From from Unix timestamp.
     /// </summary>
     public static DateTimeUtc FromUnixMilliseconds(long ms) => new(DateTimeOffset.FromUnixTimeMilliseconds(ms));
 

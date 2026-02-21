@@ -4,4 +4,4 @@ using ChatRooms.Domain.Users.ValueObjects;
 
 namespace ChatRooms.Domain.Users.Events;
 
-public sealed record UserDeletedDomainEvent(UserId UserId, DeletionReason Reason) : DomainEvent;
+public sealed record UserDeletedDomainEvent(UserId UserId, DeletionReason Reason, DateTimeUtc OccurredAt) : DomainEvent(OccurredAt);

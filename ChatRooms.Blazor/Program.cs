@@ -1,4 +1,5 @@
 using ChatRooms.Blazor.Components;
+using ChatRooms.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 

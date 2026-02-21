@@ -1,12 +1,12 @@
 ﻿using ChatRooms.Domain.Shared.Contracts;
+
 namespace ChatRooms.Domain.Shared;
 
-public abstract record DomainEvent : IDomainEvent
+// Add DateTimeUtc to the primary constructor
+public abstract record DomainEvent(DateTimeUtc OccurredAt) : IDomainEvent
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public DateTimeUtc OccurredAt { get; } = DateTimeUtc.NowUtc();
-    public DateTimeKind Kind { get; } = DateTimeKind.Utc;
+    public DateTimeKind Kind { get; } = DateTimeUtc.Kind;
     public virtual bool Equals(DomainEvent? other) => other is not null && Id == other.Id;
-
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 }

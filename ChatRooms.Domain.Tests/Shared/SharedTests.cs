@@ -1,5 +1,4 @@
 ﻿using ChatRooms.Domain.Shared;
-using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Tests.Mocks;
 using System.Collections.Concurrent;
 
@@ -12,7 +11,7 @@ public sealed class SharedTests
     {
         // Arrange & Act
         var entity = new TestEntity();
-        
+
         // Assert
         Assert.Equal(Guid.Empty, entity.Id);
     }
@@ -30,7 +29,7 @@ public sealed class SharedTests
     public void DomainEvent_Should_Have_OccurredOn_Set_To_CurrentTime()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         var occurredAt = domainEvent.OccurredAt.DateTime;
         // Assert
@@ -41,10 +40,10 @@ public sealed class SharedTests
     public void DomainEvent_Should_Be_Immutable()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         Assert.IsType<TestDomainEvent>(domainEvent);
-        // Since it's a record, it should be immutable by design. We can verify that by checking that the properties are read-only.
+        // Since it's a record, it should be immutable by design.
         Assert.True(domainEvent.GetType().GetProperties().All(p => p.CanRead && !p.CanWrite), "All properties of a domain event should be read-only to ensure immutability.");
     }
 
@@ -52,7 +51,7 @@ public sealed class SharedTests
     public void DomainEvent_Should_Inherit_From_DomainEvent_Base_Class()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         Assert.IsType<DomainEvent>(domainEvent, exactMatch: false);
     }
@@ -61,7 +60,7 @@ public sealed class SharedTests
     public void DomainEvent_Should_Be_Serializable()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         var serialized = System.Text.Json.JsonSerializer.Serialize(domainEvent);
         var deserialized = System.Text.Json.JsonSerializer.Deserialize<TestDomainEvent>(serialized);
@@ -77,7 +76,7 @@ public sealed class SharedTests
     public void DomainEvent_Should_Have_Proper_ToString_Implementation()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         var toStringResult = domainEvent.ToString();
         // Assert
@@ -88,8 +87,8 @@ public sealed class SharedTests
     public void DomainEvent_Should_Be_Comparable()
     {
         // Arrange
-        var domainEvent1 = new TestDomainEvent();
-        var domainEvent2 = new TestDomainEvent();
+        var domainEvent1 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var domainEvent2 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         Assert.NotEqual(domainEvent1, domainEvent2);
         Assert.Equal(domainEvent1, domainEvent1);
@@ -99,7 +98,7 @@ public sealed class SharedTests
     public void DomainEvent_Should_Have_OccurredAt_Set_To_Utc()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         var occurredAt = domainEvent.OccurredAt;
         // Assert
@@ -110,8 +109,8 @@ public sealed class SharedTests
     public void DomainEvent_Should_Have_Unique_Id()
     {
         // Arrange
-        var domainEvent1 = new TestDomainEvent();
-        var domainEvent2 = new TestDomainEvent();
+        var domainEvent1 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var domainEvent2 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         Assert.NotEqual(domainEvent1.Id, domainEvent2.Id);
     }
@@ -119,7 +118,7 @@ public sealed class SharedTests
     [Fact]
     public void OccurredAt_Should_Be_ThreadSafe()
     {
-        var domainEvent = new TestDomainEvent();
+        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
 
         var results = new ConcurrentBag<DateTime>();
 
@@ -139,8 +138,8 @@ public sealed class SharedTests
     public void DomainEvent_Should_Be_Equatable()
     {
         // Arrange
-        var domainEvent1 = new TestDomainEvent();
-        var domainEvent2 = new TestDomainEvent();
+        var domainEvent1 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var domainEvent2 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         Assert.False(domainEvent1.Equals(domainEvent2), "Two different instances of a domain event should not be considered equal.");
         Assert.True(domainEvent1.Equals(domainEvent1), "An instance of a domain event should be considered equal to itself.");
@@ -150,8 +149,8 @@ public sealed class SharedTests
     public void DomainEvent_Should_Have_Proper_HashCode_Implementation()
     {
         // Arrange
-        var domainEvent1 = new TestDomainEvent();
-        var domainEvent2 = new TestDomainEvent();
+        var domainEvent1 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var domainEvent2 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         var hashCode1 = domainEvent1.GetHashCode();
         var hashCode2 = domainEvent2.GetHashCode();
@@ -163,8 +162,8 @@ public sealed class SharedTests
     public void DomainEvent_Should_Be_Usable_As_Dictionary_Key()
     {
         // Arrange
-        var domainEvent1 = new TestDomainEvent();
-        var domainEvent2 = new TestDomainEvent();
+        var domainEvent1 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var domainEvent2 = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         var dictionary = new Dictionary<TestDomainEvent, string>
         {
             // Act
@@ -244,7 +243,7 @@ public sealed class SharedTests
         Assert.InRange(dateTimeUtc.Value, nowUtc.AddSeconds(-1), nowUtc.AddSeconds(1));
     }
 
-  [Fact]
+    [Fact]
     public void DateTimeUtc_Should_Be_Immutable()
     {
         // Arrange

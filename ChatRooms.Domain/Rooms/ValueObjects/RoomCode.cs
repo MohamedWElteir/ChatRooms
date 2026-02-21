@@ -1,4 +1,4 @@
-﻿namespace ChatRooms.Domain.Rooms;
+﻿namespace ChatRooms.Domain.Rooms.ValueObjects;
 
 public readonly record struct RoomCode
 {
@@ -13,12 +13,7 @@ public readonly record struct RoomCode
         Value = value;
     }
 
-    public static RoomCode New()
-    {
-        var value = RoomCodeGenerator.Generate();
-        return new RoomCode(value);
-    }
-
-    public override string ToString() => Value;
+    public static RoomCode From(string value) => new(value);
+    public static implicit operator string(RoomCode code) => code.Value;
 
 }

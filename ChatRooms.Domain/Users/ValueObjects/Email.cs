@@ -11,8 +11,8 @@ public readonly record struct Email
             throw new ArgumentException("Invalid email format.", nameof(value));
         Value = value;
     }
-    public static Email From(string value) => new (value);
-    public override string ToString() => Value;
+    public static Email From(string value) => new(value);
+    public static implicit operator string(Email email) => email.Value;
     private static bool IsValidEmail(string email)
     {
         try

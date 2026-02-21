@@ -15,8 +15,8 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("GeneralChat");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         Assert.Equal(name, room.Name);
         Assert.Equal(capacity, room.Capacity);
@@ -29,8 +29,8 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("ValidRoomName");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         Assert.NotNull(room);
         Assert.Equal(name, room.Name);
         Assert.NotEqual(default, room.Id);
@@ -41,12 +41,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("TechTalk");
-        var capacity = Capacity.Create(50);
+        var capacity = Capacity.From(50);
         // Act
-        var room = Room.Create(name, capacity);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
-        Assert.Single(domainEvents);
+        Assert.Single(domainEvents, DateTimeUtc.FromUtc(DateTime.UtcNow));
         var roomCreatedEvent = Assert.IsType<RoomCreatedDomainEvent>(domainEvents.First());
         Assert.Equal(room.Id, roomCreatedEvent.RoomId);
         Assert.Equal(name, roomCreatedEvent.Name);
@@ -88,7 +88,7 @@ public sealed class RoomTests
         // Act & Assert
         foreach (var invalidCapacity in invalidCapacities)
         {
-            Assert.Throws<ArgumentException>(() => Capacity.Create(invalidCapacity));
+            Assert.Throws<ArgumentException>(() => Capacity.From(invalidCapacity));
         }
     }
 
@@ -100,7 +100,7 @@ public sealed class RoomTests
         // Act & Assert
         foreach (var validCapacity in validCapacities)
         {
-            var capacity = Capacity.Create(validCapacity);
+            var capacity = Capacity.From(validCapacity);
             Assert.Equal(validCapacity, capacity.Value);
         }
     }
@@ -110,9 +110,9 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("EqualityTest");
-        var capacity = Capacity.Create(100);
-        var room1 = Room.Create(name, capacity);
-        var room2 = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room1 = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var room2 = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var room3 = room1;
         // Act & Assert
         Assert.NotEqual(room1, room2); // Different instances with different IDs
@@ -126,8 +126,8 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("EventClearTest");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
         room.ClearDomainEvents();
         // Assert
@@ -146,15 +146,14 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Name_ToString_ShouldReturnNameValue()
+    public void Name_ShouldReturnNameValue()
     {
         // Arrange
         var nameValue = "TestRoom";
-        var name = Name.From(nameValue);
         // Act
-        var nameString = name.ToString();
+        var name = Name.From(nameValue);
         // Assert
-        Assert.Equal(nameValue, nameString);
+        Assert.Equal(nameValue, name);
     }
 
     [Fact]
@@ -169,15 +168,14 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Capacity_ToString_ShouldReturnValueString()
+    public void Capacity_ShouldReturnValueString()
     {
         // Arrange
         var capacityValue = 75;
-        var capacity = Capacity.Create(capacityValue);
         // Act
-        var capacityString = capacity.ToString();
+        var capacity = Capacity.From(capacityValue);
         // Assert
-        Assert.Equal(capacityValue.ToString(), capacityString);
+        Assert.Equal(capacityValue, capacity);
     }
 
     [Fact]
@@ -185,12 +183,12 @@ public sealed class RoomTests
     {
         // Arrange
         var roomName = Name.From("CapacityChangeRoom");
-        var initialCapacity = Capacity.Create(75);
-        var room = Room.Create(roomName, initialCapacity);
+        var initialCapacity = Capacity.From(75);
+        var room = Room.Create(roomName, initialCapacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var newCapacityValue = 100;
-        var newCapacity = Capacity.Create(newCapacityValue);
+        var newCapacity = Capacity.From(newCapacityValue);
         // Act
-        room.ChangeCapacity(newCapacity);
+        room.ChangeCapacity(newCapacity, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         Assert.Equal(newCapacityValue, room.Capacity.Value);
     }
@@ -200,11 +198,11 @@ public sealed class RoomTests
     {
         // Arrange
         var initialName = Name.From("InitialRoomName");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(initialName, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(initialName, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var newName = Name.From("RenamedRoom");
         // Act
-        room.Rename(newName);
+        room.Rename(newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomRenamedEvent = domainEvents.OfType<RoomRenamedDomainEvent>().FirstOrDefault();
@@ -218,10 +216,10 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("ArchiveTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.Archive();
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomArchivedEvent = domainEvents.OfType<RoomArchivedDomainEvent>().FirstOrDefault();
@@ -234,12 +232,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("DeleteTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
-        room.Archive();
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Inactivity;
         // Act
-        room.Delete(reason);
+        room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomDeletedEvent = domainEvents.OfType<RoomDeletedDomainEvent>().FirstOrDefault();
@@ -253,11 +251,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("ActiveDeleteTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Manual;
         // Act
-        room.Delete(reason);
+        room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomDeletedEvent = domainEvents.OfType<RoomDeletedDomainEvent>().FirstOrDefault();
@@ -272,11 +270,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("ActiveDeleteTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Inactivity;
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Delete(reason));
+        Assert.Throws<InvalidOperationException>(() => room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -284,11 +282,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("ArchiveTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
-        room.Archive();
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Archive());
+        Assert.Throws<InvalidOperationException>(() => room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -296,12 +294,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("DeleteTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Manual;
-        room.Delete(reason);
+        room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Delete(reason));
+        Assert.Throws<InvalidOperationException>(() => room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -309,10 +307,10 @@ public sealed class RoomTests
     {
         // Arrange
         var initialName = Name.From("InitialRoomName");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(initialName, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(initialName, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.Rename(initialName);
+        room.Rename(initialName, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomRenamedEvent = domainEvents.OfType<RoomRenamedDomainEvent>().FirstOrDefault();
@@ -324,12 +322,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("DeletedRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Manual;
-        room.Delete(reason);
+        room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Join());
+        Assert.Throws<InvalidOperationException>(() => room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -337,12 +335,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("DeletedRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var reason = DeletionReason.Manual;
-        room.Delete(reason);
+        room.Delete(reason, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Leave());
+        Assert.Throws<InvalidOperationException>(() => room.Leave(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -351,10 +349,10 @@ public sealed class RoomTests
         // Arrange
         var roomName = Name.From("CapacityChangeRoom");
         var capacityValue = 75;
-        var initialCapacity = Capacity.Create(capacityValue);
-        var room = Room.Create(roomName, initialCapacity);
+        var initialCapacity = Capacity.From(capacityValue);
+        var room = Room.Create(roomName, initialCapacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.ChangeCapacity(initialCapacity);
+        room.ChangeCapacity(initialCapacity, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var capacityChangedEvent = domainEvents.OfType<RoomCapacityChangedDomainEvent>().FirstOrDefault();
@@ -379,8 +377,8 @@ public sealed class RoomTests
     {
         // Arrange
         var capacityValue = 100;
-        var capacity1 = Capacity.Create(capacityValue);
-        var capacity2 = Capacity.Create(capacityValue);
+        var capacity1 = Capacity.From(capacityValue);
+        var capacity2 = Capacity.From(capacityValue);
         // Act & Assert
         Assert.Equal(capacity1, capacity2);
         Assert.True(capacity1 == capacity2);
@@ -388,32 +386,11 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void RoomCode_New_ShouldGenerateValidCode()
-    {
-        // Act
-        var roomCode = RoomCode.New();
-        // Assert
-        Assert.NotNull(roomCode.Value);
-        Assert.Equal(8, roomCode.Value.Length);
-    }
-
-    [Fact]
-    public void RoomCode_ToString_ShouldReturnCodeValue()
-    {
-        // Arrange
-        var roomCode = RoomCode.New();
-        // Act
-        var codeString = roomCode.ToString();
-        // Assert
-        Assert.Equal(roomCode.Value, codeString);
-    }
-
-    [Fact]
     public void Room_ShouldThrowForUnsupportedEvent()
     {
         // Arrange
-        var room = Room.Create(Name.From("TestRoom"), Capacity.Create(100));
-        var unsupportedEvent = new UnsupportedDomainEvent();
+        var room = Room.Create(Name.From("TestRoom"), Capacity.From(100), RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var unsupportedEvent = new UnsupportedDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
         var exception = Assert.ThrowsAsync<InvalidOperationException>(async () => room.Apply(unsupportedEvent));
         Assert.Equal($"Event '{unsupportedEvent.GetType().Name}' is not supported by {nameof(Room)}", exception?.Result.Message);
@@ -426,15 +403,15 @@ public sealed class RoomTests
     {
         // Arrange
         var roomName = Name.From("CapacityTestRoom");
-        var initialCapacity = Capacity.Create(100);
-        var room = Room.Create(roomName, initialCapacity);
+        var initialCapacity = Capacity.From(100);
+        var room = Room.Create(roomName, initialCapacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         for (int i = 0; i < currentParticipants; i++)
         {
-            room.Join();
+            room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow));
         }
-        var newCapacity = Capacity.Create(currentParticipants - 1);
+        var newCapacity = Capacity.From(currentParticipants - 1);
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.ChangeCapacity(newCapacity));
+        Assert.Throws<InvalidOperationException>(() => room.ChangeCapacity(newCapacity, DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -442,14 +419,14 @@ public sealed class RoomTests
     {
         // Arrange
         var roomName = Name.From("ParticipantCountRoom");
-        var capacity = Capacity.Create(2);
-        var room = Room.Create(roomName, capacity);
+        var capacity = Capacity.From(2);
+        var room = Room.Create(roomName, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.Join();
+        room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow));
         Assert.Equal(1, room.CurrentParticipantsCount);
-        room.Join();
+        room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow));
         Assert.Equal(2, room.CurrentParticipantsCount);
-        room.Leave();
+        room.Leave(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         Assert.Equal(1, room.CurrentParticipantsCount);
     }
@@ -458,22 +435,22 @@ public sealed class RoomTests
     {
         // Arrange
         var roomName = Name.From("LeaveNoParticipantsRoom");
-        var capacity = Capacity.Create(10);
-        var room = Room.Create(roomName, capacity);
+        var capacity = Capacity.From(10);
+        var room = Room.Create(roomName, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Leave());
+        Assert.Throws<InvalidOperationException>(() => room.Leave(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
     [Fact]
     public void RoomParticipantJoin_ShouldThrowException_WhenCapacityReached()
     {
         // Arrange
         var roomName = Name.From("CapacityReachedRoom");
-        var capacity = Capacity.Create(2);
-        var room = Room.Create(roomName, capacity);
-        room.Join();
-        room.Join();
+        var capacity = Capacity.From(2);
+        var room = Room.Create(roomName, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Join());
+        Assert.Throws<InvalidOperationException>(() => room.Join(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -481,11 +458,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("RestoreTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
-        room.Archive();
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.Restore();
+        room.Restore(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
         var roomRestoredEvent = domainEvents.OfType<RoomUnArchivedDomainEvent>().FirstOrDefault();
@@ -497,11 +474,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("RestoreTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Restore());
+        Assert.Throws<InvalidOperationException>(() => room.Restore(DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -509,11 +486,11 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("RestoreStatusTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act
-        room.Archive();
-        room.Restore();
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Restore(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         Assert.Equal(RoomStatus.Active, room.Status);
     }
@@ -523,12 +500,12 @@ public sealed class RoomTests
     {
         // Arrange
         var name = Name.From("RenameArchiveTestRoom");
-        var capacity = Capacity.Create(100);
-        var room = Room.Create(name, capacity);
+        var capacity = Capacity.From(100);
+        var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         var newName = Name.From("NewTestName");
         // Act
-        room.Archive();
-        room.Rename(newName);
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        room.Rename(newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         Assert.Equal(room.Name, newName);
     }

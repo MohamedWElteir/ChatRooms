@@ -4,7 +4,7 @@ namespace ChatRooms.Domain.Shared;
 public abstract class Entity<TId> : IAuditable, IEquatable<Entity<TId>> where TId : struct, IEquatable<TId>
 {
     public TId Id { get; internal set; }
-    public DateTimeUtc CreatedAt { get; private init; } = DateTimeUtc.NowUtc();
+    public DateTimeUtc CreatedAt { get; protected set; }
     public DateTimeUtc? UpdatedAt { get; internal set; }
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right)

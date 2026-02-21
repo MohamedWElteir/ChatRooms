@@ -49,55 +49,55 @@ public sealed class Room : AggregateRoot<RoomId>
         }
     }
 
-    public static Room Create(Name name, Capacity capacity)
+    public static Room Create(Name name, Capacity capacity, RoomCode roomCode, DateTimeUtc dateTime)
     {
         var room = new Room();
-        if(!room.IsTransient())
+        if (!room.IsTransient())
             throw new InvalidOperationException("Only transient rooms can be created.");
 
-        room.Raise(new RoomCreatedDomainEvent(RoomId.New(), name, RoomCode.New(), capacity));
+        room.Raise(new RoomCreatedDomainEvent(RoomId.New(), name, roomCode, capacity, dateTime));
         return room;
 
     }
 
-    public void Join()
+    public void Join(DateTimeUtc occurredAt)
     {
         EnsureActive();
         if (CurrentParticipantsCount >= Capacity.Value)
             throw new InvalidOperationException("Room capacity reached.");
 
-        Raise(new RoomParticipantJoinedDomainEvent(Id));
+        Raise(new RoomParticipantJoinedDomainEvent(Id, occurredAt));
     }
-    public void Leave()
+    public void Leave(DateTimeUtc occurredAt)
     {
         EnsureActive();
         if (CurrentParticipantsCount <= 0)
             throw new InvalidOperationException("No participants to leave.");
-        Raise(new RoomParticipantLeftDomainEvent(Id));
+        Raise(new RoomParticipantLeftDomainEvent(Id, occurredAt));
     }
-    public void Rename(Name newName)
+    public void Rename(Name newName, DateTimeUtc occurredAt)
     {
-        EnsureNotDeleted(); 
+        EnsureNotDeleted();
         if (Name == newName)
             return;
-        Raise(new RoomRenamedDomainEvent(Id, newName));
+        Raise(new RoomRenamedDomainEvent(Id, newName, occurredAt));
     }
-    public void Archive()
+    public void Archive(DateTimeUtc occurredAt)
     {
         EnsureActive();
-        Raise(new RoomArchivedDomainEvent(Id));
+        Raise(new RoomArchivedDomainEvent(Id, occurredAt));
     }
 
-    public void Delete(DeletionReason reason)
+    public void Delete(DeletionReason reason, DateTimeUtc occurredAt)
     {
         EnsureNotDeleted();
         if (Status == RoomStatus.Active && reason == DeletionReason.Inactivity)
             throw new InvalidOperationException("Active rooms cannot be deleted due to inactivity.");
 
-        Raise(new RoomDeletedDomainEvent(Id, reason));
+        Raise(new RoomDeletedDomainEvent(Id, reason, occurredAt));
     }
 
-    public void ChangeCapacity(Capacity newCapacity)
+    public void ChangeCapacity(Capacity newCapacity, DateTimeUtc occurredAt)
     {
         EnsureActive();
         if (Capacity == newCapacity)
@@ -105,14 +105,14 @@ public sealed class Room : AggregateRoot<RoomId>
         if (newCapacity.Value < CurrentParticipantsCount)
             throw new InvalidOperationException("New capacity cannot be less than current participants count.");
 
-        Raise(new RoomCapacityChangedDomainEvent(Id, newCapacity));
+        Raise(new RoomCapacityChangedDomainEvent(Id, newCapacity, occurredAt));
     }
 
-    public void Restore()
+    public void Restore(DateTimeUtc occurredAt)
     {
         if (Status != RoomStatus.Archived)
             throw new InvalidOperationException("Only archived rooms can be restored.");
-        Raise(new RoomUnArchivedDomainEvent(Id));
+        Raise(new RoomUnArchivedDomainEvent(Id, occurredAt));
     }
 
     #region Event Appliers
@@ -123,6 +123,7 @@ public sealed class Room : AggregateRoot<RoomId>
         Capacity = @event.Capacity;
         Code = @event.Code;
         Status = RoomStatus.Active;
+        CreatedAt = @event.OccurredAt;
     }
 
     private void Apply(RoomArchivedDomainEvent @event)
@@ -142,6 +143,7 @@ public sealed class Room : AggregateRoot<RoomId>
         Status = RoomStatus.Deleted;
         DeletedAt = @event.OccurredAt;
         Reason = @event.DeletionReason;
+        UpdatedAt = @event.OccurredAt;
     }
 
     private void Apply(RoomRenamedDomainEvent @event)

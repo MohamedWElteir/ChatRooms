@@ -12,7 +12,7 @@ public readonly record struct Capacity
             throw new ArgumentException($"Capacity cannot exceed {MAX_CAPACITY}.", nameof(value));
         Value = value;
     }
-    public static Capacity Create(int value) => new(value);
-    public override string ToString() => Value.ToString();
+    public static Capacity From(int value) => new(value);
+    public static implicit operator int(Capacity capacity) => capacity.Value;
 
 }

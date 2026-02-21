@@ -18,5 +18,5 @@ public readonly record struct Name
     }
 
     public static Name From(string value) => new(value);
-    public override string ToString() => Value;
+    public static implicit operator string(Name name) => name.Value;
 }

@@ -1,12 +1,14 @@
-﻿using System.Security.Cryptography;
-namespace ChatRooms.Domain.Rooms;
+﻿using ChatRooms.Domain.Rooms.Contracts;
+using ChatRooms.Domain.Rooms.ValueObjects;
+using System.Security.Cryptography;
+namespace ChatRooms.Infrastructure.Security;
 
-public static class RoomCodeGenerator
+public sealed class RoomCodeGenerator : IRoomCodeGenerator
 {
     private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private const int CodeLength = 8;
 
-    public static string Generate()
+    public RoomCode Generate()
     {
         Span<byte> random = stackalloc byte[CodeLength];
         RandomNumberGenerator.Fill(random);
@@ -17,6 +19,6 @@ public static class RoomCodeGenerator
             chars[i] = Alphabet[random[i] % Alphabet.Length];
         }
 
-        return new string(chars);
+        return RoomCode.From(new string(chars));
     }
 }

@@ -5,9 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ChatRooms.Application\ChatRooms.Application.csproj" />
+    <ProjectReference Include="..\ChatRooms.Infrastructure\ChatRooms.Infrastructure.csproj" />
     <ProjectReference Include="..\ChatRooms.ServiceDefaults\ChatRooms.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>
