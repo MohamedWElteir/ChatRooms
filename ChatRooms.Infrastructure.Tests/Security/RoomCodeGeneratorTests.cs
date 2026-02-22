@@ -17,7 +17,7 @@ public class RoomCodeGeneratorTests
         // Act
         var result = _sut.Generate();
         // Assert
-        Assert.NotNull(result);
+        Assert.NotNull(result.Value);
         Assert.Equal(8, result.Value.Length);
     }
 

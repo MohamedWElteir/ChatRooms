@@ -1,28 +1,27 @@
-﻿namespace ChatRooms.Domain.Users.ValueObjects;
+﻿using System.Text.RegularExpressions;
 
-public readonly record struct Email
+namespace ChatRooms.Domain.Users.ValueObjects;
+
+public readonly partial record struct Email
 {
     public string Value { get; }
     private Email(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Email cannot be null or empty.", nameof(value));
+            throw new ArgumentNullException(nameof(value), "Email cannot be null or empty.");
         if (!IsValidEmail(value))
             throw new ArgumentException("Invalid email format.", nameof(value));
         Value = value;
     }
     public static Email From(string value) => new(value);
     public static implicit operator string(Email email) => email.Value;
+    private static readonly Regex EmailRegex = GenerateEmailRegex();
     private static bool IsValidEmail(string email)
     {
-        try
-        {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
-        }
-        catch
-        {
-            return false;
-        }
+        if (email.Length > 254) return false; // RFC 5321 max length
+        return EmailRegex.IsMatch(email);
     }
+
+    [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+    private static partial Regex GenerateEmailRegex();
 }

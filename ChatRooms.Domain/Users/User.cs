@@ -57,8 +57,9 @@ public sealed class User : AggregateRoot<UserId>
         Id = @event.UserId;
         Name = @event.Name;
         Gender = @event.Gender;
+        Email = @event.Email;
         BirthDate = @event.BirthDate;
-        UpdatedAt = @event.OccurredAt;
+        CreatedAt = @event.OccurredAt;
     }
 
     private void Apply(UserRenamedDomainEvent @event)

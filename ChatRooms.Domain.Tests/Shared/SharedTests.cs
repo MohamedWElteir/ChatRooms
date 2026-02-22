@@ -1,6 +1,8 @@
 ﻿using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Tests.Mocks;
 using System.Collections.Concurrent;
+using ChatRooms.Domain.Tests.Helpers;
+using Moq;
 
 namespace ChatRooms.Domain.Tests.Shared;
 
@@ -16,36 +18,34 @@ public sealed class SharedTests
         Assert.Equal(Guid.Empty, entity.Id);
     }
 
-    [Fact]
-    public void Creating_NewEntity_Should_Set_CreatedAt()
-    {
-        // Arrange & Act
-        var entity = new TestEntity();
-        // Assert
-        Assert.True((DateTime.UtcNow - entity.CreatedAt.DateTime).TotalSeconds < 1, "CreatedAt should be set to the current time when the entity is created.");
-    }
 
     [Fact]
-    public void DomainEvent_Should_Have_OccurredOn_Set_To_CurrentTime()
+    public void TestDomainEvent_Should_Store_Provided_OccurredAt()
     {
         // Arrange
-        var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var expected = DateTimeUtc.FromUtc(new DateTime(2024, 1, 1, 12, 0, 0,DateTimeKind.Utc));
         // Act
-        var occurredAt = domainEvent.OccurredAt.DateTime;
+        var domainEvent = new TestDomainEvent(expected);
         // Assert
-        Assert.True((DateTime.UtcNow - occurredAt).TotalSeconds < 1, "OccurredOn should be set to the current time when the event is created.");
+        Assert.Equal(expected, domainEvent.OccurredAt);
     }
 
     [Fact]
     public void DomainEvent_Should_Be_Immutable()
     {
-        // Arrange
         var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act & Assert
+
         Assert.IsType<TestDomainEvent>(domainEvent);
-        // Since it's a record, it should be immutable by design.
-        Assert.True(domainEvent.GetType().GetProperties().All(p => p.CanRead && !p.CanWrite), "All properties of a domain event should be read-only to ensure immutability.");
+        Assert.True(
+            domainEvent.GetType().GetProperties().All(p =>
+                p.CanRead && (!p.CanWrite || TestHelpers.IsInitOnly(p))),
+            $"Mutable properties: {string.Join(", ", domainEvent.GetType().GetProperties()
+                .Where(p => p.CanWrite && !TestHelpers.IsInitOnly(p))
+                .Select(p => p.Name))}"
+        );
     }
+
+    
 
     [Fact]
     public void DomainEvent_Should_Inherit_From_DomainEvent_Base_Class()

@@ -46,7 +46,7 @@ public sealed class RoomTests
         var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Assert
         var domainEvents = room.DomainEvents;
-        Assert.Single(domainEvents, DateTimeUtc.FromUtc(DateTime.UtcNow));
+        Assert.Single(domainEvents);
         var roomCreatedEvent = Assert.IsType<RoomCreatedDomainEvent>(domainEvents.First());
         Assert.Equal(room.Id, roomCreatedEvent.RoomId);
         Assert.Equal(name, roomCreatedEvent.Name);

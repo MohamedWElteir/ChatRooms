@@ -30,10 +30,10 @@ public class UserTests
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => User.Create(Name.From(string.Empty),
-                                                                        Email.From("test@test.com"),
-                                                                        Gender.Male,
-                                                                        BirthDate.From(new DateTime(2020, 10, 10)),
-                                                                        DateTimeUtc.FromUtc(DateTime.UtcNow)));
+                                                           Email.From("test@test.com"),
+                                                           Gender.Male,
+                                                           BirthDate.From(new DateTime(2020, 10, 10)),
+                                                           DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
@@ -66,6 +66,33 @@ public class UserTests
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
         Assert.NotEqual(default, user.Id);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public void Create_Null_Email_Should_Throw(string? nullOrWhiteSpaceString)
+    {
+        Assert.Throws<ArgumentNullException>(() => Email.From(nullOrWhiteSpaceString));
+    }
+
+    [Theory]
+    [InlineData("invalid.com")]        // missing @
+    [InlineData("@nodomain.com")]      // missing local part
+    [InlineData("no@")]                // missing domain
+    [InlineData("no@domain")]          // missing TLD
+    [InlineData("spaces in@email.com")]// spaces in local part
+    [InlineData("double@@email.com")]  // double @
+    [InlineData("missing.dot@com")]    // no dot in domain
+    [InlineData("@.com")]              // missing domain name
+    [InlineData("user@.com")]          // domain starts with dot
+    [InlineData("user@domain..com")]   // consecutive dots in domain
+    [InlineData("user@domain.com.")]   // dot in the end
+    [InlineData("user$@domain.com")]   // invalid character
+    public void Create_Invalid_Email_Should_Throw(string invalidEmail)
+    {
+        Assert.Throws<ArgumentException>(() => Email.From(invalidEmail));
     }
 
     [Fact]
@@ -177,10 +204,8 @@ public class UserTests
         Assert.Equal(name, user.Name);
         Assert.Equal(gender, user.Gender);
         Assert.Equal(email, user.Email);
-        Assert.Equal(email, user.Email);
         Assert.Equal(birthDate, user.BirthDate);
         Assert.Equal(occurredAtUtc, user.CreatedAt);
-        Assert.NotNull<Age>(user.Age);
     }
 
     [Fact]

@@ -12,8 +12,25 @@ public readonly record struct BirthDate
         Value = value.Date;
     }
 
+    /// <summary>
+    /// Factory to create a new BirthDate object.
+    /// </summary>
+    /// <param name="value">The DateTime.</param>
+    /// <returns>
+    /// A new BirthDate object from the provided Date.
+    /// </returns>
     public static BirthDate From(DateTime value) => new(value);
 
+    /// <summary>
+    /// Function to get the age based on the BirthDate.
+    /// </summary>
+    /// <param name="from"></param>
+    /// <returns>
+    ///  Returns the age based of the BirthDate. If no value is passed, it returns the age from the current date.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// If the date is less than the BirthDate.
+    /// </exception>
     public Age CalculateAge(DateTime? from = null)
     {
         var effectiveDate = (from ?? DateTime.UtcNow).Date;
