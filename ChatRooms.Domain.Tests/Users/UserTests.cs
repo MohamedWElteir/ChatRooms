@@ -243,4 +243,20 @@ public class UserTests
         Assert.Equal(expectedYears, age.Years);
     }
 
+    [Fact]
+    public void Change_Email_Should_Return_New_Email()
+    {
+        // Arrange
+        var user = User.Create(Name.From("Test"),
+                                Email.From("test@test.com"),
+                                Gender.Male,
+                                BirthDate.From(new DateTime(2020, 10, 10)),
+                                DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var newEmail = Email.From("new@test.com");
+        // Act
+        user.ChangeEmail(newEmail, DateTimeUtc.FromUtc(DateTime.UtcNow));
+        // Assert
+        Assert.Equal(newEmail, user.Email);
+    }
+
 }

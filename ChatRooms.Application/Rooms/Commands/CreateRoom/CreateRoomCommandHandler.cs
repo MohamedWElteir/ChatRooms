@@ -22,10 +22,10 @@ public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWor
         await roomRepository.Add(room, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return new RoomDto(
-            Id: room.Id.Value,
-            Name: room.Name.Value,
-            Code: room.Code.Value,
-            Capacity: room.Capacity.Value,
+            Id: room.Id,
+            Name: room.Name,
+            Code: room.Code,
+            Capacity: room.Capacity,
             CurrentParticipantsCount: room.CurrentParticipantsCount,
             Status: room.Status.ToString());
     }

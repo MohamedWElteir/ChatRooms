@@ -15,5 +15,8 @@ public readonly record struct RoomId
     public static RoomId New() => new(Guid.NewGuid());
 
     public override string ToString() => Value.ToString();
+
+    public static RoomId From(Guid value) => new(value);
+
     public static implicit operator Guid(RoomId roomId) => roomId.Value;
 }

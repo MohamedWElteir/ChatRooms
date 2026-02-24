@@ -6,14 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add services to the container.
-builder.Services.AddMediatR(configuration =>
-{
-    configuration.RegisterServicesFromAssemblyContaining<ApplicationAssemblyMarker>();
-});
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+var connectionString = builder.Configuration.GetConnectionString("chatroomsdb")
+    ?? throw new InvalidOperationException("Connection string 'chatroomsdb' not found.");
 builder.Services.AddOpenApi();
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(connectionString);
 builder.Services.AddApplication();
 var app = builder.Build();
 

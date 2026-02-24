@@ -3,7 +3,7 @@ using ChatRooms.Domain.Shared.Enums;
 
 namespace ChatRooms.Domain.Shared;
 
-public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable where TId : struct, IEquatable<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable, IAggregateRoot where TId : struct, IEquatable<TId>
 {
     private readonly List<IDomainEvent> _uncommittedDomainEvents = [];
     public int Version { get; private set; } = 0;

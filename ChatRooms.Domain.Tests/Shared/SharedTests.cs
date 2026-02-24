@@ -2,8 +2,6 @@
 using ChatRooms.Domain.Tests.Mocks;
 using System.Collections.Concurrent;
 using ChatRooms.Domain.Tests.Helpers;
-using Moq;
-
 namespace ChatRooms.Domain.Tests.Shared;
 
 public sealed class SharedTests
@@ -99,9 +97,7 @@ public sealed class SharedTests
     {
         // Arrange
         var domainEvent = new TestDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act
-        var occurredAt = domainEvent.OccurredAt;
-        // Assert
+        // Act & Assert
         Assert.Equal(DateTimeKind.Utc, domainEvent.Kind);
     }
 

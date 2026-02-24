@@ -35,6 +35,9 @@ public sealed class User : AggregateRoot<UserId>
             case UserDeletedDomainEvent e:
                 Apply(e);
                 break;
+            case UserEmailChangedDomainEvent e:
+                Apply(e);
+                break;
             default:
                 throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(User)}");
         }
@@ -51,6 +54,13 @@ public sealed class User : AggregateRoot<UserId>
             throw new InvalidOperationException("User is already deleted.");
         Raise(new UserDeletedDomainEvent(Id, reason, occurredAt));
     }
+    public void ChangeEmail(Email newEmail, DateTimeUtc occurredAt)
+    {
+        if (Email == newEmail)
+            return;
+        Raise(new UserEmailChangedDomainEvent(Id, newEmail, occurredAt));
+    }
+
     #region Event Appliers
     private void Apply(UserCreatedDomainEvent @event)
     {
@@ -72,6 +82,11 @@ public sealed class User : AggregateRoot<UserId>
     {
         DeletedAt = @event.OccurredAt;
         Reason = @event.Reason;
+        UpdatedAt = @event.OccurredAt;
+    }
+    private void Apply(UserEmailChangedDomainEvent @event)
+    {
+        Email = @event.NewEmail;
         UpdatedAt = @event.OccurredAt;
     }
     #endregion
