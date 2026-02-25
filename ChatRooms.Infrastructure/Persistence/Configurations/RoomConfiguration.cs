@@ -53,8 +53,14 @@ public sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
                 utc => utc.HasValue ? utc.Value.DateTime : (DateTime?)null,
                 value => value.HasValue ? DateTimeUtc.FromUtc(value.Value) : null);
 
-        builder.Property(r => r.IsDeleted)
-            .IsRequired();
+
+        builder.Property(r => r.DeletedAt)
+            .HasConversion(
+                utc => utc.HasValue ? utc.Value.DateTime : (DateTime?)null,
+                value => value.HasValue ? DateTimeUtc.FromUtc(value.Value) : null);
+
+        builder.Property(r => r.Reason)
+            .HasConversion<string>(); 
 
         builder.HasIndex(r => r.Code)
             .IsUnique();
