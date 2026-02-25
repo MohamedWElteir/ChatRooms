@@ -8,21 +8,16 @@ using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-namespace ChatRooms.Infrastructure.Persistence;
+namespace ChatRooms.Infrastructure.Persistence.Write;
 
-public sealed class ApplicationDbContext : DbContext, IUnitOfWork
+public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options), IUnitOfWork
 {
     public DbSet<Room> Rooms { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(WriteDbContext).Assembly);
         base.OnModelCreating(modelBuilder);
     }
 

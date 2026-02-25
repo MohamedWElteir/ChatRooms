@@ -1,11 +1,12 @@
 ﻿using ChatRooms.Application.Rooms.Commands;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Infrastructure.Persistence.Write;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatRooms.Infrastructure.Persistence.Repositories;
 
-public sealed class RoomRepository(ApplicationDbContext dbContext) : IRoomRepository
+public sealed class RoomRepository(WriteDbContext dbContext) : IRoomRepository
 {
     public async Task Add(Room room, CancellationToken cancellationToken)
     {

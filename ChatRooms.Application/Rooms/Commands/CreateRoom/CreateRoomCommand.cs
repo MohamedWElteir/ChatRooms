@@ -3,4 +3,4 @@ using ChatRooms.Application.Rooms.DTOs;
 
 namespace ChatRooms.Application.Rooms.Commands.CreateRoom;
 
-public sealed record CreateRoomCommand(string Name, int Capacity, string Code) : ICommand<RoomDto>;
+public sealed record CreateRoomCommand(string Name, int Capacity) : ICommand<RoomDto>;

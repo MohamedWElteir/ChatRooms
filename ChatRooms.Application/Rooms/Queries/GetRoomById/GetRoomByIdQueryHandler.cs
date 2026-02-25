@@ -8,7 +8,7 @@ public sealed class GetRoomByIdQueryHandler(IRoomQuery query) : IQueryHandler<Ge
 {
     public async Task<RoomDto> Handle(GetRoomByIdQuery request, CancellationToken cancellationToken)
     {
-        var dto = await query.GetById(request.Id, cancellationToken) ?? throw new KeyNotFoundException(nameof(Room));
+        var dto = await query.GetByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException(nameof(Room));
         return dto;
     }
 }

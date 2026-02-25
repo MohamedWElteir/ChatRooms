@@ -4,7 +4,7 @@ namespace ChatRooms.Application.Rooms.Queries;
 
 public interface IRoomQuery
 {
-    Task<RoomDto?> GetById(Guid id, CancellationToken cancellationToken);
-    Task<RoomDto?> GetByCode(string code, CancellationToken cancellationToken);
-    Task<IReadOnlyList<RoomListItemDto>> GetAll(CancellationToken cancellationToken);
+    Task<RoomDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<RoomDto?> GetByCodeAsync(string code, CancellationToken cancellationToken);
+    Task<IReadOnlyList<RoomListItemDto>> GetAllAsync(CancellationToken cancellationToken);
 }
