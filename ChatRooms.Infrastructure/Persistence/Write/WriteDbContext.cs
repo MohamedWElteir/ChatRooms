@@ -45,15 +45,10 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
         {
             foreach (var domainEvent in aggregate.DomainEvents)
             {
-                var outboxMessage = new OutboxMessage(
-                    Id: Guid.NewGuid(),
-                    Type: domainEvent.GetType().FullName!,
-                    Content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
-                    ErrorMessage: null,
-                    OccurredOn: domainEvent.OccurredAt,
-                    ProcessedOn: null,
-                    RetryCount: 0,
-                    IsProcessed: false
+                var outboxMessage = OutboxMessage.Create(
+                    type: domainEvent.GetType().FullName!,
+                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+                    occurredOn: domainEvent.OccurredAt
                 );
 
                 OutboxMessages.Add(outboxMessage);

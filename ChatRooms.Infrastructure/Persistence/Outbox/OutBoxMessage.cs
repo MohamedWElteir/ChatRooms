@@ -16,7 +16,19 @@ public sealed class OutboxMessage
     public bool IsDeadLetter { get; private set; }
 
     private OutboxMessage() { }
-
+    public static OutboxMessage Create(string type, string content, DateTimeUtc occurredOn)
+    {
+        return new OutboxMessage
+        {
+            Id = Guid.NewGuid(),
+            Type = type,
+            Content = content,
+            OccurredOn = occurredOn,
+            IsProcessed = false,
+            IsDeadLetter = false,
+            RetryCount = 0
+        };
+    }
     public void MarkAsProcessed(DateTimeUtc processedOn)
     {
         ProcessedOn = processedOn;
