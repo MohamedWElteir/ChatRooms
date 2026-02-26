@@ -38,7 +38,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
         var aggregates = ChangeTracker
             .Entries<IAggregateRoot>()
             .Select(x => x.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Any())
+            .Where(aggregate => aggregate.DomainEvents.Count != 0)
             .ToList();
 
         foreach (var aggregate in aggregates)

@@ -1,6 +1,7 @@
-﻿using ChatRooms.Domain.Shared;
+﻿using ChatRooms.Application.Abstractions.Time;
+using ChatRooms.Domain.Shared;
+using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Persistence.Outbox;
-using ChatRooms.Infrastructure.Persistence.Read;
 using ChatRooms.Infrastructure.Persistence.Write;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs;
 
-public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<OutboxProcessor> logger) : BackgroundService
+public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<OutboxProcessor> logger, IDateTimeProvider dateTimeProvider) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -31,21 +32,46 @@ public sealed class OutboxProcessor(IServiceScopeFactory scopeFactory, ILogger<O
     {
         using var scope = scopeFactory.CreateScope();
         var writeDbContext = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
-        var readDbContext = scope.ServiceProvider.GetRequiredService<ReadDbContext>();
 
-        var messageIds = await writeDbContext.Set<OutboxMessage>()
+        var messages = await writeDbContext.Set<OutboxMessage>()
             .Where(m => m.ProcessedOn == null)
-            .OrderBy(m => m.ProcessedOn)
+            .OrderBy(m => m.OccurredOn)
             .Take(20)
-            .Select(m => m.Id)
             .ToListAsync(stoppingToken);
 
-        if (messageIds.Count == 0) return;
+        if (messages.Count == 0) return;
+
+        foreach (var message in messages)
+        {
+            var projector = scope.ServiceProvider.GetKeyedService<IEventProjector>(message.Type);
+
+            if (projector is not null)
+            {
+                try
+                {
+                    if(logger.IsEnabled(LogLevel.Information) || logger.IsEnabled(LogLevel.Debug))
+                        logger.LogInformation("Processing outbox message with ID: {MessageId} and Type: {EventType}", message.Id, message.Type);
+
+                    await projector.ProjectAsync(message.Content, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while projecting event {EventType} with ID: {MessageId}", message.Type, message.Id);
+                }
+            }
+            else
+            {
+                logger.LogWarning("No projector found for event type: {EventType}", message.Type);
+            }
+        }
+        var messageIds = messages.Select(m => m.Id).ToList();
 
         await writeDbContext.Set<OutboxMessage>()
             .Where(m => messageIds.Contains(m.Id))
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(m => m.ProcessedOn, m => DateTimeUtc.FromUtc(DateTime.UtcNow)),
+                .SetProperty(m => m.IsProcessed, m => true)
+                .SetProperty(m => m.ProcessedOn, m => DateTimeUtc.FromUtc(dateTimeProvider.UtcNow)),
                 stoppingToken);
+
     }
 }

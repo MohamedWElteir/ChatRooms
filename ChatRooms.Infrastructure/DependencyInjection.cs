@@ -3,7 +3,9 @@ using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Application.Rooms.Commands;
 using ChatRooms.Application.Rooms.Queries;
 using ChatRooms.Domain.Rooms.Contracts;
+using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Infrastructure.BackgroundJobs;
+using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Persistence.Queries;
 using ChatRooms.Infrastructure.Persistence.Read;
 using ChatRooms.Infrastructure.Persistence.Repositories;
@@ -29,7 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IRoomQuery, RoomQueryService>();
         services.AddSingleton<IRoomCodeGenerator, RoomCodeGenerator>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
-
+        services.AddKeyedScoped<IEventProjector, RoomCreatedProjector>(nameof(RoomCreatedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
         return services;
     }
