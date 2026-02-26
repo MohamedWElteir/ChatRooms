@@ -52,7 +52,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
             {
                 var outboxMessage = OutboxMessage.Create(
                     type: domainEvent.GetType().FullName!,
-                    content: JsonSerializer.Serialize(domainEvent, _jsonOptions),
+                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), _jsonOptions),
                     occurredOn: domainEvent.OccurredAt
                 );
 
