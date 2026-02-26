@@ -12,6 +12,11 @@ namespace ChatRooms.Infrastructure.Persistence.Write;
 
 public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options), IUnitOfWork
 {
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
     public DbSet<Room> Rooms { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
@@ -47,7 +52,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
             {
                 var outboxMessage = OutboxMessage.Create(
                     type: domainEvent.GetType().FullName!,
-                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType()),
+                    content: JsonSerializer.Serialize(domainEvent, _jsonOptions),
                     occurredOn: domainEvent.OccurredAt
                 );
 
