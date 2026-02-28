@@ -1,8 +1,5 @@
 ﻿using ChatRooms.Application.Abstractions.Persistence;
-using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Rooms;
-using ChatRooms.Domain.Rooms.ValueObjects;
-using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +48,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
             foreach (var domainEvent in aggregate.DomainEvents)
             {
                 var outboxMessage = OutboxMessage.Create(
-                    type: domainEvent.GetType().FullName!,
+                    type: domainEvent.GetType().Name!,
                     content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), _jsonOptions),
                     occurredOn: domainEvent.OccurredAt
                 );

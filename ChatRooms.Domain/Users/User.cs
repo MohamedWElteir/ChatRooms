@@ -15,10 +15,10 @@ public sealed class User : AggregateRoot<UserId>
     public BirthDate BirthDate { get; private set; }
     public Age Age => BirthDate.CalculateAge();
     private User() : base() { }
-    public static User Create(Name name,Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
+    public static User Create(Name name, Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
     {
         var user = new User();
-        user.Raise(new UserCreatedDomainEvent(UserId.New(), name,email, gender, birthDate, OccurredAt));
+        user.Raise(new UserCreatedDomainEvent(UserId.New(), name, email, gender, birthDate, OccurredAt));
         return user;
     }
 
@@ -36,6 +36,9 @@ public sealed class User : AggregateRoot<UserId>
                 Apply(e);
                 break;
             case UserEmailChangedDomainEvent e:
+                Apply(e);
+                break;
+            case UserGenderChangedDomainEvent e:
                 Apply(e);
                 break;
             default:
@@ -59,6 +62,13 @@ public sealed class User : AggregateRoot<UserId>
         if (Email == newEmail)
             return;
         Raise(new UserEmailChangedDomainEvent(Id, newEmail, occurredAt));
+    }
+
+    public void ChangeGender(Gender newGender, DateTimeUtc occurredAt)
+    {
+        if (Gender == newGender)
+            return;
+        Raise(new UserGenderChangedDomainEvent(Id, newGender, occurredAt));
     }
 
     #region Event Appliers
@@ -87,6 +97,11 @@ public sealed class User : AggregateRoot<UserId>
     private void Apply(UserEmailChangedDomainEvent @event)
     {
         Email = @event.NewEmail;
+        UpdatedAt = @event.OccurredAt;
+    }
+    private void Apply(UserGenderChangedDomainEvent @event)
+    {
+        Gender = @event.NewGender;
         UpdatedAt = @event.OccurredAt;
     }
     #endregion
