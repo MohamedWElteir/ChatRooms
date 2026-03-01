@@ -7,16 +7,17 @@ namespace ChatRooms.Infrastructure.Persistence.Queries;
 
 public sealed class RoomQueryService(ReadDbContext readDbContext) : IRoomQuery
 {
+    private readonly FilterDefinitionBuilder<RoomDto> roomFilterDefinitionBuilder = Builders<RoomDto>.Filter;
     public async Task<RoomDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        FilterDefinition<RoomDto> filter = Builders<RoomDto>.Filter.Eq(r => r.Id, id);
+        var filter = roomFilterDefinitionBuilder.Eq(r => r.Id, id);
 
         return await readDbContext.Rooms.Find(filter).FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<RoomDto?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
     {
-        FilterDefinition<RoomDto> filter = Builders<RoomDto>.Filter.Eq(r => r.Code, code);
+        var filter = roomFilterDefinitionBuilder.Eq(r => r.Code, code);
 
         return await readDbContext.Rooms.Find(filter).FirstOrDefaultAsync(cancellationToken);
     }
