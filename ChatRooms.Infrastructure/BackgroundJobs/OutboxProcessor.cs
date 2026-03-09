@@ -49,12 +49,12 @@ public sealed class OutboxProcessor(
         if (messages.Count == 0) return;
 
         foreach (var message in messages)
-            await ProcessMessageAsync(message, scope, stoppingToken);
+            await ProcessMessageAsync(message, scope.ServiceProvider, stoppingToken);
 
         await writeDbContext.SaveChangesAsync(stoppingToken);
     }
 
-    private async Task ProcessMessageAsync(OutboxMessage message, AsyncServiceScope scope, CancellationToken stoppingToken)
+    private async Task ProcessMessageAsync(OutboxMessage message, IServiceProvider serviceProvider, CancellationToken stoppingToken)
     {
         if (message.RetryCount >= _options.MaxRetryCount)
         {
@@ -64,7 +64,7 @@ public sealed class OutboxProcessor(
             return;
         }
 
-        var projector = scope.ServiceProvider.GetKeyedService<IEventProjector>(message.Type);
+        var projector = serviceProvider.GetKeyedService<IEventProjector>(message.Type);
 
         if (projector is null)
         {
