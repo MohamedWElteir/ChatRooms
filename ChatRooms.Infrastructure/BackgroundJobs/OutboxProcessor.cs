@@ -37,7 +37,7 @@ public sealed class OutboxProcessor(
 
     private async Task ProcessOutboxMessagesAsync(CancellationToken stoppingToken)
     {
-        using var scope = scopeFactory.CreateScope();
+        await using var scope = scopeFactory.CreateAsyncScope();
         var writeDbContext = scope.ServiceProvider.GetRequiredService<WriteDbContext>();
 
         var messages = await writeDbContext.Set<OutboxMessage>()
@@ -49,44 +49,41 @@ public sealed class OutboxProcessor(
         if (messages.Count == 0) return;
 
         foreach (var message in messages)
+            await ProcessMessageAsync(message, scope, stoppingToken);
+
+        await writeDbContext.SaveChangesAsync(stoppingToken);
+    }
+
+    private async Task ProcessMessageAsync(OutboxMessage message, AsyncServiceScope scope, CancellationToken stoppingToken)
+    {
+        if (message.RetryCount >= _options.MaxRetryCount)
         {
-            var projector = scope.ServiceProvider.GetKeyedService<IEventProjector>(message.Type);
-
-            if (projector is not null)
-            {
-                if (message.RetryCount >= _options.MaxRetryCount)
-                {
-                    if (logger.IsEnabled(LogLevel.Critical))
-                        logger.LogCritical("Message {MessageId} exceeded max retry count. Moving to Dead Letter Queue.", message.Id);
-
-                    message.MarkAsDeadLetter(
-                        DateTimeUtc.FromUtc(dateTimeProvider.UtcNow),
-                        "Max retries exceeded.");
-                    continue;
-                }
-                try
-                {
-
-                    if (logger.IsEnabled(LogLevel.Information) || logger.IsEnabled(LogLevel.Debug))
-                        logger.LogInformation("Processing outbox message with ID: {MessageId} and Type: {EventType}", message.Id, message.Type);
-
-                    await projector.ProjectAsync(message.Content, stoppingToken);
-                    message.MarkAsProcessed(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
-
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An error occurred while projecting event {EventType} with ID: {MessageId}", message.Type, message.Id);
-                    message.RecordFailure(ex.Message);
-                }
-            }
-            else
-            {
-                logger.LogWarning("No projector found for event type: {EventType}", message.Type);
-            }
+            if (logger.IsEnabled(LogLevel.Critical))
+                logger.LogCritical("Message {MessageId} of type {EventType} exceeded max retry count. Moving to Dead Letter Queue.",message.Id, message.Type);
+            message.MarkAsDeadLetter(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow), "Max retries exceeded.");
+            return;
         }
 
-         await writeDbContext.SaveChangesAsync(stoppingToken);
+        var projector = scope.ServiceProvider.GetKeyedService<IEventProjector>(message.Type);
 
+        if (projector is null)
+        {
+            logger.LogWarning("No projector found for event type {EventType}",message.Type);
+            return;
+        }
+
+        try
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+                 logger.LogInformation("Processing outbox message {MessageId} of type {EventType}.", message.Id, message.Type);
+
+            await projector.ProjectAsync(message.Content, stoppingToken);
+            message.MarkAsProcessed(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to project event {EventType} for message {MessageId}.", message.Type, message.Id);
+            message.RecordFailure(ex.Message);
+        }
     }
 }
