@@ -3,14 +3,14 @@
 public readonly record struct Name
 {
     public string Value { get; }
-    private const int MAX_LENGTH = 50;
+    public const int MaxLength = 50;
 
     private Name(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("Name cannot be null or whitespace.", nameof(value));
-        if (value.Length > MAX_LENGTH)
-            throw new ArgumentException($"Name cannot exceed {MAX_LENGTH} characters.", nameof(value));
+        if (value.Length > MaxLength)
+            throw new ArgumentException($"Name cannot exceed {MaxLength} characters.", nameof(value));
         if (!char.IsLetter(value[0]))
             throw new ArgumentException("Name must start with a letter.", nameof(value));
 

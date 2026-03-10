@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddKeyedScoped<IEventProjector, RoomCreatedProjector>(nameof(RoomCreatedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
+        services.AddSingleton<IRoomCapacityPolicy, DefaultRoomCapacityPolicy>();
         return services;
     }
 }
