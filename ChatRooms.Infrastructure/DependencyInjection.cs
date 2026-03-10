@@ -6,6 +6,7 @@ using ChatRooms.Domain.Rooms.Contracts;
 using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Infrastructure.BackgroundJobs;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
+using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.Queries;
 using ChatRooms.Infrastructure.Persistence.Read;
 using ChatRooms.Infrastructure.Persistence.Repositories;
@@ -13,14 +14,19 @@ using ChatRooms.Infrastructure.Persistence.Write;
 using ChatRooms.Infrastructure.Security;
 using ChatRooms.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatRooms.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("chatrooms-write-db")
+        ?? throw new InvalidOperationException("Connection string 'chatrooms-write-db' not found.");
+
+        services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddDbContext<WriteDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
