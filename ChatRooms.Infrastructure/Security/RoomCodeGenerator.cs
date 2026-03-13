@@ -5,7 +5,7 @@ namespace ChatRooms.Infrastructure.Security;
 
 public sealed class RoomCodeGenerator : IRoomCodeGenerator
 {
-    private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ1234567890";
     private const int CodeLength = 8;
 
     public RoomCode Generate()

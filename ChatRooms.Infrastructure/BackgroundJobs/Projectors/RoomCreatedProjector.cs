@@ -10,8 +10,8 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext) : IEventPr
 {
     public async Task ProjectAsync(string eventContent, CancellationToken cancellationToken)
     {
-        RoomCreatedDomainEvent? domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent);
-        if (domainEvent == null) return;
+        var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent);
+        if (domainEvent is null) return;
 
         var newRoomDto = new RoomDto(
             domainEvent.RoomId.Value,

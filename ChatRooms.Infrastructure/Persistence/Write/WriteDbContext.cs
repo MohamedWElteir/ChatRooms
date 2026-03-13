@@ -14,8 +14,8 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = false
     };
-    public DbSet<Room> Rooms { get; set; }
-    public DbSet<OutboxMessage> OutboxMessages { get; set; }
+    public required DbSet<Room> Rooms { get; set; }
+    public required DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,7 +26,6 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : D
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ConvertDomainEventsToOutboxMessages();
-
         return await base.SaveChangesAsync(cancellationToken);
     }
 
