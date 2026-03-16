@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using ChatRooms.Infrastructure.Serialization;
 
 namespace ChatRooms.Infrastructure.Persistence.Write;
 
@@ -20,6 +21,7 @@ public sealed class WriteDbContextFactory : IDesignTimeDbContextFactory<WriteDbC
         var optionsBuilder = new DbContextOptionsBuilder<WriteDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
 
-        return new WriteDbContext(optionsBuilder.Options);
+        var jsonOptions = JsonOptionsFactory.Create();
+        return new WriteDbContext(optionsBuilder.Options, jsonOptions);
     }
 }

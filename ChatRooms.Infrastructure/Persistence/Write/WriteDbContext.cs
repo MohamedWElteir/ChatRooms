@@ -7,15 +7,11 @@ using System.Text.Json;
 
 namespace ChatRooms.Infrastructure.Persistence.Write;
 
-public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options) : DbContext(options), IUnitOfWork
+public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options, JsonSerializerOptions jsonOptions) : DbContext(options), IUnitOfWork
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
-    public required DbSet<Room> Rooms { get; set; }
-    public required DbSet<OutboxMessage> OutboxMessages { get; set; }
+    private readonly JsonSerializerOptions _jsonOptions = jsonOptions;
+    public DbSet<Room> Rooms { get; set; }
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -14,8 +14,10 @@ using ChatRooms.Infrastructure.Persistence.Write;
 using ChatRooms.Infrastructure.Security;
 using ChatRooms.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using ChatRooms.Infrastructure.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace ChatRooms.Infrastructure;
 
@@ -27,6 +29,7 @@ public static class DependencyInjection
         ?? throw new InvalidOperationException("Connection string 'chatrooms-write-db' not found.");
 
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
+        services.AddSingleton<JsonSerializerOptions>(JsonOptionsFactory.Create());
         services.AddDbContext<WriteDbContext>(options =>
         {
             options.UseNpgsql(connectionString);

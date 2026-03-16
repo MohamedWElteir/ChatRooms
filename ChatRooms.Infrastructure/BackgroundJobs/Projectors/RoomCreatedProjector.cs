@@ -6,15 +6,17 @@ using System.Text.Json;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 
-public sealed class RoomCreatedProjector(ReadDbContext readDbContext) : IEventProjector
+public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerializerOptions jsonOptions) : IEventProjector
 {
+    private readonly JsonSerializerOptions _jsonOptions = jsonOptions;
+
     public async Task ProjectAsync(string eventContent, CancellationToken cancellationToken)
     {
-        var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent);
+        var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent, _jsonOptions);
         if (domainEvent is null) return;
 
         var newRoomDto = new RoomDto(
-            domainEvent.RoomId.Value,
+            domainEvent.RoomId,
             domainEvent.Name,
             domainEvent.Code,
             domainEvent.Capacity,

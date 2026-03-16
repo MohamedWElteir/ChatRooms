@@ -6,7 +6,6 @@ namespace ChatRooms.Domain.Shared;
 /// Value object representing an absolute UTC timestamp.
 /// Internally uses DateTimeOffset.
 /// </summary>
-[JsonConverter(typeof(DateTimeUtcJsonConverter))]
 public readonly record struct DateTimeUtc
 {
     public DateTimeOffset Value { get; }
