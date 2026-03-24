@@ -8,9 +8,7 @@ using ChatRooms.Infrastructure.BackgroundJobs;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.Queries;
-using ChatRooms.Infrastructure.Persistence.Read;
 using ChatRooms.Infrastructure.Persistence.Repositories;
-using ChatRooms.Infrastructure.Persistence.Write;
 using ChatRooms.Infrastructure.Security;
 using ChatRooms.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +16,8 @@ using ChatRooms.Infrastructure.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using ChatRooms.Infrastructure.Persistence.DB.Write;
+using ChatRooms.Infrastructure.Persistence.DB.Read;
 
 namespace ChatRooms.Infrastructure;
 

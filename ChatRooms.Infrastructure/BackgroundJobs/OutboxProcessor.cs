@@ -2,8 +2,8 @@
 using ChatRooms.Domain.Shared;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
+using ChatRooms.Infrastructure.Persistence.DbContext.Write;
 using ChatRooms.Infrastructure.Persistence.Outbox;
-using ChatRooms.Infrastructure.Persistence.Write;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

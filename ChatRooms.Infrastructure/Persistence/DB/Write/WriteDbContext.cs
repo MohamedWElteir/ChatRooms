@@ -5,7 +5,7 @@ using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-namespace ChatRooms.Infrastructure.Persistence.Write;
+namespace ChatRooms.Infrastructure.Persistence.DB.Write;
 
 public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options, JsonSerializerOptions jsonOptions) : DbContext(options), IUnitOfWork
 {

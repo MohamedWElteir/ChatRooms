@@ -1,7 +1,7 @@
 ﻿using ChatRooms.Application.Rooms.Commands;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.ValueObjects;
-using ChatRooms.Infrastructure.Persistence.Write;
+using ChatRooms.Infrastructure.Persistence.DB.Write;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatRooms.Infrastructure.Persistence.Repositories;

@@ -1,7 +1,7 @@
 ﻿using ChatRooms.Application.Rooms.DTOs;
 using ChatRooms.Domain.Rooms.Enums;
 using ChatRooms.Domain.Rooms.Events;
-using ChatRooms.Infrastructure.Persistence.Read;
+using ChatRooms.Infrastructure.Persistence.DB.Read;
 using System.Text.Json;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;

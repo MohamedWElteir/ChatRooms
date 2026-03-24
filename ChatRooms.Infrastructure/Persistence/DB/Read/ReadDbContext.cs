@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
-namespace ChatRooms.Infrastructure.Persistence.Read;
+namespace ChatRooms.Infrastructure.Persistence.DB.Read;
 
 public sealed class ReadDbContext(IMongoClient mongoClient)
 {

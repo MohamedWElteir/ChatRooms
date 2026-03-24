@@ -1,6 +1,6 @@
 ﻿using ChatRooms.Application.Rooms.DTOs;
 using ChatRooms.Application.Rooms.Queries;
-using ChatRooms.Infrastructure.Persistence.Read;
+using ChatRooms.Infrastructure.Persistence.DB.Read;
 using MongoDB.Driver;
 
 namespace ChatRooms.Infrastructure.Persistence.Queries;

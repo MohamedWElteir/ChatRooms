@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using ChatRooms.Infrastructure.Serialization;
 
-namespace ChatRooms.Infrastructure.Persistence.Write;
+namespace ChatRooms.Infrastructure.Persistence.DB.Write;
 
 public sealed class WriteDbContextFactory : IDesignTimeDbContextFactory<WriteDbContext>
 {
