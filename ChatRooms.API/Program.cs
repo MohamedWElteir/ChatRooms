@@ -1,7 +1,6 @@
 using ChatRooms.Application;
 using ChatRooms.Infrastructure;
-using ChatRooms.Infrastructure.Options;
-using ChatRooms.Infrastructure.Persistence.DbContext.Write;
+using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);

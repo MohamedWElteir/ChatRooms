@@ -2,7 +2,7 @@
 using ChatRooms.Domain.Shared;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
-using ChatRooms.Infrastructure.Persistence.DbContext.Write;
+using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -59,7 +59,7 @@ public sealed class OutboxProcessor(
         if (message.RetryCount >= _options.MaxRetryCount)
         {
             if (logger.IsEnabled(LogLevel.Critical))
-                logger.LogCritical("Message {MessageId} of type {EventType} exceeded max retry count. Moving to Dead Letter Queue.",message.Id, message.Type);
+                logger.LogCritical("Message {MessageId} of type {EventType} exceeded max retry count. Moving to Dead Letter Queue.", message.Id, message.Type);
             message.MarkAsDeadLetter(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow), "Max retries exceeded.");
             return;
         }
@@ -68,14 +68,14 @@ public sealed class OutboxProcessor(
 
         if (projector is null)
         {
-            logger.LogWarning("No projector found for event type {EventType}",message.Type);
+            logger.LogWarning("No projector found for event type {EventType}", message.Type);
             return;
         }
 
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                 logger.LogInformation("Processing outbox message {MessageId} of type {EventType}.", message.Id, message.Type);
+                logger.LogInformation("Processing outbox message {MessageId} of type {EventType}.", message.Id, message.Type);
 
             await projector.ProjectAsync(message.Content, stoppingToken);
             message.MarkAsProcessed(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
