@@ -1,15 +1,15 @@
 ﻿using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Shared.Enums;
+using System.Text.Json.Serialization;
 
 namespace ChatRooms.Domain.Shared;
 
 public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable, IAggregateRoot where TId : struct, IEquatable<TId>
 {
     private readonly List<IDomainEvent> _uncommittedDomainEvents = [];
-    public int Version { get; private set; } = 0;
-
+    [JsonIgnore]
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _uncommittedDomainEvents;
-
+    public int Version { get; private set; } = 0;
     public bool IsDeleted => DeletedAt.HasValue;
     public DateTimeUtc? DeletedAt { get; internal set; }
     public DeletionReason? Reason { get; internal set; }

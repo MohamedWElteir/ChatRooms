@@ -77,13 +77,15 @@ public sealed class Room : AggregateRoot<RoomId>
     }
     public void Rename(Name newName, DateTimeUtc occurredAt)
     {
-        EnsureNotDeleted();
+        EnsureActive();
         if (Name == newName)
             return;
         Raise(new RoomRenamedDomainEvent(Id, newName, occurredAt));
     }
     public void Archive(DateTimeUtc occurredAt)
     {
+        if (Status == RoomStatus.Archived)
+            return;
         EnsureActive();
         Raise(new RoomArchivedDomainEvent(Id, occurredAt));
     }
