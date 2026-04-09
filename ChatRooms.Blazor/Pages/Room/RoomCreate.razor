@@ -1,0 +1,16 @@
+﻿@page "/room/create"
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>Create Room</h3>
+<InputText @bind-Value="_roomName" placeholder="Enter room name" />
+<InputNumber @bind-Value="_maxParticipants" placeholder="Enter max participants" />
+<button @onclick="CreateRoom">Create</button>
+
+@code {
+    private string _roomName = string.Empty;
+    private int _maxParticipants;
+    private void CreateRoom()
+    {
+        Console.WriteLine($"Creating room: {_roomName} with max participants: {_maxParticipants}");
+    }
+}
