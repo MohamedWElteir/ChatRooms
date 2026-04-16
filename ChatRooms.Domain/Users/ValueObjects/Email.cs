@@ -15,11 +15,10 @@ public readonly partial record struct Email
     }
     public static Email From(string value) => new(value);
     public static implicit operator string(Email email) => email.Value;
-    private static readonly Regex EmailRegex = GenerateEmailRegex();
     private static bool IsValidEmail(string email)
     {
         if (email.Length > 254) return false; // RFC 5321 max length
-        return EmailRegex.IsMatch(email);
+        return GenerateEmailRegex().IsMatch(email);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
