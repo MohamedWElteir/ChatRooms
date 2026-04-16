@@ -174,7 +174,7 @@ public sealed class Room : AggregateRoot<RoomId>
     #region Guard Clauses
     private void EnsureNotDeleted()
     {
-        if (Status == RoomStatus.Deleted)
+        if (Status == RoomStatus.Deleted || IsDeleted)
             throw new InvalidOperationException("Operation not allowed on deleted room.");
     }
     private void EnsureActive()

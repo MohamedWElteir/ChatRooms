@@ -6,7 +6,8 @@ using ChatRooms.Domain.Shared;
 using MediatR;
 namespace ChatRooms.Application.Rooms.Commands.ChangeRoomCapacity;
 
-public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomRepository, IDateTimeProvider dateTimeProvider, IUnitOfWork unitOfWork) : ICommandHandler<ChangeRoomCapacityCommand, Unit>
+public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomRepository, IDateTimeProvider dateTimeProvider, IUnitOfWork unitOfWork)
+    : ICommandHandler<ChangeRoomCapacityCommand, Unit>
 {
     public async Task<Unit> Handle(ChangeRoomCapacityCommand request, CancellationToken cancellationToken)
     {

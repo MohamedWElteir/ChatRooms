@@ -9,7 +9,8 @@ using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Application.Rooms.Commands.CreateRoom;
 
-public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IRoomCodeGenerator codeGenerator, IDateTimeProvider dateTimeProvider) : ICommandHandler<CreateRoomCommand, RoomDto>
+public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IRoomCodeGenerator codeGenerator, IDateTimeProvider dateTimeProvider)
+    : ICommandHandler<CreateRoomCommand, RoomDto>
 {
     public async Task<RoomDto> Handle(CreateRoomCommand command, CancellationToken cancellationToken)
     {

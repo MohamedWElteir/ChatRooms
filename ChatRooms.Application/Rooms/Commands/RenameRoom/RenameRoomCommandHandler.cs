@@ -6,7 +6,8 @@ using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Application.Rooms.Commands.RenameRoom;
 
-public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider) : ICommandHandler<RenameRoomCommand, string>
+public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
+    : ICommandHandler<RenameRoomCommand, string>
 {
     public async Task<string> Handle(RenameRoomCommand command, CancellationToken cancellationToken)
     {
