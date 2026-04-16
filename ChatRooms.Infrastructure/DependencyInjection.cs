@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Infrastructure.Persistence.DB.Read;
+using ChatRooms.Application.Policies.Room;
 
 namespace ChatRooms.Infrastructure;
 

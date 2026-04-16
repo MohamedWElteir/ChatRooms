@@ -1,7 +1,7 @@
 ﻿using ChatRooms.Domain.Rooms.Contracts;
 using ChatRooms.Domain.Rooms.ValueObjects;
 
-namespace ChatRooms.Infrastructure.Services;
+namespace ChatRooms.Application.Policies.Room;
 
 public sealed class DefaultRoomCapacityPolicy : IRoomCapacityPolicy
 {
