@@ -6,6 +6,7 @@ using ChatRooms.Application.Rooms.DTOs;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared.Contracts;
 
 namespace ChatRooms.Application.Rooms.Commands.CreateRoom;
 

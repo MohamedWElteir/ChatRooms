@@ -1,5 +1,6 @@
 ﻿using ChatRooms.Application.Abstractions.Common;
 using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared.Contracts;
 using System.Security.Cryptography;
 namespace ChatRooms.Infrastructure.Security;
 
