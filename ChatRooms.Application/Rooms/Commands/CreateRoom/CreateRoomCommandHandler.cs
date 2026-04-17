@@ -1,15 +1,15 @@
-﻿using ChatRooms.Application.Abstractions.Messaging;
+﻿using ChatRooms.Application.Abstractions.Common;
+using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Application.Rooms.DTOs;
 using ChatRooms.Domain.Rooms;
-using ChatRooms.Domain.Rooms.Contracts;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 
 namespace ChatRooms.Application.Rooms.Commands.CreateRoom;
 
-public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IRoomCodeGenerator codeGenerator, IDateTimeProvider dateTimeProvider)
+public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IGenerator<RoomCode> codeGenerator, IDateTimeProvider dateTimeProvider)
     : ICommandHandler<CreateRoomCommand, RoomDto>
 {
     public async Task<RoomDto> Handle(CreateRoomCommand command, CancellationToken cancellationToken)
