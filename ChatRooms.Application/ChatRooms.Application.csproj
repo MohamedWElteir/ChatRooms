@@ -14,6 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChatRooms.Domain\ChatRooms.Domain.csproj" />
+    <ProjectReference Include="..\ChatRooms.DTOs\ChatRooms.DTOs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Users\" />
   </ItemGroup>
 
 </Project>

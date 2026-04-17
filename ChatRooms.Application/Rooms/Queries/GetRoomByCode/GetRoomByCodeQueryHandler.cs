@@ -1,5 +1,5 @@
 ﻿using ChatRooms.Application.Abstractions.Messaging;
-using ChatRooms.Application.Rooms.DTOs;
+using ChatRooms.DTOs.Rooms;
 
 namespace ChatRooms.Application.Rooms.Queries.GetRoomByCode;
 

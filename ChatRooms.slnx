@@ -4,6 +4,7 @@
     <Project Path="ChatRooms.ServiceDefaults/ChatRooms.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Shared/">
+    <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj" Id="ca751ecd-ea29-45cf-9f04-ecaa2df0a64c" />
     <Project Path="ChatRooms.SharedKernel/ChatRooms.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">

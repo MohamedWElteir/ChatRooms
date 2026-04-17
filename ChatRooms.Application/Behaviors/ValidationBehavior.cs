@@ -18,7 +18,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
             .SelectMany(r => r.Errors)
             .ToList();
 
-        if (failures.Count != 0)
+        if (failures?.Count != 0)
             throw new ValidationException(failures);
 
         return await next(cancellationToken);

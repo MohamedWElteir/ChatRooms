@@ -1,5 +1,4 @@
-﻿
-namespace ChatRooms.Application.Users.DTOs;
+﻿namespace ChatRooms.DTOs.Users;
 
 public sealed record UserDto(
     Guid Id,

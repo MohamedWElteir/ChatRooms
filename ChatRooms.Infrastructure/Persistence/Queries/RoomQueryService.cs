@@ -1,5 +1,5 @@
-﻿using ChatRooms.Application.Rooms.DTOs;
-using ChatRooms.Application.Rooms.Queries;
+﻿using ChatRooms.Application.Rooms.Queries;
+using ChatRooms.DTOs.Rooms;
 using ChatRooms.Infrastructure.Persistence.DB.Read;
 using MongoDB.Driver;
 
