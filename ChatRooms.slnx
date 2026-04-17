@@ -17,6 +17,7 @@
     <Project Path="ChatRooms.Blazor/ChatRooms.Blazor.csproj" />
     <Project Path="ChatRooms.Domain/ChatRooms.Domain.csproj" />
     <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj" Id="f6cf8352-9254-42e1-8b88-dddb42b491e7" />
+    <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj" Id="8104e9aa-4b91-4160-ab8c-dcdfa13b0d72" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />

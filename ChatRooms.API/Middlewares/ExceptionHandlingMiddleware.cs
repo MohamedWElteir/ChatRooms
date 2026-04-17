@@ -27,7 +27,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception.");
-            await HandleServerErrorAsync(context, ex);
+            await HandleServerErrorAsync(context);
         }
     }
 
@@ -65,13 +65,13 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         });
     }
 
-    private static Task HandleServerErrorAsync(HttpContext context, Exception ex)
+    private static Task HandleServerErrorAsync(HttpContext context)
     {
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         return context.Response.WriteAsJsonAsync(new ProblemDetails
         {
             Title = "Internal Server Error",
-            Status = StatusCodes.Status500InternalServerError
+            Status = StatusCodes.Status500InternalServerError,
         });
     }
 }

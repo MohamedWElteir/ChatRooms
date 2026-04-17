@@ -3,6 +3,7 @@
 public enum DeletionReason
 {
     Manual = 1,
-    Inactivity = 2
+    Inactivity = 2,
+    DeletedByUser = 3
 }
 
