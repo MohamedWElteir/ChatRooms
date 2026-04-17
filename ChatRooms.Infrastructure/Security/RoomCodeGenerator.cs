@@ -1,9 +1,9 @@
-﻿using ChatRooms.Domain.Rooms.Contracts;
-using ChatRooms.Domain.Rooms.ValueObjects;
+﻿using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared.Contracts;
 using System.Security.Cryptography;
 namespace ChatRooms.Infrastructure.Security;
 
-public sealed class RoomCodeGenerator : IRoomCodeGenerator
+public sealed class RoomCodeGenerator : IGenerator<RoomCode>
 {
     private const string Alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private const int CodeLength = 8;
