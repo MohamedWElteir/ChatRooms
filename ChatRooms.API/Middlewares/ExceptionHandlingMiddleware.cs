@@ -20,7 +20,7 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         {
             await HandleNotFoundAsync(context, ex);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException ex) // TODO: Create custom domain exceptions or use Result pattern
         {
             await HandleDomainExceptionAsync(context, ex);
         }

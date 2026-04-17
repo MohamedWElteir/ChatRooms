@@ -1,6 +1,6 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgress = builder.AddPostgres("postgress")
+var postgres = builder.AddPostgres("postgres")
                        .WithPgAdmin()
                        .AddDatabase("chatrooms-write-db");
 
@@ -9,8 +9,8 @@ var mongo = builder.AddMongoDB("mongo")
                     .AddDatabase("chatrooms-read-db");
 
 builder.AddProject<Projects.ChatRooms_API>("chatrooms-api")
-        .WithReference(postgress)
-        .WaitFor(postgress)
+        .WithReference(postgres)
+        .WaitFor(postgres)
         .WithReference(mongo)
         .WaitFor(mongo);
 
