@@ -1,0 +1,18 @@
+﻿<div class="app-card @(Padded ? "app-card--padded" : "")">
+    @if (Header is not null)
+    {
+        <div class="app-card__header">@Header</div>
+    }
+    <div class="app-card__body">@ChildContent</div>
+    @if (Footer is not null)
+    {
+        <div class="app-card__footer">@Footer</div>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public bool Padded { get; set; } = true;
+}

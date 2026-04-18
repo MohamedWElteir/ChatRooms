@@ -1,7 +1,119 @@
 ﻿@page "/"
+@layout LandingLayout
+@inject NavigationManager Nav
 
-<PageTitle>Home</PageTitle>
+<div class="lp">
 
-<h1>Hello, world!</h1>
+    <nav class="lp-nav">
+        <span class="lp-brand">ChatRooms</span>
+        <div class="lp-nav-right">
+            <a href="#" class="lp-nav-link">Docs</a>
+            <button class="lp-btn-signin" @onclick="SignIn">Sign in →</button>
+        </div>
+    </nav>
 
-Welcome to your new app.
+    <div class="lp-hero">
+        <div class="lp-hero-left">
+            <p class="lp-kicker">Open beta · v0.1</p>
+            <h1 class="lp-h1">Chat rooms<br />done <em>right</em></h1>
+            <p class="lp-sub">
+                Structured rooms with real lifecycle management. Create, archive,
+                restore, and cap capacity — not just send messages.
+            </p>
+            <div class="lp-actions">
+                <button class="lp-btn-primary" @onclick="SignIn">Get started</button>
+                <button class="lp-btn-text" @onclick="@(() => Nav.NavigateTo("/rooms"))">
+                    Browse rooms →
+                </button>
+            </div>
+        </div>
+
+        <div class="lp-hero-right">
+            <div class="lp-preview">
+                <div class="lp-preview-bar">
+                    <span class="lp-preview-dot" aria-hidden="true"></span>
+                    <span class="lp-preview-dot" aria-hidden="true"></span>
+                    <span class="lp-preview-dot" aria-hidden="true"></span>
+                    <span class="lp-preview-url">chatrooms.app/rooms</span>
+                </div>
+                <div class="lp-preview-body">
+                    <p class="lp-preview-label">All rooms</p>
+                    <div class="lp-room-row">
+                        <div class="lp-room-info">
+                            <span class="lp-room-name">General Chat</span>
+                            <span class="lp-room-code">ABCD1234</span>
+                        </div>
+                        <div class="lp-room-meta">
+                            <span class="lp-cap">42/100</span>
+                            <span class="lp-pill lp-pill--active">Active</span>
+                        </div>
+                    </div>
+                    <div class="lp-room-row">
+                        <div class="lp-room-info">
+                            <span class="lp-room-name">Tech Talk</span>
+                            <span class="lp-room-code">XYZ78901</span>
+                        </div>
+                        <div class="lp-room-meta">
+                            <span class="lp-cap">89/100</span>
+                            <span class="lp-pill lp-pill--active">Active</span>
+                        </div>
+                    </div>
+                    <div class="lp-room-row">
+                        <div class="lp-room-info">
+                            <span class="lp-room-name">Old Lounge</span>
+                            <span class="lp-room-code">QRS22334</span>
+                        </div>
+                        <div class="lp-room-meta">
+                            <span class="lp-cap">0/50</span>
+                            <span class="lp-pill lp-pill--archived">Archived</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lp-preview-footer">
+                    <span class="lp-preview-footer-text">3 rooms · 2 active</span>
+                    <button class="lp-preview-btn">New room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lp-features">
+        <div class="lp-feat">
+            <p class="lp-feat-num">01</p>
+            <p class="lp-feat-title">Event-driven sync</p>
+            <p class="lp-feat-text">
+                Outbox pattern moves domain events from PostgreSQL to MongoDB.
+                At-least-once delivery, no dual-write risk.
+            </p>
+        </div>
+        <div class="lp-feat">
+            <p class="lp-feat-num">02</p>
+            <p class="lp-feat-title">Full lifecycle</p>
+            <p class="lp-feat-text">
+                Rooms aren't just created and deleted. Archive, restore, cap,
+                rename — with invariants enforced in the domain.
+            </p>
+        </div>
+        <div class="lp-feat">
+            <p class="lp-feat-num">03</p>
+            <p class="lp-feat-title">Keycloak-ready</p>
+            <p class="lp-feat-text">
+                OIDC drops in when you're ready. The sign-in hook is already
+                isolated — one swap, no restructuring.
+            </p>
+        </div>
+    </div>
+
+    <footer class="lp-footer">
+        <span class="lp-footer-copy">ChatRooms 2025</span>
+        <div class="lp-footer-links">
+            <a href="#" class="lp-footer-link">API</a>
+            <a href="#" class="lp-footer-link">Status</a>
+        </div>
+    </footer>
+
+</div>
+
+@code {
+    private void SignIn() => Nav.NavigateTo("/rooms");
+}

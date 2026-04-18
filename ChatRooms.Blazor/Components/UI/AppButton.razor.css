@@ -1,0 +1,85 @@
+﻿.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--cr-radius);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+}
+
+    .app-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+.app-btn--full {
+    width: 100%;
+}
+
+.app-btn--sm {
+    padding: 5px 12px;
+    font-size: 13px;
+}
+
+.app-btn--primary {
+    background: var(--cr-primary);
+    color: #fff;
+    border-color: var(--cr-primary);
+}
+
+    .app-btn--primary:hover:not(:disabled) {
+        background: var(--cr-primary-hover);
+        border-color: var(--cr-primary-hover);
+    }
+
+.app-btn--secondary {
+    background: var(--cr-surface);
+    color: var(--cr-text);
+    border-color: var(--cr-border-strong);
+}
+
+    .app-btn--secondary:hover:not(:disabled) {
+        background: var(--cr-surface-3);
+    }
+
+.app-btn--danger {
+    background: var(--cr-danger);
+    color: #fff;
+    border-color: var(--cr-danger);
+}
+
+    .app-btn--danger:hover:not(:disabled) {
+        background: #B91C1C;
+    }
+
+.app-btn--ghost {
+    background: transparent;
+    color: var(--cr-text);
+    border-color: transparent;
+}
+
+    .app-btn--ghost:hover:not(:disabled) {
+        background: var(--cr-surface-3);
+    }
+
+.app-btn__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: btn-spin 0.65s linear infinite;
+}
+
+@keyframes btn-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

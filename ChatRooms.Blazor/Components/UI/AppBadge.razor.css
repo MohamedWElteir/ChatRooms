@@ -1,0 +1,51 @@
+﻿.app-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.app-badge__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.app-badge--active {
+    background: var(--cr-success-light);
+    color: #166534;
+}
+
+    .app-badge--active .app-badge__dot {
+        background: var(--cr-success);
+    }
+
+.app-badge--archived {
+    background: var(--cr-warning-light);
+    color: #92400E;
+}
+
+    .app-badge--archived .app-badge__dot {
+        background: var(--cr-warning);
+    }
+
+.app-badge--deleted {
+    background: var(--cr-danger-light);
+    color: #991B1B;
+}
+
+    .app-badge--deleted .app-badge__dot {
+        background: var(--cr-danger);
+    }
+
+.app-badge--default {
+    background: var(--cr-surface-3);
+    color: var(--cr-text-muted);
+}
+
+    .app-badge--default .app-badge__dot {
+        background: var(--cr-text-subtle);
+    }

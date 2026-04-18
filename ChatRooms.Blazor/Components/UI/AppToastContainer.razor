@@ -1,0 +1,35 @@
+﻿@inject ToastService ToastService
+@implements IDisposable
+
+<div class="toast-container">
+    @foreach (var toast in ToastService.Toasts)
+    {
+        <div class="toast toast--@toast.Variant.ToString().ToLower()">
+            <div class="toast__icon">@IconFor(toast.Variant)</div>
+            <div class="toast__content">
+                <div class="toast__title">@toast.Title</div>
+                @if (!string.IsNullOrEmpty(toast.Message))
+                {
+                    <div class="toast__msg">@toast.Message</div>
+                }
+            </div>
+            <button class="toast__close" aria-label="Close notification" @onclick="() => ToastService.Dismiss(toast.Id)">×</button>
+
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+        => ToastService.OnChange += StateHasChanged;
+
+    public void Dispose()
+        => ToastService.OnChange -= StateHasChanged;
+
+    private static string IconFor(ToastVariant v) => v switch
+    {
+        ToastVariant.Success => "✓",
+        ToastVariant.Error => "!",
+        _ => "i"
+    };
+}

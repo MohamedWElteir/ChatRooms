@@ -1,0 +1,39 @@
+﻿<div class="app-field @(HasError ? "app-field--error" : "")">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label class="app-field__label" for="@_id">@Label</label>
+    }
+    <input id="@_id"
+           class="app-field__input"
+           type="@Type"
+           placeholder="@Placeholder"
+           value="@Value"
+           disabled="@Disabled"
+           @oninput="OnInput" />
+    @if (HasError && !string.IsNullOrEmpty(ErrorMessage))
+    {
+        <span class="app-field__error">@ErrorMessage</span>
+    }
+    else if (!string.IsNullOrEmpty(Hint))
+    {
+        <span class="app-field__hint">@Hint</span>
+    }
+</div>
+
+@code {
+    private readonly string _id = $"input-{Guid.NewGuid():N}";
+
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string Type { get; set; } = "text";
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public string? Hint { get; set; }
+    [Parameter] public string? ErrorMessage { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
+    private async Task OnInput(ChangeEventArgs e)
+        => await ValueChanged.InvokeAsync(e.Value?.ToString());
+}

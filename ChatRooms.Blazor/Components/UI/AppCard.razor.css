@@ -1,0 +1,27 @@
+﻿.app-card {
+    background: var(--cr-surface);
+    border: 1px solid var(--cr-border);
+    border-radius: var(--cr-radius-lg);
+    overflow: hidden;
+}
+
+.app-card__header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--cr-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.app-card--padded .app-card__body {
+    padding: 18px;
+}
+
+.app-card__footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--cr-border);
+    background: var(--cr-surface-2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

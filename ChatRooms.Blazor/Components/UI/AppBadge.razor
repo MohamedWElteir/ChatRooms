@@ -1,0 +1,13 @@
+﻿<span class="app-badge app-badge--@Variant">
+    @if (ShowDot)
+    {
+        <span class="app-badge__dot"></span>
+    }
+    @ChildContent
+</span>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Variant { get; set; } = "default";  // active | archived | deleted | default
+    [Parameter] public bool ShowDot { get; set; } = true;
+}
