@@ -17,7 +17,7 @@ namespace ChatRooms.Presentation.Rooms;
 [Route("api/rooms")]
 public sealed class RoomController(ISender sender) : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("create")]
     [ProducesResponseType(typeof(RoomDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create(

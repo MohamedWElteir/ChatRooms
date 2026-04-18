@@ -28,6 +28,7 @@ public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWor
             Code: room.Code,
             Capacity: room.Capacity,
             CurrentParticipantsCount: room.CurrentParticipantsCount,
-            Status: nameof(room.Status));
+            Status: room.Status.ToString()
+            );
     }
 }
