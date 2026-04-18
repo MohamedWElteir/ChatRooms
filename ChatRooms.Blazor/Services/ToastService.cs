@@ -8,6 +8,7 @@ public sealed class ToastService(ILogger<ToastService> logger)
 {
     private readonly Lock _toastsLock = new();
     private readonly List<Toast> _toasts = [];
+
     public IReadOnlyList<Toast> Toasts
     {
         get
@@ -18,13 +19,20 @@ public sealed class ToastService(ILogger<ToastService> logger)
             }
         }
     }
+
     public event Action? OnChange;
 
     public void Show(string title, string? message = null, ToastVariant variant = ToastVariant.Info)
     {
         var toast = new Toast(Guid.NewGuid(), title, message, variant);
-        _toasts.Add(toast);
+
+        lock (_toastsLock)
+        {
+            _toasts.Add(toast);
+        }
+
         OnChange?.Invoke();
+
         _ = Task.Run(async () =>
         {
             try
@@ -33,7 +41,7 @@ public sealed class ToastService(ILogger<ToastService> logger)
             }
             catch (Exception ex)
             {
-               logger.LogError(ex, "Error while removing toast with ID {ToastId}", toast.Id);
+                logger.LogError(ex, "Error while removing toast with ID {ToastId}", toast.Id);
             }
         });
     }
@@ -44,7 +52,11 @@ public sealed class ToastService(ILogger<ToastService> logger)
 
     public void Dismiss(Guid id)
     {
-        _toasts.RemoveAll(t => t.Id == id);
+        lock (_toastsLock)
+        {
+            _toasts.RemoveAll(t => t.Id == id);
+        }
+
         OnChange?.Invoke();
     }
 

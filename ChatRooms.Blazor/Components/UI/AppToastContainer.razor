@@ -20,16 +20,19 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
-        => ToastService.OnChange += StateHasChanged;
+    @code {
+        protected override void OnInitialized()
+            => ToastService.OnChange += HandleToastChanged;
 
-    public void Dispose()
-        => ToastService.OnChange -= StateHasChanged;
+        public void Dispose() => ToastService.OnChange -= HandleToastChanged;
 
-    private static string IconFor(ToastVariant v) => v switch
-    {
-        ToastVariant.Success => "✓",
-        ToastVariant.Error => "!",
-        _ => "i"
-    };
+        private void HandleToastChanged() => InvokeAsync(StateHasChanged);
+
+        private static string IconFor(ToastVariant v) => v switch
+        {
+            ToastVariant.Success => "✓",
+            ToastVariant.Error => "!",
+            _ => "i"
+        };
+    }
 }

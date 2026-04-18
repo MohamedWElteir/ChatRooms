@@ -11,7 +11,7 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri("https+http://chatrooms-api");
         });
-        services.AddSingleton<ToastService>();
+        services.AddScoped<ToastService>();
         return services;
     }
 }
