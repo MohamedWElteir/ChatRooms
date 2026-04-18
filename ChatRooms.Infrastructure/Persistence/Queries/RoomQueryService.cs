@@ -22,11 +22,11 @@ public sealed class RoomQueryService(ReadDbContext readDbContext) : IRoomQuery
         return await readDbContext.Rooms.Find(filter).FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<RoomListItemDto>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<RoomListItem>> GetAllAsync(CancellationToken cancellationToken)
     {
         return await readDbContext.Rooms
             .Find(_ => true)
-            .Project(r => new RoomListItemDto(r.Id, r.Name, r.Code, r.Capacity, r.CurrentParticipantsCount))
+            .Project(r => new RoomListItem(r.Id, r.Name, r.Code, r.Capacity, r.CurrentParticipantsCount))
             .ToListAsync(cancellationToken);
     }
 }

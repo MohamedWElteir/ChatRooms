@@ -6,5 +6,5 @@ public interface IRoomQuery
 {
     Task<RoomDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<RoomDto?> GetByCodeAsync(string code, CancellationToken cancellationToken);
-    Task<IReadOnlyList<RoomListItemDto>> GetAllAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<RoomListItem>> GetAllAsync(CancellationToken cancellationToken);
 }

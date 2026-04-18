@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddSingleton<IGenerator<RoomCode>, RoomCodeGenerator>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddKeyedScoped<IEventProjector, RoomCreatedProjector>(nameof(RoomCreatedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomRenamedProjector>(nameof(RoomRenamedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
         services.AddSingleton<IRoomCapacityPolicy, DefaultRoomCapacityPolicy>();
         return services;

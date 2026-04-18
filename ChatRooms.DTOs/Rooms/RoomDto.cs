@@ -1,3 +1,5 @@
-﻿namespace ChatRooms.DTOs.Rooms;
+﻿using ChatRooms.DTOs.Shared;
 
-public sealed record RoomDto(Guid Id, string Name, string Code, int Capacity, int CurrentParticipantsCount, string Status);
+namespace ChatRooms.DTOs.Rooms;
+
+public sealed record RoomDto(Guid Id, string Name, string Code, int Capacity, int CurrentParticipantsCount, string Status, int Version) : DtoBase(Id, Version);

@@ -8,11 +8,9 @@ namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 
 public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerializerOptions jsonOptions) : IEventProjector
 {
-    private readonly JsonSerializerOptions _jsonOptions = jsonOptions;
-
     public async Task ProjectAsync(string eventContent, CancellationToken cancellationToken)
     {
-        var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent, _jsonOptions);
+        var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent, jsonOptions);
         if (domainEvent is null) return;
 
         var newRoomDto = new RoomDto(
@@ -21,7 +19,8 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
             domainEvent.Code,
             domainEvent.Capacity,
             1,
-            nameof(RoomStatus.Active));
+            nameof(RoomStatus.Active),
+            1);
 
         await readDbContext.Rooms.InsertOneAsync(newRoomDto, cancellationToken: cancellationToken);
     }
