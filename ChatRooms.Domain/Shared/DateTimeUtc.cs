@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace ChatRooms.Domain.Shared;
+﻿namespace ChatRooms.Domain.Shared;
 
 /// <summary>
 /// Value object representing an absolute UTC timestamp.
