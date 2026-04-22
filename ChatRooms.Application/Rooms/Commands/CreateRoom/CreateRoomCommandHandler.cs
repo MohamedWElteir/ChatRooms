@@ -20,6 +20,7 @@ public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWor
             roomCode: codeGenerator.Generate(),
             dateTime: DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
 
+        room.Join(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
         await roomRepository.Add(room, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return new RoomDto(

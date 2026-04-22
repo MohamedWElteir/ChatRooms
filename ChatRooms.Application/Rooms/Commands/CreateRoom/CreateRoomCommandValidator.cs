@@ -16,5 +16,8 @@ public sealed class CreateRoomCommandValidator : AbstractValidator<CreateRoomCom
         RuleFor(x => x.Capacity)
             .GreaterThanOrEqualTo(roomCapacityPolicy.MinCapacity).WithMessage($"Capacity must be at least {roomCapacityPolicy.MinCapacity}.")
             .LessThanOrEqualTo(roomCapacityPolicy.MaxCapacity).WithMessage($"Capacity cannot exceed {roomCapacityPolicy.MaxCapacity}.");
+
+        RuleFor(x => x.CurrentParticipantsCount)
+            .GreaterThan(0).WithMessage("Current Participants Count must be greater than 0.");
     }
 }
