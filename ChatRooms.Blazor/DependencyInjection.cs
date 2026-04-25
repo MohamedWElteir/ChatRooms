@@ -9,7 +9,7 @@ public static class DependencyInjection
     {
         services.AddHttpClient<IRoomApiClient, RoomApiClient>(client =>
         {
-            client.BaseAddress = new Uri("https+http://chatrooms-api");
+            client.BaseAddress = new Uri("https+http://chatrooms-bff");
         });
         services.AddScoped<ToastService>();
         return services;

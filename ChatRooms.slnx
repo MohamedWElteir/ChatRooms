@@ -14,10 +14,14 @@
   <Folder Name="/Src/">
     <Project Path="ChatRooms.API/ChatRooms.API.csproj" />
     <Project Path="ChatRooms.Application/ChatRooms.Application.csproj" Id="7bf099f5-1b88-44a5-92bc-8f15b89a84cc" />
+    <Project Path="ChatRooms.BFF/ChatRooms.BFF.csproj" />
     <Project Path="ChatRooms.Blazor/ChatRooms.Blazor.csproj" />
     <Project Path="ChatRooms.Domain/ChatRooms.Domain.csproj" />
     <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj" Id="f6cf8352-9254-42e1-8b88-dddb42b491e7" />
     <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj" Id="8104e9aa-4b91-4160-ab8c-dcdfa13b0d72" />
+  </Folder>
+  <Folder Name="/Src/Setup/">
+    <Project Path="ChatRooms.KeycloakSetup/ChatRooms.KeycloakSetup.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />

@@ -17,15 +17,19 @@ using ChatRooms.Infrastructure.Persistence.Repositories;
 using ChatRooms.Infrastructure.Security;
 using ChatRooms.Infrastructure.Serialization;
 using ChatRooms.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ChatRooms.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         var connectionString = configuration.GetConnectionString("chatrooms-write-db")
         ?? throw new InvalidOperationException("Connection string 'chatrooms-write-db' not found.");
@@ -46,6 +50,21 @@ public static class DependencyInjection
         services.AddKeyedScoped<IEventProjector, RoomRenamedProjector>(nameof(RoomRenamedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
         services.AddSingleton<IRoomCapacityPolicy, DefaultRoomCapacityPolicy>();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = configuration["Keycloak:Authority"];
+                options.Audience = "chatrooms-api";
+                options.RequireHttpsMetadata = !environment.IsDevelopment();
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    NameClaimType = "preferred_username",
+                    RoleClaimType = "roles"
+                };
+            });
         return services;
     }
 }

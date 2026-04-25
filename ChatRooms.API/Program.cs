@@ -14,7 +14,7 @@ builder.AddServiceDefaults();
 builder.AddMongoDBClient("chatrooms-read-db");
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 
 builder.Services

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,11 +9,14 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Keycloak" />
     <PackageReference Include="Aspire.Hosting.MongoDB" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChatRooms.API\ChatRooms.API.csproj" />
+    <ProjectReference Include="..\ChatRooms.BFF\ChatRooms.BFF.csproj" />
     <ProjectReference Include="..\ChatRooms.Blazor\ChatRooms.Blazor.csproj" />
+    <ProjectReference Include="..\ChatRooms.KeycloakSetup\ChatRooms.KeycloakSetup.csproj" />
   </ItemGroup>
 </Project>
