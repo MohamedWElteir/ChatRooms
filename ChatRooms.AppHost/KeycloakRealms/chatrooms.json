@@ -5,6 +5,10 @@
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
   "bruteForceProtected": true,
+  "accessTokenLifespan": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "passwordPolicy": "length(8) and notUsername(undefined)",
 
   "clients": [
     {
@@ -19,16 +23,14 @@
       "redirectUris": [
         "http://localhost:5001/*"
       ],
-      "postLogoutRedirectUris": [
-        "http://localhost:5001/*"
-      ],
       "webOrigins": [
         "http://localhost:5001"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
         "access.token.lifespan": "900",
-        "client.session.idle.timeout": "1800"
+        "client.session.idle.timeout": "1800",
+        "post.logout.redirect.uris": "http://localhost:5001/*"
       },
       "protocolMappers": [
         {
@@ -85,7 +87,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password", // WARNING: Weak password for local development only. Do NOT use in production.
+          "value": "password",
           "temporary": false
         }
       ],
@@ -101,17 +103,11 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password", // WARNING: Weak password for local development only. Do NOT use in production.
+          "value": "password",
           "temporary": false
         }
       ],
       "realmRoles": [ "user", "admin" ]
     }
-  ],
-
-  "passwordPolicy": "length(8) and notUsername(undefined)",
-
-  "accessTokenLifespan": 900,
-  "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000
+  ]
 }

@@ -1,14 +1,19 @@
 using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
+var keycloakAdminPassword = builder.AddParameter("keycloak-admin-password", secret: true);
+var keycloakSecret = builder.AddParameter("keycloak-secret", secret: true);
 
-var keycloak = builder.AddKeycloak("keycloak", port: 8080)
+var keycloak = builder.AddKeycloak(
+    "keycloak", 
+    port: 8080,
+    adminPassword: keycloakAdminPassword)
     .WithRealmImport("./KeycloakRealms/");
 if (builder.Configuration.GetValue<bool>("PersistKeycloak"))
 {
     keycloak.WithDataVolume();
 }
-var keycloakSecret = builder.AddParameter("keycloak-secret", secret: true);
+
 
 var postgres = builder.AddPostgres("postgres")
     .WithPgAdmin()
@@ -42,7 +47,7 @@ builder.AddProject<Projects.ChatRooms_KeycloakSetup>("chatrooms-keycloak-setup")
     .WaitFor(keycloak)
     .WaitFor(bff)
     .WithEnvironment("Keycloak__AdminUser", "admin")
-    .WithEnvironment("Keycloak__AdminPassword", "admin")
+    .WithEnvironment("Keycloak__AdminPassword", keycloakAdminPassword)
     .WithEnvironment("Keycloak__Realm", "chatrooms")
     .WithEnvironment("Keycloak__BffClientId", "chatrooms-bff")
     .WithEnvironment("Keycloak__ClientSecret", keycloakSecret);
