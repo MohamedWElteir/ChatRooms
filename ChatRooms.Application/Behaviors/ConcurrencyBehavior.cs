@@ -3,6 +3,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+namespace ChatRooms.Application.Behaviors;
+
 public sealed class ConcurrencyBehavior<TRequest, TResponse>(
     ILogger<ConcurrencyBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
