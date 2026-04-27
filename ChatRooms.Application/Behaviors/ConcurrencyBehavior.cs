@@ -1,4 +1,6 @@
-﻿using MediatR;
+﻿using ChatRooms.Application.Abstractions.Messaging;
+
+using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,7 +10,7 @@ namespace ChatRooms.Application.Behaviors;
 public sealed class ConcurrencyBehavior<TRequest, TResponse>(
     ILogger<ConcurrencyBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+    where TRequest : ICommand<TResponse>
 {
     public async Task<TResponse> Handle(
         TRequest request,
