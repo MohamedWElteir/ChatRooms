@@ -14,13 +14,13 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
         if (domainEvent is null) return;
 
         var newRoomDto = new RoomDto(
-            domainEvent.RoomId,
-            domainEvent.Name,
-            domainEvent.Code,
-            domainEvent.Capacity,
-            1,
-            nameof(RoomStatus.Active),
-            1);
+            Id: domainEvent.RoomId,
+            Name: domainEvent.Name,
+            Code: domainEvent.Code,
+            Capacity: domainEvent.Capacity,
+            CurrentParticipantsCount: 1,
+            Status: nameof(RoomStatus.Active),
+            Version: domainEvent.AggregateVersion);
 
         await readDbContext.Rooms.InsertOneAsync(newRoomDto, cancellationToken: cancellationToken);
     }

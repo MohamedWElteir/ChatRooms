@@ -8,22 +8,39 @@ using System.Text.Json;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 
-public sealed class RoomRenamedProjector(ReadDbContext readDbContext, JsonSerializerOptions jsonOptions) : IEventProjector
+// ChatRooms.Infrastructure/BackgroundJobs/Projectors/RoomRenamedProjector.cs
+public sealed class RoomRenamedProjector(
+    ReadDbContext readDbContext,
+    JsonSerializerOptions jsonOptions) : IEventProjector
 {
     public async Task ProjectAsync(string eventContent, CancellationToken cancellationToken)
     {
-        var domainEvent = JsonSerializer.Deserialize<RoomRenamedDomainEvent>(eventContent, jsonOptions);
+        var domainEvent = JsonSerializer.Deserialize<RoomRenamedDomainEvent>(
+            eventContent, jsonOptions);
         if (domainEvent is null) return;
 
+        var filter = Builders<RoomDto>.Filter.And(
+            Builders<RoomDto>.Filter.Eq(r => r.Id, domainEvent.RoomId),
+            Builders<RoomDto>.Filter.Lt(r => r.Version, domainEvent.AggregateVersion)
+        );
+
         var result = await readDbContext.Rooms.UpdateOneAsync(
-            filter: room => room.Id == domainEvent.RoomId,
-            update: Builders<RoomDto>.Update
-                .Set(room => room.Name, domainEvent.NewName)
-                .Inc(room => room.Version, 1),
+            filter,
+            Builders<RoomDto>.Update
+                .Set(r => r.Name, domainEvent.NewName)
+                .Set(r => r.Version, domainEvent.AggregateVersion),
             cancellationToken: cancellationToken);
+
         if (result.MatchedCount == 0)
         {
-            throw new InvalidOperationException($"Room with id {domainEvent.RoomId} not found in read database.");
+            var exists = await readDbContext.Rooms
+                .Find(r => r.Id == (Guid)domainEvent.RoomId)
+                .AnyAsync(cancellationToken);
+
+            if (!exists)
+                throw new InvalidOperationException(
+                    $"Room {domainEvent.RoomId} not found in read model.");
+
         }
     }
 }

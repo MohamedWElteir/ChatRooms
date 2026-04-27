@@ -17,6 +17,10 @@ public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable, IAggrega
     protected void Raise(IDomainEvent @event)
     {
         Apply(@event);
+        Version++;
+        if (@event is DomainEvent domainEvent)
+            domainEvent.AggregateVersion = Version;
+
         _uncommittedDomainEvents.Add(@event);
     }
 
