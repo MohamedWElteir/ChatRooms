@@ -9,7 +9,16 @@ public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable, IAggrega
     private readonly List<IDomainEvent> _uncommittedDomainEvents = [];
     [JsonIgnore]
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _uncommittedDomainEvents;
-    public int Version { get; private set; } = 0;
+    public int Version
+    {
+        get;
+        private set
+        {
+            field = value >= 0
+                ? value
+                : throw new InvalidOperationException("Version cannot be negative.");
+        }
+    }
     public bool IsDeleted => DeletedAt.HasValue;
     public DateTimeUtc? DeletedAt { get; internal set; }
     public DeletionReason? Reason { get; internal set; }

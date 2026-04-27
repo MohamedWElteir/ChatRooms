@@ -60,7 +60,11 @@ public sealed class RoomConfiguration : IEntityTypeConfiguration<Room>
                 value => value.HasValue ? DateTimeUtc.FromUtc(value.Value) : null);
 
         builder.Property(r => r.Reason)
-            .HasConversion<string>(); 
+            .HasConversion<string>();
+
+        builder.Property(r => r.Version)
+            .HasColumnType("integer")
+            .IsConcurrencyToken();
 
         builder.HasIndex(r => r.Code)
             .IsUnique();
