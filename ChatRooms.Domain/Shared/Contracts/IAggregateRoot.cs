@@ -7,5 +7,4 @@ public interface IAggregateRoot
 
     void Apply(IDomainEvent @event);
     void ClearDomainEvents();
-    void LoadFromHistory(IEnumerable<IDomainEvent> history);
 }

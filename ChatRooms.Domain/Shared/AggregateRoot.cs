@@ -26,12 +26,4 @@ public abstract class AggregateRoot<TId> : Entity<TId>, ISoftDeletable, IAggrega
 
     public abstract void Apply(IDomainEvent @event);
     public void ClearDomainEvents() => _uncommittedDomainEvents.Clear();
-    public void LoadFromHistory(IEnumerable<IDomainEvent> history)
-    {
-        foreach (var @event in history)
-        {
-            Apply(@event);
-            Version++;
-        }
-    }
 }
