@@ -8,5 +8,6 @@ public sealed record RoomCreatedDomainEvent(
     Name Name,
     RoomCode Code,
     Capacity Capacity,
+    int CurrentParticipantsCount,
     DateTimeUtc OccurredAt
     ) : DomainEvent(OccurredAt);

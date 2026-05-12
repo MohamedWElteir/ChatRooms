@@ -81,5 +81,17 @@ patchResponse.EnsureSuccessStatusCode();
 if (logger.IsEnabled(LogLevel.Information))
     logger.LogInformation("BFF client updated. RedirectURIs now point to {Bff}", bffBaseUrl);
 
+var clientSecret = config["Keycloak:ClientSecret"]
+    ?? throw new InvalidOperationException("Keycloak:ClientSecret is not configured.");
+
+var secretResponse = await http.PutAsJsonAsync(
+    $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}",
+    new { secret = clientSecret, clientAuthenticatorType = "client-secret" });
+
+secretResponse.EnsureSuccessStatusCode();
+
+if (logger.IsEnabled(LogLevel.Information))
+    logger.LogInformation("BFF client secret updated successfully.");
+
 
 await app.StopAsync();

@@ -116,5 +116,17 @@
 </div>
 
 @code {
-    private void SignIn() => Nav.NavigateTo("/bff/login");
+    private string BffUrl => "http://localhost:5031";
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine($"BFF URL resolved to: {BffUrl}");
+    }
+
+    private void SignIn()
+    {
+        var loginUrl = $"{BffUrl}/bff/login";
+        Console.WriteLine($"Navigating to: {loginUrl}");
+        Nav.NavigateTo(loginUrl, forceLoad: true);
+    }
 }

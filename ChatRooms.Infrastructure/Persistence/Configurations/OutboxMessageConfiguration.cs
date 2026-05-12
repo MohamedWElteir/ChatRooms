@@ -1,4 +1,4 @@
-﻿using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -43,6 +43,6 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
         builder.Property(o => o.IsProcessed)
             .IsRequired();
 
-        builder.HasIndex(o => new { o.IsProcessed, o.OccurredOn });
+        builder.HasIndex(o => new { o.IsProcessed, o.IsDeadLetter, o.OccurredOn });
     }
 }

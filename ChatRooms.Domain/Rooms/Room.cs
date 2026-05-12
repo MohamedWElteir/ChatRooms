@@ -55,7 +55,7 @@ public sealed class Room : AggregateRoot<RoomId>
         if (!room.IsTransient())
             throw new InvalidOperationException("Only transient rooms can be created.");
 
-        room.Raise(new RoomCreatedDomainEvent(RoomId.New(), name, roomCode, capacity, dateTime));
+        room.Raise(new RoomCreatedDomainEvent(RoomId.New(), name, roomCode, capacity, room.CurrentParticipantsCount, dateTime));
         return room;
 
     }
@@ -124,6 +124,7 @@ public sealed class Room : AggregateRoot<RoomId>
         Name = @event.Name;
         Capacity = @event.Capacity;
         Code = @event.Code;
+        CurrentParticipantsCount = @event.CurrentParticipantsCount;
         Status = RoomStatus.Active;
         CreatedAt = @event.OccurredAt;
     }

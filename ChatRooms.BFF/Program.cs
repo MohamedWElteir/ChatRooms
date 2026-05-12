@@ -38,16 +38,20 @@ builder.Services
     .AddOpenIdConnect(options =>
     {
         options.Authority = builder.Configuration["Keycloak:Authority"];
+        options.MetadataAddress = builder.Configuration["Keycloak:MetadataAddress"];
         options.ClientId = builder.Configuration["Keycloak:ClientId"];
         options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.UsePkce = true;
         options.SaveTokens = true;
+        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.GetClaimsFromUserInfoEndpoint = true;
         options.MapInboundClaims = false;
         options.Scope.Add("profile");
         options.Scope.Add("email");
         options.Scope.Add("roles");
+        options.TokenValidationParameters.ValidateIssuer = true;
     });
 
 builder.Services.AddAuthorization();

@@ -18,7 +18,7 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
             Name: domainEvent.Name,
             Code: domainEvent.Code,
             Capacity: domainEvent.Capacity,
-            CurrentParticipantsCount: 1,
+            CurrentParticipantsCount: domainEvent.CurrentParticipantsCount,
             Status: nameof(RoomStatus.Active),
             Version: domainEvent.AggregateVersion);
 

@@ -12,7 +12,7 @@ public sealed record DeleteRoomCommandHandler(IRoomRepository roomRepository, IU
     public async Task<Unit> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
     {
         var room = await roomRepository.GetById(command.RoomId, cancellationToken) ?? throw new InvalidOperationException($"Room with id {command.RoomId} not found.");
-        room.Delete(Enum.Parse<DeletionReason>(command.DeletionReason, ignoreCase: true), DateTimeUtc.NowUtc());
+        room.Delete(Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason) ? deletionReason : throw new InvalidOperationException("Invalid deletion reason."), DateTimeUtc.NowUtc());
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }

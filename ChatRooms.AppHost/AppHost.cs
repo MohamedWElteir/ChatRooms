@@ -39,7 +39,8 @@ var bff = builder.AddProject<Projects.ChatRooms_BFF>("chatrooms-bff")
     .WithEnvironment("Keycloak__ClientSecret", keycloakSecret);
 
 builder.AddProject<Projects.ChatRooms_Blazor>("chatrooms-blazor")
-    .WithReference(bff);
+    .WithReference(bff)
+    .WaitFor(bff);
 
 builder.AddProject<Projects.ChatRooms_KeycloakSetup>("chatrooms-keycloak-setup")
     .WithReference(keycloak)
