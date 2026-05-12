@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ChatRooms.Application.Rooms.Commands.DeleteRoom;
 
-public sealed record DeleteRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork)
     : ICommandHandler<DeleteRoomCommand, Unit>
 {
     public async Task<Unit> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
