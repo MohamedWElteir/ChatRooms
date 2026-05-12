@@ -4,11 +4,44 @@
   "registrationAllowed": false,
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
+  "rememberMe": true,
+
   "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxTemporaryLockouts": 3,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+
+  "passwordPolicy": "length(8) and passwordHistory(3) and notContainsUsername(undefined) and notEmail(undefined) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and maxLength(72)",
+
   "accessTokenLifespan": 900,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 36000,
-  "passwordPolicy": "length(8) and notUsername(undefined)",
+
+  "eventsEnabled": true,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+  "enabledEventTypes": [
+    "LOGIN",
+    "LOGIN_ERROR",
+    "LOGOUT",
+    "LOGOUT_ERROR",
+    "REGISTER",
+    "REGISTER_ERROR",
+    "UPDATE_PASSWORD",
+    "UPDATE_PASSWORD_ERROR",
+    "UPDATE_EMAIL",
+    "RESET_PASSWORD",
+    "RESET_PASSWORD_ERROR",
+    "USER_DISABLED_BY_PERMANENT_LOCKOUT",
+    "USER_DISABLED_BY_TEMPORARY_LOCKOUT",
+    "REFRESH_TOKEN_ERROR",
+    "CODE_TO_TOKEN_ERROR"
+  ],
 
   "clients": [
     {
@@ -20,12 +53,8 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": [
-        "http://localhost:5001/*"
-      ],
-      "webOrigins": [
-        "http://localhost:5001"
-      ],
+      "redirectUris": [ "http://localhost:5001/*" ],
+      "webOrigins": [ "http://localhost:5001" ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
         "access.token.lifespan": "900",
@@ -46,6 +75,20 @@
             "id.token.claim": "true",
             "access.token.claim": "true"
           }
+        },
+        {
+          "name": "systemuserid-claim",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "systemuserid",
+            "claim.name": "systemuserid",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "jsonType.label": "String"
+          }
         }
       ]
     },
@@ -63,6 +106,20 @@
     }
   ],
 
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]}},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]}},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]}},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]}},{\"name\":\"systemuserid\",\"displayName\":\"System User ID\",\"validations\":{},\"annotations\":{},\"required\":{},\"permissions\":{\"view\":[\"admin\"],\"edit\":[\"admin\"]},\"multivalued\":false}]}"
+          ]
+        }
+      }
+    ]
+  },
+
   "roles": {
     "realm": [
       {
@@ -71,7 +128,7 @@
       },
       {
         "name": "admin",
-        "description": "Can manage rooms, view all users"
+        "description": "Can manage rooms and view all users"
       }
     ]
   },
@@ -87,7 +144,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Password1!",
           "temporary": false
         }
       ],
@@ -103,7 +160,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "Password1!",
           "temporary": false
         }
       ],

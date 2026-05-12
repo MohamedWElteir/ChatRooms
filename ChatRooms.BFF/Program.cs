@@ -93,7 +93,7 @@ app.UseAuthorization();
 
 app.MapDefaultEndpoints();
 
-app.MapGet("/bff/login", () => Results.Challenge(
+app.MapGet("/bff/login", async () => Results.Challenge(
     new AuthenticationProperties
     {
         RedirectUri = "/rooms",

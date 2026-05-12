@@ -84,7 +84,7 @@ public sealed class Room : AggregateRoot<RoomId>
     }
     public void Archive(DateTimeUtc occurredAt)
     {
-        if (Status == RoomStatus.Archived)
+        if (Status is RoomStatus.Archived)
             return;
         EnsureActive();
         Raise(new RoomArchivedDomainEvent(Id, occurredAt));
@@ -112,7 +112,7 @@ public sealed class Room : AggregateRoot<RoomId>
 
     public void Restore(DateTimeUtc occurredAt)
     {
-        if (Status != RoomStatus.Archived)
+        if (Status is not RoomStatus.Archived)
             throw new InvalidOperationException("Only archived rooms can be restored.");
         Raise(new RoomUnArchivedDomainEvent(Id, occurredAt));
     }
@@ -174,13 +174,13 @@ public sealed class Room : AggregateRoot<RoomId>
     #region Guard Clauses
     private void EnsureNotDeleted()
     {
-        if (Status == RoomStatus.Deleted || IsDeleted)
+        if (Status is RoomStatus.Deleted || IsDeleted)
             throw new InvalidOperationException("Operation not allowed on deleted room.");
     }
     private void EnsureActive()
     {
         EnsureNotDeleted();
-        if (Status != RoomStatus.Active)
+        if (Status is not RoomStatus.Active)
             throw new InvalidOperationException("Operation only allowed on active rooms.");
     }
     #endregion
