@@ -21,7 +21,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --no-restore --warningsaserrors
+        run: dotnet build --no-restore -p:TreatWarningsAsErrors=true
 
       - name: Format
         run: dotnet format --verify-no-changes
