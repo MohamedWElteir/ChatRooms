@@ -15,7 +15,4 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ChatRooms.SharedKernel\ChatRooms.SharedKernel.csproj" />
-  </ItemGroup>
 </Project>

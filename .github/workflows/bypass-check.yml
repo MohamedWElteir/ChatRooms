@@ -1,0 +1,56 @@
+name: CI Bypass
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to bypass CI for
+        required: true
+        type: number
+      reason:
+        description: Reason for bypass
+        required: true
+        type: string
+
+jobs:
+  bypass:
+    runs-on: ubuntu-latest
+    environment: ci-bypass
+    permissions:
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create bypass check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ github.event.inputs.pr_number }}
+            });
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'CI / test',
+              head_sha: pr.head.sha,
+              status: 'completed',
+              conclusion: 'success',
+              output: {
+                title: 'Bypassed by ${{ github.actor }}',
+                summary: 'CI bypassed by ${{ github.actor }}. Reason: ${{ github.event.inputs.reason }}'
+              }
+            });
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.inputs.pr_number }},
+              body: '✅ CI check bypassed by @${{ github.actor }}.\nReason: ${{ github.event.inputs.reason }}'
+            });

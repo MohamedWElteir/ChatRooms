@@ -12,6 +12,7 @@ using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.DB.Read;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
+using ChatRooms.Infrastructure.Persistence.Outbox;
 using ChatRooms.Infrastructure.Persistence.Queries;
 using ChatRooms.Infrastructure.Persistence.Repositories;
 using ChatRooms.Infrastructure.Security;
@@ -36,6 +37,8 @@ public static class DependencyInjection
 
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.AddSingleton(JsonOptionsFactory.Create());
+        services.AddSingleton<IOutboxMessageFactory, OutboxMessageFactory>();
+        services.AddSingleton<IOutboxMessageProcessor, OutboxMessageProcessor>();
         services.AddDbContext<WriteDbContext>(options =>
         {
             options.UseNpgsql(connectionString);

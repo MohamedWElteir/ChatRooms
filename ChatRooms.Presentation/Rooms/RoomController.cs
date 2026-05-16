@@ -21,9 +21,10 @@ public sealed class RoomController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(RoomDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create(
-        [FromBody] CreateRoomCommand command,
+        [FromBody] CreateRoomRequest request,
         CancellationToken cancellationToken)
     {
+        var command = new CreateRoomCommand(request.Name, request.Capacity);
         var room = await sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
     }

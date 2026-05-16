@@ -36,9 +36,9 @@
     transition: color 0.15s;
 }
 
-    .lp-nav-link:hover {
+.lp-nav-link:hover {
         color: #111;
-    }
+}
 
 .lp-btn-signin {
     font-size: 13px;
@@ -58,7 +58,6 @@
         border-color: #111;
     }
 
-/* ── Hero ── */
 .lp-hero {
     flex: 1;
     display: grid;
@@ -90,10 +89,10 @@
     margin-bottom: 24px;
 }
 
-    .lp-h1 em {
+ .lp-h1 em {
         font-style: normal;
         color: #C84B0F;
-    }
+ }
 
 .lp-sub {
     font-size: 15px;
@@ -121,9 +120,9 @@
     transition: background 0.15s;
 }
 
-    .lp-btn-primary:hover {
+ .lp-btn-primary:hover {
         background: #333;
-    }
+ }
 
 .lp-btn-text {
     font-size: 14px;
