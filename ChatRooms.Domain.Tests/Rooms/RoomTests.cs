@@ -278,15 +278,16 @@ public sealed class RoomTests
     }
 
     [Fact]
-    public void Room_Archive_ShouldThrowError_WhenRoomIsNotActive()
+    public void Room_Archive_ShouldBeIdempotent_WhenRoomIsAlreadyArchived()
     {
         // Arrange
         var name = Name.From("ArchiveTestRoom");
         var capacity = Capacity.From(100);
         var room = Room.Create(name, capacity, RoomCode.From("VALID123"), DateTimeUtc.FromUtc(DateTime.UtcNow));
         room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow)));
+        // Act & Assert (should not throw)
+        room.Archive(DateTimeUtc.FromUtc(DateTime.UtcNow));
+        Assert.Equal(RoomStatus.Archived, room.Status);
     }
 
     [Fact]

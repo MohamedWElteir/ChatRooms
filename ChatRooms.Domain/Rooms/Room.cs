@@ -77,7 +77,7 @@ public sealed class Room : AggregateRoot<RoomId>
     }
     public void Rename(Name newName, DateTimeUtc occurredAt)
     {
-        EnsureActive();
+        EnsureNotDeleted();
         if (Name == newName)
             return;
         Raise(new RoomRenamedDomainEvent(Id, newName, occurredAt));

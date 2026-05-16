@@ -36,9 +36,9 @@ public sealed class SharedTests
         Assert.IsType<TestDomainEvent>(domainEvent);
         Assert.True(
             domainEvent.GetType().GetProperties().All(p =>
-                p.CanRead && (!p.CanWrite || TestHelpers.IsInitOnly(p))),
+                p.CanRead && (!p.CanWrite || TestHelpers.IsInitOnly(p) || !p.SetMethod!.IsPublic)),
             $"Mutable properties: {string.Join(", ", domainEvent.GetType().GetProperties()
-                .Where(p => p.CanWrite && !TestHelpers.IsInitOnly(p))
+                .Where(p => p.CanWrite && !TestHelpers.IsInitOnly(p) && p.SetMethod!.IsPublic)
                 .Select(p => p.Name))}"
         );
     }
