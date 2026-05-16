@@ -8,6 +8,7 @@ using ChatRooms.Application.Users.Commands;
 using ChatRooms.Application.Users.Queries;
 using ChatRooms.Domain.Rooms.Contracts;
 using ChatRooms.Domain.Rooms.Events;
+using ChatRooms.Domain.Users.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Infrastructure.BackgroundJobs;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
@@ -55,6 +56,7 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddKeyedScoped<IEventProjector, RoomCreatedProjector>(nameof(RoomCreatedDomainEvent));
         services.AddKeyedScoped<IEventProjector, RoomRenamedProjector>(nameof(RoomRenamedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, UserCreatedProjector>(nameof(UserCreatedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
         services.AddSingleton<IRoomCapacityPolicy, DefaultRoomCapacityPolicy>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
