@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-
+﻿using ChatRooms.Application.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatRooms.API.Middlewares;
@@ -12,6 +12,10 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         {
             await next(context);
         }
+        catch (ConcurrencyConflictException ex)
+        {
+            await HandleConflictAsync(context, ex);
+        }
         catch (ValidationException ex)
         {
             await HandleValidationExceptionAsync(context, ex);
@@ -20,15 +24,22 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         {
             await HandleNotFoundAsync(context, ex);
         }
-        catch (InvalidOperationException ex) // TODO: Create custom domain exceptions or use Result pattern
-        {
-            await HandleDomainExceptionAsync(context, ex);
-        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Unhandled exception.");
             await HandleServerErrorAsync(context);
         }
+    }
+
+    private static Task HandleConflictAsync(HttpContext context, InvalidOperationException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status409Conflict;
+        return context.Response.WriteAsJsonAsync(new ProblemDetails
+        {
+            Title = "Concurrency Conflict",
+            Detail = ex.Message,
+            Status = StatusCodes.Status409Conflict
+        });
     }
 
     private static Task HandleValidationExceptionAsync(HttpContext context, ValidationException ex)
@@ -51,17 +62,6 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
             Title = "Resource Not Found",
             Detail = ex.Message,
             Status = StatusCodes.Status404NotFound
-        });
-    }
-
-    private static Task HandleDomainExceptionAsync(HttpContext context, InvalidOperationException ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status409Conflict;
-        return context.Response.WriteAsJsonAsync(new ProblemDetails
-        {
-            Title = "Business Rule Violation",
-            Detail = ex.Message,
-            Status = StatusCodes.Status409Conflict
         });
     }
 

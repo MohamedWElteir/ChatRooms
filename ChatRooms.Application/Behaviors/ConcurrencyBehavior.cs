@@ -1,7 +1,6 @@
 ﻿using ChatRooms.Application.Abstractions.Messaging;
-
+using ChatRooms.Application.Exceptions;
 using MediatR;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,9 +25,7 @@ public sealed class ConcurrencyBehavior<TRequest, TResponse>(
             logger.LogWarning(ex,
                 "Concurrency conflict on {RequestType}", typeof(TRequest).Name);
 
-            // TODO: Translate to a domain-meaningful exception
-            // ExceptionHandlingMiddleware maps InvalidOperationException → 409
-            throw new InvalidOperationException(
+            throw new ConcurrencyConflictException(
                 "The resource was modified by another request. " +
                 "Please refresh and try again.");
         }

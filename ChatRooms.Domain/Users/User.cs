@@ -1,6 +1,7 @@
 ﻿using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Shared.Enums;
+using ChatRooms.Domain.Shared.Errors;
 using ChatRooms.Domain.Users.Enums;
 using ChatRooms.Domain.Users.Events;
 using ChatRooms.Domain.Users.ValueObjects;
@@ -51,11 +52,13 @@ public sealed class User : AggregateRoot<UserId>
             return;
         Raise(new UserRenamedDomainEvent(Id, newName, occurredAt));
     }
-    public void Delete(DeletionReason reason, DateTimeUtc occurredAt)
+    public Result Delete(DeletionReason reason, DateTimeUtc occurredAt)
     {
         if (IsDeleted)
-            throw new InvalidOperationException("User is already deleted.");
+            return UserErrors.AlreadyDeleted;
+
         Raise(new UserDeletedDomainEvent(Id, reason, occurredAt));
+        return Result.Success();
     }
     public void ChangeEmail(Email newEmail, DateTimeUtc occurredAt)
     {

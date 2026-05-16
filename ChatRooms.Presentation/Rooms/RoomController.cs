@@ -5,7 +5,9 @@ using ChatRooms.Application.Rooms.Commands.RenameRoom;
 using ChatRooms.Application.Rooms.Queries.GetRoomByCode;
 using ChatRooms.Application.Rooms.Queries.GetRoomById;
 using ChatRooms.Domain.Rooms.ValueObjects;
+using ChatRooms.Domain.Shared;
 using ChatRooms.DTOs.Rooms;
+using ChatRooms.Presentation.Common;
 using ChatRooms.Presentation.Rooms.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -19,14 +21,18 @@ public sealed class RoomController(ISender sender) : ControllerBase
 {
     [HttpPost("create")]
     [ProducesResponseType(typeof(RoomDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create(
         [FromBody] CreateRoomRequest request,
         CancellationToken cancellationToken)
     {
         var command = new CreateRoomCommand(request.Name, request.Capacity);
-        var room = await sender.Send(command, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = room.Id }, room);
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
     }
 
     [HttpGet("{id:guid}")]
@@ -54,48 +60,59 @@ public sealed class RoomController(ISender sender) : ControllerBase
 
     [HttpPatch("{id:guid}/name")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Rename(
         Guid id,
         [FromBody] RenameRoomRequest request,
         CancellationToken cancellationToken)
     {
-        var newName = await sender.Send(
+        var result = await sender.Send(
             new RenameRoomCommand(RoomId.From(id), request.NewName),
             cancellationToken);
-        return Ok(newName);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return Ok(result.Value);
     }
 
     [HttpPatch("{id:guid}/capacity")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ChangeCapacity(
         Guid id,
         [FromBody] ChangeCapacityRequest request,
         CancellationToken cancellationToken)
     {
-        await sender.Send(
+        var result = await sender.Send(
             new ChangeRoomCapacityCommand(RoomId.From(id), request.NewCapacity),
             cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
         return NoContent();
     }
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Delete(
     Guid id,
     [FromBody] DeleteRoomRequest request,
     CancellationToken cancellationToken)
     {
-        await sender.Send(
+        var result = await sender.Send(
             new DeleteRoomCommand(RoomId.From(id), request.Reason),
             cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
 
         return NoContent();
     }

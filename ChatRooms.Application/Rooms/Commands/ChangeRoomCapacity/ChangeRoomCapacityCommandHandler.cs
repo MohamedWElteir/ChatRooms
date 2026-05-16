@@ -3,17 +3,21 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
-using MediatR;
+using ChatRooms.Domain.Shared.Errors;
 namespace ChatRooms.Application.Rooms.Commands.ChangeRoomCapacity;
 
 public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomRepository, IDateTimeProvider dateTimeProvider, IUnitOfWork unitOfWork)
-    : ICommandHandler<ChangeRoomCapacityCommand, Unit>
+    : ICommandHandler<ChangeRoomCapacityCommand, Result>
 {
-    public async Task<Unit> Handle(ChangeRoomCapacityCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ChangeRoomCapacityCommand request, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(request.RoomId, cancellationToken) ?? throw new Exception("Room not found");
-        room.ChangeCapacity(Capacity.From(request.NewCapacity), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var room = await roomRepository.GetById(request.RoomId, cancellationToken);
+        if (room is null) return RoomErrors.NotFound;
+
+        var result = room.ChangeCapacity(Capacity.From(request.NewCapacity), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        if (result.IsFailure) return result;
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Unit.Value;
+        return Result.Success();
     }
 }

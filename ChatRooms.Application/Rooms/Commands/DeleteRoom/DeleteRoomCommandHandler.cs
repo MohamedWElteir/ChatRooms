@@ -1,19 +1,27 @@
 ﻿using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
+using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Enums;
-using MediatR;
+using ChatRooms.Domain.Shared.Errors;
 
 namespace ChatRooms.Application.Rooms.Commands.DeleteRoom;
 
-public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork)
-    : ICommandHandler<DeleteRoomCommand, Unit>
+public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
+    : ICommandHandler<DeleteRoomCommand, Result>
 {
-    public async Task<Unit> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.RoomId, cancellationToken) ?? throw new InvalidOperationException($"Room with id {command.RoomId} not found.");
-        room.Delete(Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason) ? deletionReason : throw new InvalidOperationException("Invalid deletion reason."), DateTimeUtc.NowUtc());
+        var room = await roomRepository.GetById(command.RoomId, cancellationToken);
+        if (room is null) return RoomErrors.NotFound;
+
+        if (!Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason))
+            return new Error("Room.InvalidDeletionReason", "Invalid deletion reason.");
+
+        var result = room.Delete(deletionReason, DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        if (result.IsFailure) return result;
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Unit.Value;
+        return Result.Success();
     }
 }

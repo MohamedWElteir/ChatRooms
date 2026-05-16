@@ -3,18 +3,26 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared.Errors;
 
 namespace ChatRooms.Application.Rooms.Commands.RenameRoom;
 
 public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
-    : ICommandHandler<RenameRoomCommand, string>
+    : ICommandHandler<RenameRoomCommand, Result<string>>
 {
-    public async Task<string> Handle(RenameRoomCommand command, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(RenameRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.Id, cancellationToken) ?? throw new InvalidOperationException($"Room with id {command.Id} not found.");
+        var room = await roomRepository.GetById(command.Id, cancellationToken);
+        if (room is null) return RoomErrors.NotFound;
 
-        room.Rename(Name.From(command.NewName), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var renameResult = room.Rename(Name.From(command.NewName), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        if (renameResult.IsFailure)
+        {
+            var (_, renameError) = renameResult;
+            return renameError!;
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return room.Name;
+        return room.Name.Value;
     }
 }

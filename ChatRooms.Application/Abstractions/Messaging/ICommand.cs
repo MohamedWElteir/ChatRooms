@@ -2,6 +2,6 @@
 
 namespace ChatRooms.Application.Abstractions.Messaging;
 
-public interface ICommand<out TResult> : IRequest<TResult>
+public interface ICommand<TResult> : IRequest<TResult>
 {
 }
