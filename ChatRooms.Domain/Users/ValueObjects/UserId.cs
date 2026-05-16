@@ -13,6 +13,7 @@ public readonly record struct UserId
     }
 
     public static UserId New() => new(Guid.NewGuid());
+    public static UserId From(Guid value) => new(value);
 
     public override string ToString() => Value.ToString();
     public static implicit operator Guid(UserId UserId) => UserId.Value;

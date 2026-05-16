@@ -15,10 +15,15 @@ public sealed class User : AggregateRoot<UserId>
     public Gender Gender { get; private set; }
     public BirthDate BirthDate { get; private set; }
     public Age Age => BirthDate.CalculateAge();
+
     private User() : base() { }
-    public static User Create(Name name, Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
+
+    public static Result<User> Create(Name name, Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
     {
         var user = new User();
+        if (!user.IsTransient())
+            return UserErrors.NotTransient;
+
         user.Raise(new UserCreatedDomainEvent(UserId.New(), name, email, gender, birthDate, OccurredAt));
         return user;
     }
@@ -46,12 +51,19 @@ public sealed class User : AggregateRoot<UserId>
                 throw new InvalidOperationException($"Event '{@event.GetType().Name}' is not supported by {nameof(User)}");
         }
     }
-    public void Rename(Name newName, DateTimeUtc occurredAt)
+
+    public Result Rename(Name newName, DateTimeUtc occurredAt)
     {
+        var check = EnsureNotDeleted();
+        if (check.IsFailure) return check;
+
         if (Name == newName)
-            return;
+            return Result.Success();
+
         Raise(new UserRenamedDomainEvent(Id, newName, occurredAt));
+        return Result.Success();
     }
+
     public Result Delete(DeletionReason reason, DateTimeUtc occurredAt)
     {
         if (IsDeleted)
@@ -60,18 +72,29 @@ public sealed class User : AggregateRoot<UserId>
         Raise(new UserDeletedDomainEvent(Id, reason, occurredAt));
         return Result.Success();
     }
-    public void ChangeEmail(Email newEmail, DateTimeUtc occurredAt)
+
+    public Result ChangeEmail(Email newEmail, DateTimeUtc occurredAt)
     {
+        var check = EnsureNotDeleted();
+        if (check.IsFailure) return check;
+
         if (Email == newEmail)
-            return;
+            return Result.Success();
+
         Raise(new UserEmailChangedDomainEvent(Id, newEmail, occurredAt));
+        return Result.Success();
     }
 
-    public void ChangeGender(Gender newGender, DateTimeUtc occurredAt)
+    public Result ChangeGender(Gender newGender, DateTimeUtc occurredAt)
     {
+        var check = EnsureNotDeleted();
+        if (check.IsFailure) return check;
+
         if (Gender == newGender)
-            return;
+            return Result.Success();
+
         Raise(new UserGenderChangedDomainEvent(Id, newGender, occurredAt));
+        return Result.Success();
     }
 
     #region Event Appliers
@@ -97,15 +120,27 @@ public sealed class User : AggregateRoot<UserId>
         Reason = @event.Reason;
         UpdatedAt = @event.OccurredAt;
     }
+
     private void Apply(UserEmailChangedDomainEvent @event)
     {
         Email = @event.NewEmail;
         UpdatedAt = @event.OccurredAt;
     }
+
     private void Apply(UserGenderChangedDomainEvent @event)
     {
         Gender = @event.NewGender;
         UpdatedAt = @event.OccurredAt;
+    }
+    #endregion
+
+    #region Guard Clauses
+    private Result EnsureNotDeleted()
+    {
+        if (IsDeleted)
+            return UserErrors.Deleted;
+
+        return Result.Success();
     }
     #endregion
 }

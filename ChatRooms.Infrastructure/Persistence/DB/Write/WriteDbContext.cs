@@ -1,6 +1,7 @@
 ﻿using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Shared.Contracts;
+using ChatRooms.Domain.Users;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ namespace ChatRooms.Infrastructure.Persistence.DB.Write;
 public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options, IOutboxMessageFactory outboxMessageFactory) : DbContext(options), IUnitOfWork
 {
     public DbSet<Room> Rooms { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

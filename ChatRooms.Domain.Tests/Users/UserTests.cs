@@ -1,4 +1,5 @@
 using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared.Enums;
 using ChatRooms.Domain.Shared.Errors;
 using ChatRooms.Domain.Tests.Mocks;
 using ChatRooms.Domain.Users;
@@ -13,15 +14,15 @@ public class UserTests
     [Fact]
     public void CreateUser_WithValidName_ShouldSucceed()
     {
-        // Arrange
         var name = Name.From("ValidUserName");
         var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
         var gender = Gender.Male;
         var email = Email.From("test@test.com");
         var occurredAtUtc = DateTimeUtc.FromUtc(DateTime.UtcNow);
-        // Act
-        var user = User.Create(name, email, gender, birthDate, occurredAtUtc);
-        // Assert
+
+        var userResult = User.Create(name, email, gender, birthDate, occurredAtUtc);
+        var user = userResult.Value!;
+
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
     }
@@ -29,7 +30,6 @@ public class UserTests
     [Fact]
     public void CreateUser_WithEmptyName_ShouldThrowException()
     {
-        // Act & Assert
         Assert.Throws<ArgumentException>(() => User.Create(Name.From(string.Empty),
                                                            Email.From("test@test.com"),
                                                            Gender.Male,
@@ -40,30 +40,30 @@ public class UserTests
     [Fact]
     public void CreateUser_ShouldRaiseUserCreatedDomainEvent()
     {
-        // Arrange
         var name = Name.From("ValidUserName");
         var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
         var gender = Gender.Male;
         var email = Email.From("test@test.com");
         var occurredAtUtc = DateTimeUtc.FromUtc(DateTime.UtcNow);
-        // Act
-        var user = User.Create(name, email, gender, birthDate, occurredAtUtc);
-        // Assert
+
+        var userResult = User.Create(name, email, gender, birthDate, occurredAtUtc);
+        var user = userResult.Value!;
+
         Assert.Contains(user.DomainEvents, e => e is UserCreatedDomainEvent);
     }
 
     [Fact]
     public void CreateUser_Should_CreateUserWith_A_NoneDefaultId()
     {
-        // Arrange
         var name = Name.From("ValidUserName");
         var birthDate = BirthDate.From(new DateTime(2025, 10, 10));
         var gender = Gender.Male;
         var email = Email.From("test@test.com");
         var occurredAtUtc = DateTimeUtc.FromUtc(DateTime.UtcNow);
-        // Act
-        var user = User.Create(name, email, gender, birthDate, occurredAtUtc);
-        // Assert
+
+        var userResult = User.Create(name, email, gender, birthDate, occurredAtUtc);
+        var user = userResult.Value!;
+
         Assert.NotNull(user);
         Assert.Equal(name, user.Name);
         Assert.NotEqual(default, user.Id);
@@ -79,18 +79,18 @@ public class UserTests
     }
 
     [Theory]
-    [InlineData("invalid.com")]        // missing @
-    [InlineData("@nodomain.com")]      // missing local part
-    [InlineData("no@")]                // missing domain
-    [InlineData("no@domain")]          // missing TLD
-    [InlineData("spaces in@email.com")]// spaces in local part
-    [InlineData("double@@email.com")]  // double @
-    [InlineData("missing.dot@com")]    // no dot in domain
-    [InlineData("@.com")]              // missing domain name
-    [InlineData("user@.com")]          // domain starts with dot
-    [InlineData("user@domain..com")]   // consecutive dots in domain
-    [InlineData("user@domain.com.")]   // dot in the end
-    [InlineData("user$@domain.com")]   // invalid character
+    [InlineData("invalid.com")]
+    [InlineData("@nodomain.com")]
+    [InlineData("no@")]
+    [InlineData("no@domain")]
+    [InlineData("spaces in@email.com")]
+    [InlineData("double@@email.com")]
+    [InlineData("missing.dot@com")]
+    [InlineData("@.com")]
+    [InlineData("user@.com")]
+    [InlineData("user@domain..com")]
+    [InlineData("user@domain.com.")]
+    [InlineData("user$@domain.com")]
     public void Create_Invalid_Email_Should_Throw(string invalidEmail)
     {
         Assert.Throws<ArgumentException>(() => Email.From(invalidEmail));
@@ -99,108 +99,171 @@ public class UserTests
     [Fact]
     public void RenameUser_WithValidNewName_ShouldSucceed()
     {
-        // Arrange
-        var user = User.Create(Name.From("InitialName"),
-                                         Email.From("test@test.com"),
-                                         Gender.Male,
-                                         BirthDate.From(new DateTime(2020, 10, 10)),
-                                         DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("InitialName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var newName = Name.From("NewValidName");
-        // Act
+
         user.Rename(newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Assert
+
         Assert.Equal(newName, user.Name);
     }
 
     [Fact]
     public void RenameUser_WithSameName_ShouldNotRaiseEvent()
     {
-        // Arrange
-        var user = User.Create(Name.From("SameName"),
-                                    Email.From("test@test.com"),
-                                    Gender.Male,
-                                    BirthDate.From(new DateTime(2020, 10, 10)),
-                                    DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("SameName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var sameName = Name.From("SameName");
-        // Act
-        user.Rename(sameName, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Assert
-        Assert.DoesNotContain(user.DomainEvents, e => e is UserRenamedDomainEvent);
 
+        user.Rename(sameName, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.DoesNotContain(user.DomainEvents, e => e is UserRenamedDomainEvent);
     }
+
     [Fact]
     public void RenameUser_WithEmptyName_ShouldThrowException()
     {
-        // Arrange
-        var user = User.Create(Name.From("ValidName"),
-                                    Email.From("test@test.com"),
-                                    Gender.Male,
-                                    BirthDate.From(new DateTime(2020, 10, 10)),
-                                    DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act & Assert
+        var userResult = User.Create(Name.From("ValidName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
         Assert.Throws<ArgumentException>(() => user.Rename(Name.From(string.Empty), DateTimeUtc.FromUtc(DateTime.UtcNow)));
     }
 
     [Fact]
     public void RenameUser_ShouldRaiseUserRenamedDomainEvent()
     {
-        // Arrange
-        var user = User.Create(Name.From("InitialName"),
-                                    Email.From("test@test.com"),
-                                    Gender.Male,
-                                    BirthDate.From(new DateTime(2020, 10, 10)),
-                                    DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("InitialName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var newName = Name.From("NewValidName");
-        // Act
+
         user.Rename(newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Assert
+
         Assert.Contains(user.DomainEvents, e => e is UserRenamedDomainEvent);
     }
 
     [Fact]
     public void RenameUser_Should_UpdateNameProperty()
     {
-        // Arrange
-        var user = User.Create(Name.From("InitialName"),
-                                    Email.From("test@test.com"),
-                                    Gender.Male,
-                                    BirthDate.From(new DateTime(2020, 10, 10)),
-                                    DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("InitialName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var newName = Name.From("NewValidName");
-        // Act
+
         user.Rename(newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Assert
+
         Assert.Equal(newName, user.Name);
+    }
+
+    [Fact]
+    public void RenameUser_WhenDeleted_ShouldFail()
+    {
+        var userResult = User.Create(Name.From("InitialName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+        user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        var renameResult = user.Rename(Name.From("NewName"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.True(renameResult.IsFailure);
+    }
+
+    [Fact]
+    public void DeleteUser_ShouldSucceed()
+    {
+        var userResult = User.Create(Name.From("ValidName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        var deleteResult = user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.True(deleteResult.IsSuccess);
+        Assert.True(user.IsDeleted);
+    }
+
+    [Fact]
+    public void DeleteUser_WhenAlreadyDeleted_ShouldFail()
+    {
+        var userResult = User.Create(Name.From("ValidName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+        user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        var deleteResult = user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.True(deleteResult.IsFailure);
+    }
+
+    [Fact]
+    public void DeleteUser_ShouldRaiseUserDeletedDomainEvent()
+    {
+        var userResult = User.Create(Name.From("ValidName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.Contains(user.DomainEvents, e => e is UserDeletedDomainEvent);
     }
 
     [Fact]
     public void Apply_UnsupportedEvent_ShouldThrowException()
     {
-        // Arrange
-        var user = User.Create(Name.From("ValidName"),
-                                    Email.From("test@test.com"),
-                                    Gender.Male,
-                                    BirthDate.From(new DateTime(2020, 10, 10)),
-                                    DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act & Assert
+        var userResult = User.Create(Name.From("ValidName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
         Assert.Throws<InvalidOperationException>(() => user.Apply(new UnsupportedDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow))));
     }
 
     [Fact]
     public void Apply_UserCreatedDomainEvent_ShouldSetProperties()
     {
-        // Arrange
         var userId = UserId.New();
         var name = Name.From("TestUser");
         var gender = Gender.Male;
         var birthDate = BirthDate.From(new DateTime(2020, 10, 10));
         var email = Email.From("test@test.com");
         var occurredAtUtc = DateTimeUtc.FromUtc(DateTime.UtcNow);
-        var user = User.Create(name, email, gender, birthDate, occurredAtUtc);
+        var userResult = User.Create(name, email, gender, birthDate, occurredAtUtc);
+        var user = userResult.Value!;
         var domainEvent = new UserCreatedDomainEvent(userId, name, email, gender, birthDate, occurredAtUtc);
-        // Act
+
         user.Apply(domainEvent);
-        // Assert
+
         Assert.Equal(userId, user.Id);
         Assert.Equal(name, user.Name);
         Assert.Equal(gender, user.Gender);
@@ -212,17 +275,17 @@ public class UserTests
     [Fact]
     public void Apply_UserRenamedDomainEvent_ShouldUpdateName()
     {
-        // Arrange
-        var user = User.Create(Name.From("InitialName"),
-                                        Email.From("test@test.com"),
-                                        Gender.Male,
-                                        BirthDate.From(new DateTime(2020, 10, 10)),
-                                        DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("InitialName"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var newName = Name.From("UpdatedName");
         var domainEvent = new UserRenamedDomainEvent(user.Id, newName, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act
+
         user.Apply(domainEvent);
-        // Assert
+
         Assert.Equal(newName, user.Name);
     }
 
@@ -231,33 +294,125 @@ public class UserTests
     [InlineData("2000-01-01", 26)]
     public void AgeCalculation_Should_ReturnCorrectAge(string birthDateString, int expectedYears)
     {
-        // Arrange
         var birthDate = BirthDate.From(DateTime.Parse(birthDateString));
-        var user = User.Create(Name.From("Test"),
-                                        Email.From("test@test.com"),
-                                        Gender.Male,
-                                        birthDate,
-                                        DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Act
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     birthDate,
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
         var age = user.Age;
-        // Assert
+
         Assert.Equal(expectedYears, age.Years);
     }
 
     [Fact]
     public void Change_Email_Should_Return_New_Email()
     {
-        // Arrange
-        var user = User.Create(Name.From("Test"),
-                                Email.From("test@test.com"),
-                                Gender.Male,
-                                BirthDate.From(new DateTime(2020, 10, 10)),
-                                DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
         var newEmail = Email.From("new@test.com");
-        // Act
+
         user.ChangeEmail(newEmail, DateTimeUtc.FromUtc(DateTime.UtcNow));
-        // Assert
+
         Assert.Equal(newEmail, user.Email);
     }
 
+    [Fact]
+    public void Change_Email_WithSameEmail_ShouldNotRaiseEvent()
+    {
+        var email = Email.From("test@test.com");
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        user.ChangeEmail(email, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.DoesNotContain(user.DomainEvents, e => e is UserEmailChangedDomainEvent);
+    }
+
+    [Fact]
+    public void Change_Email_WhenDeleted_ShouldFail()
+    {
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+        user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        var result = user.ChangeEmail(Email.From("new@test.com"), DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.True(result.IsFailure);
+    }
+
+    [Fact]
+    public void Change_Gender_ShouldSucceed()
+    {
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        user.ChangeGender(Gender.Female, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.Equal(Gender.Female, user.Gender);
+    }
+
+    [Fact]
+    public void Change_Gender_WithSameGender_ShouldNotRaiseEvent()
+    {
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        user.ChangeGender(Gender.Male, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.DoesNotContain(user.DomainEvents, e => e is UserGenderChangedDomainEvent);
+    }
+
+    [Fact]
+    public void Change_Gender_WhenDeleted_ShouldFail()
+    {
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+        user.Delete(DeletionReason.DeletedByUser, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        var result = user.ChangeGender(Gender.Female, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.True(result.IsFailure);
+    }
+
+    [Fact]
+    public void Change_Gender_ShouldRaiseUserGenderChangedDomainEvent()
+    {
+        var userResult = User.Create(Name.From("Test"),
+                                     Email.From("test@test.com"),
+                                     Gender.Male,
+                                     BirthDate.From(new DateTime(2020, 10, 10)),
+                                     DateTimeUtc.FromUtc(DateTime.UtcNow));
+        var user = userResult.Value!;
+
+        user.ChangeGender(Gender.Female, DateTimeUtc.FromUtc(DateTime.UtcNow));
+
+        Assert.Contains(user.DomainEvents, e => e is UserGenderChangedDomainEvent);
+    }
 }
