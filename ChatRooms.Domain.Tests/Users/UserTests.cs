@@ -74,7 +74,7 @@ public class UserTests
     [InlineData(null)]
     public void Create_Null_Email_Should_Throw(string? nullOrWhiteSpaceString)
     {
-        Assert.Throws<ArgumentNullException>(() => Email.From(nullOrWhiteSpaceString));
+        Assert.Throws<ArgumentNullException>(() => Email.From(nullOrWhiteSpaceString!));
     }
 
     [Theory]
