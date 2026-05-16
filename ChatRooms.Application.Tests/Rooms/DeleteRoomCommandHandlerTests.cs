@@ -6,7 +6,6 @@ using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Enums;
-using ChatRooms.Domain.Shared.Errors;
 using Moq;
 
 namespace ChatRooms.Application.Tests.Rooms;

@@ -27,7 +27,7 @@ public sealed class RenameUserCommandHandlerTests
         _dateTimeProviderMock.Setup(x => x.UtcNow).Returns(new DateTime(2026, 5, 16, 12, 0, 0, DateTimeKind.Utc));
 
         var createResult = User.Create(
-            ChatRooms.Domain.Users.ValueObjects.Name.From("Original"),
+            Name.From("Original"),
             Email.From("test@test.com"),
             Domain.Users.Enums.Gender.Male,
             BirthDate.From(new DateTime(2000, 1, 1)),

@@ -27,7 +27,7 @@ public sealed class ChangeEmailCommandHandlerTests
         _dateTimeProviderMock.Setup(x => x.UtcNow).Returns(new DateTime(2026, 5, 16, 12, 0, 0, DateTimeKind.Utc));
 
         var createResult = User.Create(
-            ChatRooms.Domain.Users.ValueObjects.Name.From("TestUser"),
+            Name.From("TestUser"),
             Email.From("old@test.com"),
             Domain.Users.Enums.Gender.Male,
             BirthDate.From(new DateTime(2000, 1, 1)),

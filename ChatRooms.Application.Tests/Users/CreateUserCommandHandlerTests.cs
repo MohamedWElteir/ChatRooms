@@ -2,11 +2,8 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Application.Users.Commands;
 using ChatRooms.Application.Users.Commands.CreateUser;
-using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Users;
 using ChatRooms.Domain.Users.Enums;
-using ChatRooms.Domain.Users.ValueObjects;
-using ChatRooms.DTOs.Users;
 using Moq;
 
 namespace ChatRooms.Application.Tests.Users;
