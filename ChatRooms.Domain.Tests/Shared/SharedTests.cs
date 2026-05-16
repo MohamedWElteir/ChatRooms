@@ -21,7 +21,7 @@ public sealed class SharedTests
     public void TestDomainEvent_Should_Store_Provided_OccurredAt()
     {
         // Arrange
-        var expected = DateTimeUtc.FromUtc(new DateTime(2024, 1, 1, 12, 0, 0,DateTimeKind.Utc));
+        var expected = DateTimeUtc.FromUtc(new DateTime(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc));
         // Act
         var domainEvent = new TestDomainEvent(expected);
         // Assert
@@ -43,7 +43,7 @@ public sealed class SharedTests
         );
     }
 
-    
+
 
     [Fact]
     public void DomainEvent_Should_Inherit_From_DomainEvent_Base_Class()

@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System.Text.Json;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;
+
 public sealed class RoomRenamedProjector(
     ReadDbContext readDbContext,
     JsonSerializerOptions jsonOptions) : IEventProjector

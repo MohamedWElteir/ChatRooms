@@ -21,11 +21,11 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
             .HasColumnType("jsonb")
             .IsRequired();
 
-  
+
         builder.Property(o => o.ErrorMessage)
             .HasMaxLength(2000);
 
-        
+
         builder.Property(o => o.OccurredOn)
             .HasConversion(
                 utc => utc.DateTime,

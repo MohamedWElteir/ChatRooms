@@ -5,7 +5,7 @@ var keycloakAdminPassword = builder.AddParameter("keycloak-admin-password", secr
 var keycloakSecret = builder.AddParameter("keycloak-secret", secret: true);
 
 var keycloak = builder.AddKeycloak(
-    "keycloak", 
+    "keycloak",
     port: 8080,
     adminPassword: keycloakAdminPassword)
     .WithRealmImport("./KeycloakRealms/");

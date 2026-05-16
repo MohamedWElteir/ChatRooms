@@ -1,6 +1,7 @@
 ﻿using ChatRooms.Domain.Shared.Contracts;
 
 namespace ChatRooms.Domain.Shared;
+
 public abstract record DomainEvent(DateTimeUtc OccurredAt) : IDomainEvent
 {
     public Guid Id { get; } = Guid.NewGuid();

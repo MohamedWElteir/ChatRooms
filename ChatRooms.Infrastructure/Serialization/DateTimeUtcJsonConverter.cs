@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ChatRooms.Infrastructure.Serialization;
+
 public sealed class DateTimeUtcJsonConverter : JsonConverter<DateTimeUtc>
 {
     public override DateTimeUtc Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
