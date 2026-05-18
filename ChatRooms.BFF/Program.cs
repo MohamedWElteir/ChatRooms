@@ -24,7 +24,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var keycloakBaseUrl = builder.Configuration["Keycloak:Authority"]
-    ?.Replace("/realms/chatrooms", "") 
+    ?.Replace("/realms/chatrooms", "")
     ?? "http://localhost:8080";
 
 builder.Services.AddHttpClient<IKeycloakAdminService, KeycloakAdminService>(client =>
@@ -174,7 +174,7 @@ app.MapPost("/bff/register", async (
         keycloakUserId, "systemuserid", domainUser!.Id.ToString(),
         adminToken, ct);
 
-    if(logger.IsEnabled(LogLevel.Information))
+    if (logger.IsEnabled(LogLevel.Information))
         logger.LogInformation(
             "Registration complete. Keycloak: {KcId} → Domain: {DomainId}",
             keycloakUserId, domainUser.Id);
