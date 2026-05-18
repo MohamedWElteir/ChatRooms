@@ -22,7 +22,7 @@
                 restore, and cap capacity — not just send messages.
             </p>
             <div class="lp-actions">
-                <button class="lp-btn-primary" @onclick="SignIn">Get started</button>
+                <button class="lp-btn-primary" @onclick="@(() => Nav.NavigateTo("/register"))">Get started</button>
                 <button class="lp-btn-text" @onclick="@(() => Nav.NavigateTo("/rooms"))">
                     Browse rooms →
                 </button>

@@ -1,11 +1,15 @@
+using ChatRooms.BFF.Services;
 using ChatRooms.BFF.Transforms;
+using ChatRooms.DTOs.Users;
 using ChatRooms.ServiceDefaults;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +22,36 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
+
+var keycloakBaseUrl = builder.Configuration["Keycloak:Authority"]
+    ?.Replace("/realms/chatrooms", "") 
+    ?? "http://localhost:8080";
+
+builder.Services.AddHttpClient<IKeycloakAdminService, KeycloakAdminService>(client =>
+{
+    client.BaseAddress = new Uri(keycloakBaseUrl);
+});
+
+builder.Services.AddHttpClient<KeycloakTokenService>(client =>
+{
+    client.BaseAddress = new Uri(keycloakBaseUrl);
+});
+
+builder.Services
+    .AddHttpClient("keycloak-token", client =>
+    {
+        client.BaseAddress = new Uri(
+            builder.Configuration["Keycloak:Authority"]
+                ?.Replace("/realms/chatrooms", "")
+            ?? "http://localhost:8080");
+    });
+builder.Services.AddScoped<KeycloakTokenService>();
+
+builder.Services
+    .AddHttpClient("chatrooms-api", client =>
+    {
+        client.BaseAddress = new Uri("https+http://chatrooms-api");
+    });
 
 builder.Services
     .AddAuthentication(options =>
@@ -96,6 +130,58 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapDefaultEndpoints();
+
+
+app.MapPost("/bff/register", async (
+    RegisterBffRequest request,
+    IKeycloakAdminService keycloakAdmin,
+    KeycloakTokenService tokenService,
+    IHttpClientFactory httpClientFactory,
+    ILogger<Program> logger,
+    CancellationToken ct) =>
+{
+
+    var adminToken = await tokenService.GetServiceAccountTokenAsync(ct);
+
+    var keycloakUserId = await keycloakAdmin.CreateUserAsync(
+        request, adminToken, ct);
+
+
+    using var apiHttp = httpClientFactory.CreateClient("chatrooms-api");
+    var apiResponse = await apiHttp.PostAsJsonAsync("/api/users/register",
+        new
+        {
+            request.Name,
+            request.Email,
+            request.Password,
+            request.Gender,
+            request.BirthDate
+        }, ct);
+
+    if (!apiResponse.IsSuccessStatusCode)
+    {
+        await keycloakAdmin.DeleteUserAsync(keycloakUserId, adminToken, ct);
+
+        return Results.Problem(
+            detail: "Failed to create user account.",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+
+    var domainUser = await apiResponse.Content
+        .ReadFromJsonAsync<UserDto>(ct);
+
+    await keycloakAdmin.SetUserAttributeAsync(
+        keycloakUserId, "systemuserid", domainUser!.Id.ToString(),
+        adminToken, ct);
+
+    if(logger.IsEnabled(LogLevel.Information))
+        logger.LogInformation(
+            "Registration complete. Keycloak: {KcId} → Domain: {DomainId}",
+            keycloakUserId, domainUser.Id);
+
+    return Results.Ok(new { message = "Account created. Please sign in." });
+
+}).RequireRateLimiting("auth");
 
 app.MapGet("/bff/login", async () => Results.Challenge(
     new AuthenticationProperties
