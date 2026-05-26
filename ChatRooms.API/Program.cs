@@ -19,7 +19,8 @@ builder.Services.AddApplication();
 
 builder.Services
     .AddControllers()
-    .AddApplicationPart(typeof(PresentationAssemblyMarker).Assembly);
+    .AddApplicationPart(typeof(PresentationAssemblyMarker).Assembly)
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 var app = builder.Build();
 

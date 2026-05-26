@@ -11,6 +11,12 @@ public static class DependencyInjection
         {
             client.BaseAddress = new Uri("https+http://chatrooms-bff");
         });
+
+        services.AddHttpClient("bff", client =>
+        {
+            client.BaseAddress = new Uri("https+http://chatrooms-bff");
+        });
+
         services.AddScoped<ToastService>();
         return services;
     }

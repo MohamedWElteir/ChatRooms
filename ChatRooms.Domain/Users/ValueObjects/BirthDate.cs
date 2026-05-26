@@ -9,7 +9,7 @@ public readonly record struct BirthDate
         if (value > DateTime.UtcNow)
             throw new ArgumentException("BirthDate cannot be in the future.", nameof(value));
 
-        Value = value.Date;
+        Value = DateTime.SpecifyKind(value.Date, DateTimeKind.Utc);
     }
 
     /// <summary>

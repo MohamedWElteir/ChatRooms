@@ -2,6 +2,7 @@
 @layout LandingLayout
 @rendermode InteractiveServer
 @inject NavigationManager Nav
+@inject IConfiguration Config
 
 <div class="lp">
 
@@ -22,7 +23,7 @@
                 restore, and cap capacity — not just send messages.
             </p>
             <div class="lp-actions">
-                <button class="lp-btn-primary" @onclick="SignIn">Get started</button>
+                <button class="lp-btn-primary" @onclick="@(() => Nav.NavigateTo("/register"))">Get started</button>
                 <button class="lp-btn-text" @onclick="@(() => Nav.NavigateTo("/rooms"))">
                     Browse rooms →
                 </button>
@@ -116,7 +117,19 @@
 </div>
 
 @code {
-    private string BffUrl => "http://localhost:5031";
+    private string BffUrl
+    {
+        get
+        {
+            var cfg = Config["BffUrl"];
+            if (!string.IsNullOrEmpty(cfg)) return cfg;
+
+            var aspire = Config["services:chatrooms-bff:http:0"];
+            if (!string.IsNullOrEmpty(aspire)) return aspire;
+
+            return "http://localhost:5031";
+        }
+    }
 
     protected override void OnInitialized()
     {

@@ -1,0 +1,27 @@
+{
+  "model": "claude-sonnet-4-6",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "dotnet format --no-restore --verbosity quiet 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '$CLAUDE_TOOL_INPUT' | grep -qiE 'DROP TABLE|TRUNCATE|DELETE FROM [a-z]+ WHERE 1|DROP DATABASE|rm -rf /' && echo '{\"block\":true,\"message\":\"Destructive command blocked. Confirm explicitly before running.\"}' || true"
+          }
+        ]
+      }
+    ]
+  }
+}
