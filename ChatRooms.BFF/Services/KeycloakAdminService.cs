@@ -20,9 +20,9 @@ public sealed class KeycloakAdminService(
             username = request.Name,
             email = request.Email,
             firstName = request.Name,
-            lastName = "",
+            lastName = request.Name,
             enabled = true,
-            emailVerified = false,
+            emailVerified = true,
             credentials = new[]
             {
             new { type = "password", value = request.Password, temporary = false }

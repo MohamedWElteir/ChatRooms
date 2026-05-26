@@ -5,6 +5,7 @@
   "resetPasswordAllowed": true,
   "loginWithEmailAllowed": true,
   "rememberMe": true,
+  "requiredActions": [],
 
   "bruteForceProtected": true,
   "permanentLockout": false,

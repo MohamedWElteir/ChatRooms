@@ -2,6 +2,7 @@
 @layout LandingLayout
 @rendermode InteractiveServer
 @inject NavigationManager Nav
+@inject IConfiguration Config
 
 <div class="lp">
 
@@ -116,7 +117,19 @@
 </div>
 
 @code {
-    private string BffUrl => "http://localhost:5031";
+    private string BffUrl
+    {
+        get
+        {
+            var cfg = Config["BffUrl"];
+            if (!string.IsNullOrEmpty(cfg)) return cfg;
+
+            var aspire = Config["services:chatrooms-bff:http:0"];
+            if (!string.IsNullOrEmpty(aspire)) return aspire;
+
+            return "http://localhost:5031";
+        }
+    }
 
     protected override void OnInitialized()
     {

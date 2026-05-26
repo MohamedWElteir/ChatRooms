@@ -4,6 +4,7 @@
 @inject IConfiguration Config
 @inject IRoomApiClient ApiClient
 @inject IHttpClientFactory HttpClientFactory
+@inject ILogger<Register> Logger
 
 <PageTitle>Create account · ChatRooms</PageTitle>
 
@@ -143,7 +144,19 @@
 
     private bool IsLoading = false;
 
-    private string BffUrl => Config["BffUrl"] ?? "http://localhost:5031";
+    private string BffUrl
+    {
+        get
+        {
+            var cfg = Config["BffUrl"];
+            if (!string.IsNullOrEmpty(cfg)) return cfg;
+
+            var aspire = Config["services:chatrooms-bff:http:0"];
+            if (!string.IsNullOrEmpty(aspire)) return aspire;
+
+            return "http://localhost:5031";
+        }
+    }
 
     private string[] StepTitles = ["Create your account", "Secure your account", "A bit about you"];
     private string[] StepSubs =
@@ -201,7 +214,7 @@
         try
         {
             var response = await Http.PostAsJsonAsync(
-                $"{BffUrl}/bff/register",
+                "bff/register",
                 new
                 {
                     Name,
@@ -217,14 +230,33 @@
             }
             else
             {
-                var problem = await response.Content
-                    .ReadFromJsonAsync<ProblemDetails>();
-                ServerError = problem?.Detail ?? "Something went wrong. Please try again.";
+                var body = await response.Content.ReadAsStringAsync();
+                ServerError = (int)response.StatusCode switch
+                {
+                    >= 500 => "Our servers are having trouble. Please try again in a moment.",
+                    409 => "An account with this email already exists.",
+                    400 => "Please check your information and try again.",
+                    _ => $"Unexpected error ({response.StatusCode}). Please try again."
+                };
+                Logger.LogWarning(
+                    "Registration failed: {Status} {Body}", response.StatusCode, body);
             }
         }
-        catch
+        catch (HttpRequestException ex)
         {
-            ServerError = "Could not connect. Please check your connection and try again.";
+            Logger.LogError(ex, "Registration connection failed");
+            ServerError = "Could not reach the registration service. " +
+                "Please make sure the application is running and try again.";
+        }
+        catch (TaskCanceledException)
+        {
+            Logger.LogWarning("Registration request timed out");
+            ServerError = "The request took too long. Please check your connection and try again.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Registration failed unexpectedly");
+            ServerError = "Something went wrong. Please try again.";
         }
         finally
         {

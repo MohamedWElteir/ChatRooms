@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# opencode
+.opencode/settings.local.json
+AGENTS.local.md

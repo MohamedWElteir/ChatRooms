@@ -140,47 +140,83 @@ app.MapPost("/bff/register", async (
     ILogger<Program> logger,
     CancellationToken ct) =>
 {
-
-    var adminToken = await tokenService.GetServiceAccountTokenAsync(ct);
-
-    var keycloakUserId = await keycloakAdmin.CreateUserAsync(
-        request, adminToken, ct);
-
-
-    using var apiHttp = httpClientFactory.CreateClient("chatrooms-api");
-    var apiResponse = await apiHttp.PostAsJsonAsync("/api/users/register",
-        new
-        {
-            request.Name,
-            request.Email,
-            request.Password,
-            request.Gender,
-            request.BirthDate
-        }, ct);
-
-    if (!apiResponse.IsSuccessStatusCode)
+    try
     {
-        await keycloakAdmin.DeleteUserAsync(keycloakUserId, adminToken, ct);
+        logger.LogInformation("Registration started: {Name} <{Email}>", request.Name, request.Email);
 
+        var adminToken = await tokenService.GetServiceAccountTokenAsync(ct);
+        logger.LogDebug("Keycloak admin token acquired");
+
+        var keycloakUserId = await keycloakAdmin.CreateUserAsync(
+            request, adminToken, ct);
+        logger.LogInformation("Keycloak user created: {KcId}", keycloakUserId);
+
+        using var apiHttp = httpClientFactory.CreateClient("chatrooms-api");
+        var apiResponse = await apiHttp.PostAsJsonAsync("/api/users",
+            new
+            {
+                request.Name,
+                request.Email,
+                request.Gender,
+                request.BirthDate
+            }, ct);
+
+        if (!apiResponse.IsSuccessStatusCode)
+        {
+            var apiError = await apiResponse.Content.ReadAsStringAsync(ct);
+            logger.LogError(
+                "API user creation failed, rolling back Keycloak user. API: {Status} {Error}",
+                apiResponse.StatusCode, apiError);
+
+            await keycloakAdmin.DeleteUserAsync(keycloakUserId, adminToken, ct);
+            logger.LogInformation("Keycloak user rolled back: {KcId}", keycloakUserId);
+
+            return apiResponse.StatusCode switch
+            {
+                System.Net.HttpStatusCode.Conflict =>
+                    Results.Problem(detail: "This email is already registered.", statusCode: StatusCodes.Status409Conflict),
+                System.Net.HttpStatusCode.BadRequest =>
+                    Results.Problem(detail: "Invalid user information.", statusCode: StatusCodes.Status400BadRequest),
+                _ => Results.Problem(
+                    detail: "Failed to create user account. Please try again.",
+                    statusCode: StatusCodes.Status502BadGateway)
+            };
+        }
+
+        var domainUser = await apiResponse.Content
+            .ReadFromJsonAsync<UserDto>(ct);
+
+        await keycloakAdmin.SetUserAttributeAsync(
+            keycloakUserId, "systemuserid", domainUser!.Id.ToString(),
+            adminToken, ct);
+        logger.LogDebug("Keycloak user attribute set: systemuserid={Id}", domainUser.Id);
+
+        logger.LogInformation(
+            "Registration complete: {Name} <{Email}> → Kc:{KcId} Sys:{DomainId}",
+            request.Name, request.Email, keycloakUserId, domainUser.Id);
+
+        return Results.Ok(new { message = "Account created. Please sign in." });
+    }
+    catch (InvalidOperationException ex)
+    {
+        logger.LogWarning("Registration rejected: {Message}", ex.Message);
+        return Results.Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
+    }
+    catch (HttpRequestException ex)
+    {
+        logger.LogError(ex, "Registration failed due to upstream service error");
         return Results.Problem(
-            detail: "Failed to create user account.",
+            detail: "A required service is not available. Please try again later.",
+            statusCode: StatusCodes.Status502BadGateway);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Registration failed unexpectedly for {Name} <{Email}>",
+            request.Name, request.Email);
+        return Results.Problem(
+            detail: "Something went wrong. Please try again.",
             statusCode: StatusCodes.Status500InternalServerError);
     }
-
-    var domainUser = await apiResponse.Content
-        .ReadFromJsonAsync<UserDto>(ct);
-
-    await keycloakAdmin.SetUserAttributeAsync(
-        keycloakUserId, "systemuserid", domainUser!.Id.ToString(),
-        adminToken, ct);
-
-    if (logger.IsEnabled(LogLevel.Information))
-        logger.LogInformation(
-            "Registration complete. Keycloak: {KcId} → Domain: {DomainId}",
-            keycloakUserId, domainUser.Id);
-
-    return Results.Ok(new { message = "Account created. Please sign in." });
-
 }).RequireRateLimiting("auth");
 
 app.MapGet("/bff/login", async () => Results.Challenge(
