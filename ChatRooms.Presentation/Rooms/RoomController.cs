@@ -2,6 +2,7 @@
 using ChatRooms.Application.Rooms.Commands.CreateRoom;
 using ChatRooms.Application.Rooms.Commands.DeleteRoom;
 using ChatRooms.Application.Rooms.Commands.RenameRoom;
+using ChatRooms.Application.Rooms.Queries;
 using ChatRooms.Application.Rooms.Queries.GetRoomByCode;
 using ChatRooms.Application.Rooms.Queries.GetRoomById;
 using ChatRooms.Domain.Rooms.ValueObjects;
@@ -16,9 +17,17 @@ namespace ChatRooms.Presentation.Rooms;
 
 [ApiController]
 [Route("api/rooms")]
-public sealed class RoomController(ISender sender) : ControllerBase
+public sealed class RoomController(ISender sender, IRoomQuery roomQuery) : ControllerBase
 {
-    [HttpPost("create")]
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<RoomListItem>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    {
+        var rooms = await roomQuery.GetAllAsync(cancellationToken);
+        return Ok(rooms);
+    }
+
+    [HttpPost]
     [ProducesResponseType(typeof(RoomDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]

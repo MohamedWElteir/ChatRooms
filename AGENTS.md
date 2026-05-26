@@ -68,6 +68,20 @@ ChatRooms.SharedKernel/  — Future shared kernel (currently empty)
 - No EF Core DbContext references in Domain or Application layers
 - No domain entities serialized as API response models — use DTOs
 
+## Obsidian Vault
+
+This project has an Obsidian vault at `C:\Users\dell\obsidian\ChatRooms` for persistent knowledge.
+
+**At the end of every session (and periodically during long sessions), save to the vault:**
+
+1. **`sessions/YYYY-MM-DD-HHmm.md`** — A dated session note summarizing what was done, key decisions, files modified, and next steps. Use blockquote format for the user's questions/conversation.
+
+2. **`bugs/YYYY-MM-DD-title.md`** — When a bug is identified or discussed, create or update a bug entry with severity, reproduction steps, and fix notes. Use the frontmatter format: `status`, `severity`, `date`, `tags: [bug]`.
+
+3. **`decisions/YYYY-MM-DD-title.md`** — When an architectural decision is made, create an ADR-style entry with `status`, `date`, `tags: [decision]`, followed by Context/Decision/Consequences/Alternatives sections.
+
+Also update the index files (`bugs/readme.md`, `decisions/readme.md`) with new bullet-point entries linking to the new notes.
+
 ## Known Gotchas
 - `ChatRooms.SharedKernel` exists but is empty — likely placeholder for future extraction
 - Migrations target both PostgreSQL (write) and MongoDB (read) — two separate DB concerns

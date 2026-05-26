@@ -219,20 +219,25 @@ app.MapPost("/bff/register", async (
     }
 }).RequireRateLimiting("auth");
 
-app.MapGet("/bff/login", async () => Results.Challenge(
-    new AuthenticationProperties
-    {
-        RedirectUri = "/rooms",
-        IsPersistent = true
-    },
-    [OpenIdConnectDefaults.AuthenticationScheme]))
-    .RequireRateLimiting("auth");
+app.MapGet("/bff/login", async (IConfiguration config) =>
+{
+    var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
+    return Results.Challenge(
+        new AuthenticationProperties
+        {
+            RedirectUri = $"{blazorUrl}/rooms",
+            IsPersistent = true
+        },
+        [OpenIdConnectDefaults.AuthenticationScheme]);
+}).RequireRateLimiting("auth");
 
 app.MapGet("/bff/logout", async ctx =>
 {
+    var config = ctx.RequestServices.GetRequiredService<IConfiguration>();
+    var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
     await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     await ctx.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
-        new AuthenticationProperties { RedirectUri = "/" });
+        new AuthenticationProperties { RedirectUri = $"{blazorUrl}/" });
 }).RequireAuthorization();
 
 app.MapReverseProxy()
