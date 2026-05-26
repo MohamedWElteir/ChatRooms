@@ -26,6 +26,8 @@
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />
     <Project Path="ChatRooms.Domain.Tests/ChatRooms.Domain.Tests.csproj" />
     <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj" Id="acebb44a-ab72-46ba-8861-e1cd52119b9e" />
+    <Project Path="ChatRooms.Presentation.Tests/ChatRooms.Presentation.Tests.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
-  <Project Path="ChatRooms.Presentation.Tests/ChatRooms.Presentation.Tests.csproj" />
 </Solution>
