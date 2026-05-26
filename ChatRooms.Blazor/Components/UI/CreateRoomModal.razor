@@ -1,0 +1,81 @@
+<Modal @bind-Visible="_show" Title="New room">
+    <ChildContent>
+        <AppInput Label="Room name"
+                  Placeholder="e.g. General Chat"
+                  Value="@_name"
+                  ValueChanged="@(v => { _name = v; _error = null; })"
+                  ErrorMessage="@_nameError" />
+
+        <AppInput Label="Max participants"
+                  Type="number"
+                  Placeholder="e.g. 100"
+                  Value="@_capacity"
+                  ValueChanged="@(v => { _capacity = v; _error = null; })"
+                  ErrorMessage="@_capacityError" />
+
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="cr-error">@_error</div>
+        }
+    </ChildContent>
+    <Footer>
+        <AppButton Variant="secondary" Size="sm" OnClick="@(() => _show = false)">Cancel</AppButton>
+        <AppButton Variant="primary" Size="sm" Loading="@_busy" OnClick="Create">Create</AppButton>
+    </Footer>
+</Modal>
+
+@code {
+    [Inject] private IRoomApiClient ApiClient { get; set; } = default!;
+
+    private bool _show;
+    private string _name = "";
+    private string _capacity = "10";
+    private string? _nameError;
+    private string? _capacityError;
+    private string? _error;
+    private bool _busy;
+
+    [Parameter] public EventCallback OnCreated { get; set; }
+
+    public void Open()
+    {
+        _name = "";
+        _capacity = "10";
+        _nameError = null;
+        _capacityError = null;
+        _error = null;
+        _show = true;
+        StateHasChanged();
+    }
+
+    private async Task Create()
+    {
+        _nameError = string.IsNullOrWhiteSpace(_name) ? "Name is required" : null;
+        _capacityError = !int.TryParse(_capacity, out var cap) || cap < 2 ? "Minimum 2 participants" : null;
+
+        if (_nameError is not null || _capacityError is not null)
+            return;
+
+        _busy = true;
+        _error = null;
+
+        try
+        {
+            await ApiClient.CreateAsync(new ChatRooms.Blazor.HttpClients.CreateRoomRequest(_name.Trim(), cap));
+            _show = false;
+            await OnCreated.InvokeAsync();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Found)
+        {
+            _error = "You need to sign in to create a room.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to create room: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

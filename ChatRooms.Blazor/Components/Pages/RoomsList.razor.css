@@ -1,0 +1,144 @@
+.rl-page {
+    --cr-primary: #111;
+    --cr-primary-hover: #333;
+    --cr-surface: #fff;
+    --cr-surface-3: #F0EDE8;
+    --cr-text: #111;
+    --cr-border-strong: #CCC;
+
+    min-height: 100vh;
+    background: #F7F4EF;
+    color: #111;
+    font-family: 'Geist', 'Inter', system-ui, sans-serif;
+}
+
+.rl-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 48px;
+    border-bottom: 1px solid #E5E0D8;
+}
+
+.rl-brand {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: #111;
+}
+
+.rl-btn-back {
+    font-size: 13px;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: color 0.15s;
+}
+
+    .rl-btn-back:hover {
+        color: #111;
+    }
+
+.rl-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.rl-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.rl-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111;
+    letter-spacing: -0.03em;
+    margin: 0;
+}
+
+.rl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.rl-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #E5E0D8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+    .rl-row:hover {
+        border-color: #CCC;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+.rl-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rl-row-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111;
+}
+
+.rl-row-code {
+    font-size: 12px;
+    color: #AAA;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+}
+
+.rl-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rl-cap {
+    font-size: 13px;
+    color: #888;
+}
+
+.rl-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+}
+
+.rl-empty-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #111;
+    margin-bottom: 6px;
+}
+
+.rl-empty-text {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 16px;
+}
+
+.rl-error {
+    text-align: center;
+    padding: 40px 20px;
+    color: #DC2626;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+}
