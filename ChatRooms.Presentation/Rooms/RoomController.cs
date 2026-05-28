@@ -5,7 +5,6 @@ using ChatRooms.Application.Rooms.Commands.RenameRoom;
 using ChatRooms.Application.Rooms.Queries.GetRoomByCode;
 using ChatRooms.Application.Rooms.Queries.GetRoomById;
 using ChatRooms.Domain.Rooms.ValueObjects;
-using ChatRooms.Domain.Shared;
 using ChatRooms.DTOs.Rooms;
 using ChatRooms.Presentation.Common;
 using ChatRooms.Presentation.Rooms.Requests;

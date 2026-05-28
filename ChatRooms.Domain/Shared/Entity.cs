@@ -33,6 +33,6 @@ public abstract class Entity<TId> : IAuditable, IEquatable<Entity<TId>> where TI
     }
 
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
-    public bool IsTransient() => EqualityComparer<TId>.Default.Equals(Id, default);
+    protected bool IsTransient() => EqualityComparer<TId>.Default.Equals(Id, default);
 
 }

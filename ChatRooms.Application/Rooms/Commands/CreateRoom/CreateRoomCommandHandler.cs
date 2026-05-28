@@ -5,7 +5,6 @@ using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
-using ChatRooms.Domain.Shared.Errors;
 using ChatRooms.DTOs.Rooms;
 
 namespace ChatRooms.Application.Rooms.Commands.CreateRoom;

@@ -1,6 +1,5 @@
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Enums;
-using ChatRooms.Domain.Shared.Errors;
 using ChatRooms.Domain.Tests.Mocks;
 using ChatRooms.Domain.Users;
 using ChatRooms.Domain.Users.Enums;

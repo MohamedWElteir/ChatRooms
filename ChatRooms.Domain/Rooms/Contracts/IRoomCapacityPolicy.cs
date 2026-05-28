@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ChatRooms.Domain.Rooms.Contracts;
+﻿namespace ChatRooms.Domain.Rooms.Contracts;
 
 public interface IRoomCapacityPolicy
 {

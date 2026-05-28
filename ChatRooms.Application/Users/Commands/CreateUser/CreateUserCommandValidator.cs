@@ -1,4 +1,3 @@
-using ChatRooms.Domain.Users.ValueObjects;
 using FluentValidation;
 
 namespace ChatRooms.Application.Users.Commands.CreateUser;

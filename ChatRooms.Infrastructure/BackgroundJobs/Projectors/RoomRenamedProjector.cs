@@ -33,7 +33,7 @@ public sealed class RoomRenamedProjector(
         if (result.MatchedCount == 0)
         {
             var exists = await readDbContext.Rooms
-                .Find(r => r.Id == (Guid)domainEvent.RoomId)
+                .Find(r => r.Id == domainEvent.RoomId)
                 .AnyAsync(cancellationToken);
 
             if (!exists)

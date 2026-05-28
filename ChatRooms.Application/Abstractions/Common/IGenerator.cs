@@ -1,6 +1,6 @@
 ﻿namespace ChatRooms.Application.Abstractions.Common;
 
-public interface IGenerator<T> where T : struct
+public interface IGenerator<out T> where T : struct
 {
     T Generate();
 }
