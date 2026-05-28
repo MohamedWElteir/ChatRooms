@@ -1,63 +1,93 @@
-// Set up event handlers
 const reconnectModal = document.getElementById("components-reconnect-modal");
-reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
+const retryButton    = document.getElementById("components-reconnect-button");
+const resumeButton   = document.getElementById("components-resume-button");
+const secondsSpan    = document.getElementById("components-seconds-to-next-attempt");
 
-const retryButton = document.getElementById("components-reconnect-button");
-retryButton.addEventListener("click", retry);
+if (!reconnectModal || !retryButton || !resumeButton) {
+    console.error("[ReconnectModal] Required DOM elements are missing. Reconnect UI will not function.");
+} else {
+    reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
+    retryButton.addEventListener("click", retry);
+    resumeButton.addEventListener("click", resume);
+}
 
-const resumeButton = document.getElementById("components-resume-button");
-resumeButton.addEventListener("click", resume);
+let retryOnVisibility = false;
 
 function handleReconnectStateChanged(event) {
-    if (event.detail.state === "show") {
-        reconnectModal.showModal();
-    } else if (event.detail.state === "hide") {
-        reconnectModal.close();
-    } else if (event.detail.state === "failed") {
-        document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
-    } else if (event.detail.state === "rejected") {
-        location.reload();
+    const state = event.detail.state;
+
+    if (secondsSpan && event.detail.secondsToNextAttempt != null) {
+        secondsSpan.textContent = event.detail.secondsToNextAttempt;
+    }
+
+    switch (state) {
+        case "show":
+            reconnectModal.showModal();
+            break;
+        case "hide":
+            reconnectModal.close();
+            retryOnVisibility = false;
+            break;
+        case "failed":
+            retryOnVisibility = true;
+            break;
+        case "retrying":
+            retryOnVisibility = false;
+            break;
+        case "rejected":
+            location.reload();
+            break;
     }
 }
 
 async function retry() {
-    document.removeEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+    retryOnVisibility = false;
+    setButtonsDisabled(true);
 
     try {
-        // Reconnect will asynchronously return:
-        // - true to mean success
-        // - false to mean we reached the server, but it rejected the connection (e.g., unknown circuit ID)
-        // - exception to mean we didn't reach the server (this can be sync or async)
         const successful = await Blazor.reconnect();
-        if (!successful) {
-            // We have been able to reach the server, but the circuit is no longer available.
-            // We'll reload the page so the user can continue using the app as quickly as possible.
-            const resumeSuccessful = await Blazor.resumeCircuit();
-            if (!resumeSuccessful) {
-                location.reload();
-            } else {
-                reconnectModal.close();
-            }
+
+        if (successful) {
+            reconnectModal.close();
+        } else {
+            // The server is reachable but the circuit is gone (rejected).
+            // Attempting resumeCircuit() here is incorrect — resume is for *paused* circuits,
+            // not rejected ones. Reload is the only correct recovery path.
+             location.reload();
+             return;
         }
-    } catch (err) {
-        // We got an exception, server is currently unavailable
-        document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+    } catch {
+        retryOnVisibility = true;
+    } finally {
+        setButtonsDisabled(false);
     }
 }
 
 async function resume() {
+    setButtonsDisabled(true);
+
     try {
         const successful = await Blazor.resumeCircuit();
         if (!successful) {
             location.reload();
+        } else {
+            reconnectModal.close();
         }
     } catch {
-        reconnectModal.classList.replace("components-reconnect-paused", "components-reconnect-resume-failed");
+        reconnectModal.classList.remove("components-reconnect-paused");
+        reconnectModal.classList.add("components-reconnect-resume-failed");
+    } finally {
+        setButtonsDisabled(false);
     }
 }
 
-async function retryWhenDocumentBecomesVisible() {
-    if (document.visibilityState === "visible") {
-        await retry();
+document.addEventListener("visibilitychange", () => {
+    if (retryOnVisibility && document.visibilityState === "visible") {
+        retry();
     }
+});
+
+function setButtonsDisabled(disabled) {
+    if (retryButton)  retryButton.disabled  = disabled;
+    if (resumeButton) resumeButton.disabled = disabled;
 }
