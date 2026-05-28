@@ -13,9 +13,9 @@ public sealed class Room : AggregateRoot<RoomId>
     public Capacity Capacity { get; private set; }
     public RoomCode Code { get; private set; }
     public RoomStatus Status { get; private set; }
-    public int CurrentParticipantsCount { get; private set; } = 0;
+    public int CurrentParticipantsCount { get; private set; }
 
-    private Room() : base() { }
+    private Room() { }
     public override void Apply(IDomainEvent @event)
     {
         switch (@event)

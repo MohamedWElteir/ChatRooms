@@ -2,9 +2,4 @@
 
 namespace ChatRooms.Domain.Tests.Mocks;
 
-internal class TestEntity : Entity<Guid>
-{
-    public TestEntity()
-    {
-    }
-}
+internal class TestEntity : Entity<Guid>;

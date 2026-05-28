@@ -125,9 +125,7 @@
             if (!string.IsNullOrEmpty(cfg)) return cfg;
 
             var aspire = Config["services:chatrooms-bff:http:0"];
-            if (!string.IsNullOrEmpty(aspire)) return aspire;
-
-            return "http://localhost:5031";
+            return !string.IsNullOrEmpty(aspire) ? aspire : "http://localhost:5031";
         }
     }
 

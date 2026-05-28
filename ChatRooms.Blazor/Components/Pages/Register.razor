@@ -2,7 +2,6 @@
 @layout LandingLayout
 @inject NavigationManager Nav
 @inject IConfiguration Config
-@inject IRoomApiClient ApiClient
 @inject IHttpClientFactory HttpClientFactory
 @inject ILogger<Register> Logger
 
@@ -14,101 +13,103 @@
         <div class="auth-header">
             <p class="auth-brand">ChatRooms</p>
             <div class="auth-steps">
-                <div class="auth-step @(Step >= 0 ? "active" : "") @(Step > 0 ? "done" : "")"></div>
-                <div class="auth-step @(Step >= 1 ? "active" : "") @(Step > 1 ? "done" : "")"></div>
-                <div class="auth-step @(Step >= 2 ? "active" : "")"></div>
+                <div class="auth-step @(_step >= 0 ? "active" : "") @(_step > 0 ? "done" : "")"></div>
+                <div class="auth-step @(_step >= 1 ? "active" : "") @(_step > 1 ? "done" : "")"></div>
+                <div class="auth-step @(_step >= 2 ? "active" : "")"></div>
             </div>
-            <h1 class="auth-title">@StepTitles[Step]</h1>
-            <p class="auth-sub">@StepSubs[Step]</p>
+            <h1 class="auth-title">@_stepTitles[_step]</h1>
+            <p class="auth-sub">@_stepSubs[_step]</p>
         </div>
 
         <div class="auth-body">
-            @if (Step == 0)
+            @switch (_step)
             {
-                <AppInput Label="Display name"
-                          Placeholder="e.g. JaneDoe"
-                          Value="@Name"
-                          ValueChanged="@(v => { Name = v; })"
-                          Hint="No spaces · max 15 characters"
-                          ErrorMessage="@NameError" />
+                case 0:
+                    <AppInput Label="Display name"
+                              Placeholder="e.g. JaneDoe"
+                              Value="@_name"
+                              ValueChanged="@(v => { _name = v; })"
+                              Hint="No spaces · max 15 characters"
+                              ErrorMessage="@_nameError" />
 
-                <AppInput Label="Email address"
-                          Type="email"
-                          Placeholder="you@example.com"
-                          Value="@Email"
-                          ValueChanged="@(v => { Email = v; })"
-                          ErrorMessage="@EmailError" />
-            }
-            else if (Step == 1)
-            {
-                <AppInput Label="Password"
-                          Type="password"
-                          Placeholder="Min. 8 characters"
-                          Value="@Password"
-                          ValueChanged="@(v => { Password = v; ValidatePassword(); })" />
+                    <AppInput Label="Email address"
+                              Type="email"
+                              Placeholder="you@example.com"
+                              Value="@_email"
+                              ValueChanged="@(v => { _email = v; })"
+                              ErrorMessage="@_emailError" />
+                    break;
+                case 1:
+                {
+                    <AppInput Label="Password"
+                              Type="password"
+                              Placeholder="Min. 8 characters"
+                              Value="@_password"
+                              ValueChanged="@(v => { _password = v; ValidatePassword(); })" />
 
-                <div class="pw-strength">
-                    <div class="pw-strength-bars">
-                        @for (int i = 0; i < 4; i++)
-                        {
-                            var filled = i < PasswordScore;
-                            var cls = filled ? $"pw-bar pw-bar--{PasswordClass}" : "pw-bar";
-                            <div class="@cls"></div>
-                        }
+                    <div class="pw-strength">
+                        <div class="pw-strength-bars">
+                            @for (int i = 0; i < 4; i++)
+                            {
+                                var filled = i < _passwordScore;
+                                var cls = filled ? $"pw-bar pw-bar--{_passwordClass}" : "pw-bar";
+                                <div class="@cls"></div>
+                            }
+                        </div>
+                        <span class="pw-strength-label">@_passwordLabel</span>
                     </div>
-                    <span class="pw-strength-label">@PasswordLabel</span>
-                </div>
 
-                <AppInput Label="Confirm password"
-                          Type="password"
-                          Placeholder="Repeat your password"
-                          Value="@PasswordConfirm"
-                          ValueChanged="@(v => { PasswordConfirm = v; })"
-                          ErrorMessage="@PasswordError" />
-            }
-            else if (Step == 2)
-            {
-                <div class="app-field">
-                    <label class="app-field__label">Gender</label>
-                    <div class="gender-grid">
-                        <button class="gender-opt @(Gender == "Male" ? "gender-opt--selected" : "")"
-                                type="button" @onclick="@(() => Gender = "Male")">
-                            Male
-                        </button>
-                        <button class="gender-opt @(Gender == "Female" ? "gender-opt--selected" : "")"
-                                type="button" @onclick="@(() => Gender = "Female")">
-                            Female
-                        </button>
+                    <AppInput Label="Confirm password"
+                              Type="password"
+                              Placeholder="Repeat your password"
+                              Value="@_passwordConfirm"
+                              ValueChanged="@(v => { _passwordConfirm = v; })"
+                              ErrorMessage="@_passwordError" />
+                    break;
+                }
+                case 2:
+                    <div class="app-field">
+                        <label class="app-field__label">Gender</label>
+                        <div class="gender-grid">
+                            <button class="gender-opt @(_gender == "Male" ? "gender-opt--selected" : "")"
+                                    type="button" @onclick="@(() => _gender = "Male")">
+                                Male
+                            </button>
+                            <button class="gender-opt @(_gender == "Female" ? "gender-opt--selected" : "")"
+                                    type="button" @onclick="@(() => _gender = "Female")">
+                                Female
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <AppInput Label="Date of birth"
-                          Type="date"
-                          Value="@BirthDate"
-                          ValueChanged="@(v => { BirthDate = v; })"
-                          Hint="You must be at least 13 years old" />
+                    <AppInput Label="Date of birth"
+                              Type="date"
+                              Value="@_birthDate"
+                              ValueChanged="@(v => { _birthDate = v; })"
+                              Hint="You must be at least 13 years old" />
+                    break;
             }
 
-            @if (!string.IsNullOrEmpty(ServerError))
+            @if (!string.IsNullOrEmpty(_serverError))
             {
-                <div class="auth-error">@ServerError</div>
+                <div class="auth-error">@_serverError</div>
             }
         </div>
 
         <div class="auth-footer">
             <AppButton Variant="primary"
                        FullWidth="true"
-                       Loading="@IsLoading"
+                       Loading="@_isLoading"
                        Disabled="@(!IsStepValid())"
                        OnClick="HandleNext">
-                @(Step == 2 ? "Create account" : "Continue")
+                @(_step == 2 ? "Create account" : "Continue")
             </AppButton>
 
-            @if (Step > 0)
+            @if (_step > 0)
             {
                 <AppButton Variant="secondary"
                            FullWidth="true"
-                           OnClick="@(() => Step--)">
+                           OnClick="@(() => _step--)">
                     Back
                 </AppButton>
             }
@@ -124,25 +125,25 @@
 </div>
 
 @code {
-    private int Step = 0;
+    private int _step;
 
-    private string Name = "";
-    private string Email = "";
-    private string Password = "";
-    private string PasswordConfirm = "";
-    private string Gender = "";
-    private string BirthDate = "";
+    private string _name = "";
+    private string _email = "";
+    private string _password = "";
+    private string _passwordConfirm = "";
+    private string _gender = "";
+    private string _birthDate = "";
 
-    private string NameError = "";
-    private string EmailError = "";
-    private string PasswordError = "";
-    private string ServerError = "";
+    private readonly string _nameError = "";
+    private readonly string _emailError = "";
+    private readonly string _passwordError = "";
+    private string _serverError = "";
 
-    private int PasswordScore = 0;
-    private string PasswordClass = "";
-    private string PasswordLabel = "Enter a password";
+    private int _passwordScore;
+    private string _passwordClass = "";
+    private string _passwordLabel = "Enter a password";
 
-    private bool IsLoading = false;
+    private bool _isLoading;
 
     private string BffUrl
     {
@@ -152,49 +153,47 @@
             if (!string.IsNullOrEmpty(cfg)) return cfg;
 
             var aspire = Config["services:chatrooms-bff:http:0"];
-            if (!string.IsNullOrEmpty(aspire)) return aspire;
-
-            return "http://localhost:5031";
+            return !string.IsNullOrEmpty(aspire) ? aspire : "http://localhost:5031";
         }
     }
 
-    private string[] StepTitles = ["Create your account", "Secure your account", "A bit about you"];
-    private string[] StepSubs =
+    private readonly string[] _stepTitles = ["Create your account", "Secure your account", "A bit about you"];
+    private readonly string[] _stepSubs =
     [
         "Start with your name and email.",
         "Choose a strong password.",
         "Almost done — just a couple more details."
     ];
     private HttpClient Http => HttpClientFactory.CreateClient("bff");
-    private bool IsStepValid() => Step switch
+    private bool IsStepValid() => _step switch
     {
-        0 => Name.Length is >= 2 and <= 15
-             && !Name.Contains(' ')
-             && Email.Contains('@') && Email.Contains('.'),
+        0 => _name.Length is >= 2 and <= 15
+             && !_name.Contains(' ')
+             && _email.Contains('@') && _email.Contains('.'),
 
-        1 => Password.Length >= 8
-             && Password == PasswordConfirm
-             && PasswordScore >= 2,
+        1 => _password.Length >= 8
+             && _password == _passwordConfirm
+             && _passwordScore >= 2,
 
-        2 => !string.IsNullOrEmpty(Gender)
-             && !string.IsNullOrEmpty(BirthDate)
-             && DateTime.TryParse(BirthDate, out var dob)
-             && (DateTime.UtcNow.Year - dob.Year) >= 13,
+        2 => !string.IsNullOrEmpty(_gender)
+             && !string.IsNullOrEmpty(_birthDate)
+             && DateTime.TryParse(_birthDate, out var dob)
+             && DateTime.UtcNow.Year - dob.Year >= 13,
 
         _ => false
     };
 
     private void ValidatePassword()
     {
-        var p = Password;
+        var p = _password;
         var score = 0;
         if (p.Length >= 8) score++;
         if (p.Any(char.IsUpper) && p.Any(char.IsLower)) score++;
         if (p.Any(char.IsDigit)) score++;
         if (p.Any(c => !char.IsLetterOrDigit(c))) score++;
 
-        PasswordScore = score;
-        (PasswordClass, PasswordLabel) = score switch
+        _passwordScore = score;
+        (_passwordClass, _passwordLabel) = score switch
         {
             1 => ("weak", "Weak"),
             2 => ("fair", "Fair"),
@@ -206,10 +205,10 @@
 
     private async Task HandleNext()
     {
-        if (Step < 2) { Step++; return; }
+        if (_step < 2) { _step++; return; }
 
-        IsLoading = true;
-        ServerError = "";
+        _isLoading = true;
+        _serverError = "";
 
         try
         {
@@ -217,11 +216,11 @@
                 "bff/register",
                 new
                 {
-                    Name,
-                    Email,
-                    Password,
-                    Gender,
-                    BirthDate = DateTime.Parse(BirthDate)
+                    Name = _name,
+                    Email = _email,
+                    Password = _password,
+                    Gender = _gender,
+                    BirthDate = DateTime.Parse(_birthDate)
                 });
 
             if (response.IsSuccessStatusCode)
@@ -231,7 +230,7 @@
             else
             {
                 var body = await response.Content.ReadAsStringAsync();
-                ServerError = (int)response.StatusCode switch
+                _serverError = (int)response.StatusCode switch
                 {
                     >= 500 => "Our servers are having trouble. Please try again in a moment.",
                     409 => "An account with this email already exists.",
@@ -245,22 +244,22 @@
         catch (HttpRequestException ex)
         {
             Logger.LogError(ex, "Registration connection failed");
-            ServerError = "Could not reach the registration service. " +
+            _serverError = "Could not reach the registration service. " +
                 "Please make sure the application is running and try again.";
         }
         catch (TaskCanceledException)
         {
             Logger.LogWarning("Registration request timed out");
-            ServerError = "The request took too long. Please check your connection and try again.";
+            _serverError = "The request took too long. Please check your connection and try again.";
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Registration failed unexpectedly");
-            ServerError = "Something went wrong. Please try again.";
+            _serverError = "Something went wrong. Please try again.";
         }
         finally
         {
-            IsLoading = false;
+            _isLoading = false;
         }
     }
 }

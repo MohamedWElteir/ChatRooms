@@ -16,15 +16,15 @@ public sealed class User : AggregateRoot<UserId>
     public BirthDate BirthDate { get; private set; }
     public Age Age => BirthDate.CalculateAge();
 
-    private User() : base() { }
+    private User() { }
 
-    public static Result<User> Create(Name name, Email email, Gender gender, BirthDate birthDate, DateTimeUtc OccurredAt)
+    public static Result<User> Create(Name name, Email email, Gender gender, BirthDate birthDate, DateTimeUtc occurredAt)
     {
         var user = new User();
         if (!user.IsTransient())
             return UserErrors.NotTransient;
 
-        user.Raise(new UserCreatedDomainEvent(UserId.New(), name, email, gender, birthDate, OccurredAt));
+        user.Raise(new UserCreatedDomainEvent(UserId.New(), name, email, gender, birthDate, occurredAt));
         return user;
     }
 

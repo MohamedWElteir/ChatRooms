@@ -17,8 +17,8 @@ public readonly partial record struct Email
     public static implicit operator string(Email email) => email.Value;
     private static bool IsValidEmail(string email)
     {
-        if (email.Length > 254) return false; // RFC 5321 max length
-        return GenerateEmailRegex().IsMatch(email);
+        return email.Length <= 254 && // RFC 5321 max length
+               GenerateEmailRegex().IsMatch(email);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]

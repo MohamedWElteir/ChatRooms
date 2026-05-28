@@ -18,7 +18,7 @@ public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUn
         var renameResult = room.Rename(Name.From(command.NewName), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
         if (renameResult.IsFailure)
         {
-            var (_, renameError) = renameResult;
+            (_, Error? renameError) = renameResult;
             return renameError!;
         }
 

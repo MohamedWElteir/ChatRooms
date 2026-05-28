@@ -16,9 +16,7 @@ public sealed class RoomApiClient(HttpClient http) : IRoomApiClient
         response.EnsureSuccessStatusCode();
 
         var room = await response.Content.ReadFromJsonAsync<RoomDto>(cancellationToken);
-        return room is null
-            ? throw new InvalidOperationException("The server returned a successful response but no room payload was provided.")
-            : room;
+        return room ?? throw new InvalidOperationException("The server returned a successful response but no room payload was provided.");
     }
 
     public async Task RenameAsync(Guid id, string newName, CancellationToken cancellationToken = default)

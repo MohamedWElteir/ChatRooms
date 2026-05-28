@@ -11,15 +11,13 @@ public sealed class OutboxMessageFactory(JsonSerializerOptions jsonOptions) : IO
 
         foreach (var aggregate in aggregates)
         {
-            foreach (var domainEvent in aggregate.DomainEvents)
-            {
-                var outboxMessage = OutboxMessage.Create(
-                    type: domainEvent.GetType().Name!,
-                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), jsonOptions),
-                    occurredOn: domainEvent.OccurredAt
-                );
-                messages.Add(outboxMessage);
-            }
+            messages.AddRange(aggregate.DomainEvents
+                .Select(domainEvent => OutboxMessage.Create(
+                    type: domainEvent.GetType().Name,
+                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), jsonOptions), 
+                    occurredOn: domainEvent.OccurredAt)
+                )
+            );
             aggregate.ClearDomainEvents();
         }
 

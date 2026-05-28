@@ -4,7 +4,7 @@
     <Project Path="ChatRooms.ServiceDefaults/ChatRooms.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Shared/">
-    <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj" Id="ca751ecd-ea29-45cf-9f04-ecaa2df0a64c" />
+    <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj"/>
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
@@ -12,12 +12,12 @@
   </Folder>
   <Folder Name="/Src/">
     <Project Path="ChatRooms.API/ChatRooms.API.csproj" />
-    <Project Path="ChatRooms.Application/ChatRooms.Application.csproj" Id="7bf099f5-1b88-44a5-92bc-8f15b89a84cc" />
+    <Project Path="ChatRooms.Application/ChatRooms.Application.csproj"/>
     <Project Path="ChatRooms.BFF/ChatRooms.BFF.csproj" />
     <Project Path="ChatRooms.Blazor/ChatRooms.Blazor.csproj" />
     <Project Path="ChatRooms.Domain/ChatRooms.Domain.csproj" />
-    <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj" Id="f6cf8352-9254-42e1-8b88-dddb42b491e7" />
-    <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj" Id="8104e9aa-4b91-4160-ab8c-dcdfa13b0d72" />
+    <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj"/>
+    <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj"/>
   </Folder>
   <Folder Name="/Src/Setup/">
     <Project Path="ChatRooms.KeycloakSetup/ChatRooms.KeycloakSetup.csproj" />
@@ -25,7 +25,7 @@
   <Folder Name="/Tests/">
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />
     <Project Path="ChatRooms.Domain.Tests/ChatRooms.Domain.Tests.csproj" />
-    <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj" Id="acebb44a-ab72-46ba-8861-e1cd52119b9e" />
+    <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj"/>
     <Project Path="ChatRooms.Presentation.Tests/ChatRooms.Presentation.Tests.csproj" />
   </Folder>
 </Solution>

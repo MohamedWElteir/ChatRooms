@@ -28,23 +28,39 @@ public sealed class DynamicValueObjectJsonConverter<TValueObject, TPrimitive> : 
 
     public override TValueObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.StartObject)
+        switch (reader.TokenType)
         {
-            using var doc = JsonDocument.ParseValue(ref reader);
-            if (doc.RootElement.TryGetProperty("Value", out var element))
+            case JsonTokenType.StartObject:
             {
-                var nestedValue = element.Deserialize<TPrimitive>(options);
-                return nestedValue is not null
-                    ? _createMethod(nestedValue)
-                    : throw new JsonException($"Invalid {typeof(TValueObject).Name} object.");
+                using var doc = JsonDocument.ParseValue(ref reader);
+                if (doc.RootElement.TryGetProperty("Value", out var element))
+                {
+                    var nestedValue = element.Deserialize<TPrimitive>(options);
+                    return nestedValue is not null
+                        ? _createMethod(nestedValue)
+                        : throw new JsonException($"Invalid {typeof(TValueObject).Name} object.");
+                }
+                throw new JsonException($"Missing 'Value' property on {typeof(TValueObject).Name}.");
             }
-            throw new JsonException($"Missing 'Value' property on {typeof(TValueObject).Name}.");
+            case JsonTokenType.None:
+            case JsonTokenType.EndObject:
+            case JsonTokenType.StartArray:
+            case JsonTokenType.EndArray:
+            case JsonTokenType.PropertyName:
+            case JsonTokenType.Comment:
+            case JsonTokenType.String:
+            case JsonTokenType.Number:
+            case JsonTokenType.True:
+            case JsonTokenType.False:
+            case JsonTokenType.Null:
+            default:
+            {
+                var flatValue = JsonSerializer.Deserialize<TPrimitive>(ref reader, options);
+                return flatValue is not null
+                    ? _createMethod(flatValue)
+                    : throw new JsonException($"Invalid {typeof(TValueObject).Name} value.");
+            }
         }
-
-        var flatValue = JsonSerializer.Deserialize<TPrimitive>(ref reader, options);
-        return flatValue is not null
-            ? _createMethod(flatValue)
-            : throw new JsonException($"Invalid {typeof(TValueObject).Name} value.");
     }
 
     public override void Write(Utf8JsonWriter writer, TValueObject value, JsonSerializerOptions options)

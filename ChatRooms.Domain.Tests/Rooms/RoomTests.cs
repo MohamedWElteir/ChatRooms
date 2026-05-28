@@ -4,7 +4,6 @@ using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Enums;
-using ChatRooms.Domain.Shared.Errors;
 using ChatRooms.Domain.Tests.Mocks;
 
 namespace ChatRooms.Domain.Tests.Rooms;
@@ -75,7 +74,7 @@ public sealed class RoomTests
             "",
             "   ",
             new string('A', 51),
-            "1InvalidStart",
+            "1InvalidStart"
         };
         // Act & Assert
         foreach (var invalidName in invalidNames)
@@ -417,7 +416,18 @@ public sealed class RoomTests
         var room = roomResult.Value!;
         var unsupportedEvent = new UnsupportedDomainEvent(DateTimeUtc.FromUtc(DateTime.UtcNow));
         // Act & Assert
-        var exception = Assert.ThrowsAsync<InvalidOperationException>(async () => room.Apply(unsupportedEvent));
+        var exception = Assert.ThrowsAsync<InvalidOperationException>(() =>
+        {
+            try
+            {
+                room.Apply(unsupportedEvent);
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromException(ex);
+            }
+        });
         Assert.Equal($"Event '{unsupportedEvent.GetType().Name}' is not supported by {nameof(Room)}", exception?.Result.Message);
     }
 

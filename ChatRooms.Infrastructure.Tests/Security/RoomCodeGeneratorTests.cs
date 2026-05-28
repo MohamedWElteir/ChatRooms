@@ -4,12 +4,7 @@ namespace ChatRooms.Infrastructure.Tests.Security;
 
 public class RoomCodeGeneratorTests
 {
-    private readonly RoomCodeGenerator _sut;
-
-    public RoomCodeGeneratorTests()
-    {
-        _sut = new RoomCodeGenerator();
-    }
+    private readonly RoomCodeGenerator _sut = new();
 
     [Fact]
     public void Generate_ShouldReturnValidRoomCode()
