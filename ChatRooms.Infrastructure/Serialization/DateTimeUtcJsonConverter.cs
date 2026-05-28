@@ -11,40 +11,40 @@ public sealed class DateTimeUtcJsonConverter : JsonConverter<DateTimeUtc>
         switch (reader.TokenType)
         {
             case JsonTokenType.StartObject:
-            {
-                using var doc = JsonDocument.ParseValue(ref reader);
-                if (doc.RootElement.TryGetProperty("Value", out var v))
                 {
-                    throw new JsonException("Invalid DateTimeUtc object.");
-                }
+                    using var doc = JsonDocument.ParseValue(ref reader);
+                    if (doc.RootElement.TryGetProperty("Value", out var v))
+                    {
+                        throw new JsonException("Invalid DateTimeUtc object.");
+                    }
 
-                if (v.ValueKind == JsonValueKind.String)
+                    if (v.ValueKind == JsonValueKind.String)
+                    {
+                        var dto = DateTimeOffset.Parse(v.GetString()!);
+                        return DateTimeUtc.FromUtc(dto.UtcDateTime);
+                    }
+
+                    if (v.ValueKind == JsonValueKind.Number)
+                    {
+                        var ms = v.GetInt64();
+                        return DateTimeUtc.FromUnixMilliseconds(ms);
+                    }
+
+                    throw new JsonException("Invalid DateTimeUtc object.");
+
+                }
+            case JsonTokenType.String:
                 {
-                    var dto = DateTimeOffset.Parse(v.GetString()!);
+                    var s = reader.GetString();
+                    if (string.IsNullOrWhiteSpace(s)) throw new JsonException("Invalid DateTimeUtc value.");
+                    var dto = DateTimeOffset.Parse(s);
                     return DateTimeUtc.FromUtc(dto.UtcDateTime);
                 }
-
-                if (v.ValueKind == JsonValueKind.Number)
+            case JsonTokenType.Number:
                 {
-                    var ms = v.GetInt64();
+                    var ms = reader.GetInt64();
                     return DateTimeUtc.FromUnixMilliseconds(ms);
                 }
-
-                throw new JsonException("Invalid DateTimeUtc object.");
-
-            }
-            case JsonTokenType.String:
-            {
-                var s = reader.GetString();
-                if (string.IsNullOrWhiteSpace(s)) throw new JsonException("Invalid DateTimeUtc value.");
-                var dto = DateTimeOffset.Parse(s);
-                return DateTimeUtc.FromUtc(dto.UtcDateTime);
-            }
-            case JsonTokenType.Number:
-            {
-                var ms = reader.GetInt64();
-                return DateTimeUtc.FromUnixMilliseconds(ms);
-            }
             case JsonTokenType.None:
             case JsonTokenType.EndObject:
             case JsonTokenType.StartArray:

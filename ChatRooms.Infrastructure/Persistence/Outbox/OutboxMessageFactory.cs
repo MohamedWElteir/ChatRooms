@@ -14,7 +14,7 @@ public sealed class OutboxMessageFactory(JsonSerializerOptions jsonOptions) : IO
             messages.AddRange(aggregate.DomainEvents
                 .Select(domainEvent => OutboxMessage.Create(
                     type: domainEvent.GetType().Name,
-                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), jsonOptions), 
+                    content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), jsonOptions),
                     occurredOn: domainEvent.OccurredAt)
                 )
             );
