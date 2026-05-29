@@ -1,6 +1,8 @@
 using ChatRooms.Blazor;
 using ChatRooms.Blazor.Components;
+using ChatRooms.Blazor.HttpClients;
 using ChatRooms.ServiceDefaults;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddBlazorServices();
+builder.Services.AddScoped<AccessTokenStore>();
+builder.Services.AddTransient<AuthorizationDelegatingHandler>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -26,6 +31,16 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Path.StartsWithSegments("/_blazor"))
+    {
+        var store = context.RequestServices.GetRequiredService<AccessTokenStore>();
+        store.Token = await context.GetTokenAsync("access_token");
+    }
+    await next();
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
