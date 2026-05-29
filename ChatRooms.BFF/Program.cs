@@ -219,17 +219,14 @@ app.MapPost("/bff/register", async (
     }
 }).RequireRateLimiting("auth");
 
-app.MapGet("/bff/login", (IConfiguration config) =>
-{
-    var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
-    return Results.Challenge(
+app.MapGet("/bff/login", () => Results.Challenge(
         new AuthenticationProperties
         {
-            RedirectUri = $"{blazorUrl}/rooms",
+            RedirectUri = "/rooms",
             IsPersistent = true
         },
-        [OpenIdConnectDefaults.AuthenticationScheme]);
-}).RequireRateLimiting("auth");
+        [OpenIdConnectDefaults.AuthenticationScheme]))
+    .RequireRateLimiting("auth");
 
 app.MapGet("/bff/logout", async ctx =>
 {
