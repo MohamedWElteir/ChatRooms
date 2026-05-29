@@ -9,8 +9,9 @@ public static class DependencyInjection
     {
         services.AddHttpClient<IRoomApiClient, RoomApiClient>(client =>
         {
-            client.BaseAddress = new Uri("https+http://chatrooms-bff");
-        });
+            client.BaseAddress = new Uri("https+http://chatrooms-api");
+        })
+        .AddHttpMessageHandler<AuthorizationDelegatingHandler>();
 
         services.AddHttpClient("bff", client =>
         {

@@ -25,7 +25,8 @@
 </Modal>
 
 @code {
-    [Inject] private IRoomApiClient ApiClient { get; set; } = default!;
+    [Inject] private IRoomApiClient ApiClient { get; set; } = null!;
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
 
     private bool _show;
     private string _name = "";
@@ -61,13 +62,13 @@
 
         try
         {
-            await ApiClient.CreateAsync(new ChatRooms.Blazor.HttpClients.CreateRoomRequest(_name.Trim(), cap));
+            await ApiClient.CreateAsync(new CreateRoomRequest(_name.Trim(), cap));
             _show = false;
             await OnCreated.InvokeAsync();
         }
-        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Found)
+        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized)
         {
-            _error = "You need to sign in to create a room.";
+            Navigation.NavigateTo("/bff/login", forceLoad: true);
         }
         catch (Exception ex)
         {
