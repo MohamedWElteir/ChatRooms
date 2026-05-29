@@ -219,7 +219,7 @@ app.MapPost("/bff/register", async (
     }
 }).RequireRateLimiting("auth");
 
-app.MapGet("/bff/login", async (IConfiguration config) =>
+app.MapGet("/bff/login", (IConfiguration config) =>
 {
     var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
     return Results.Challenge(
