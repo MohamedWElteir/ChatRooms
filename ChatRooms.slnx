@@ -4,7 +4,9 @@
     <Project Path="ChatRooms.ServiceDefaults/ChatRooms.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Shared/">
-    <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj"/>
+    <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
@@ -12,12 +14,18 @@
   </Folder>
   <Folder Name="/Src/">
     <Project Path="ChatRooms.API/ChatRooms.API.csproj" />
-    <Project Path="ChatRooms.Application/ChatRooms.Application.csproj"/>
+    <Project Path="ChatRooms.Application/ChatRooms.Application.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="ChatRooms.BFF/ChatRooms.BFF.csproj" />
     <Project Path="ChatRooms.Blazor/ChatRooms.Blazor.csproj" />
     <Project Path="ChatRooms.Domain/ChatRooms.Domain.csproj" />
-    <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj"/>
-    <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj"/>
+    <Project Path="ChatRooms.Infrastructure/ChatRooms.Infrastructure.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
+    <Project Path="ChatRooms.Presentation/ChatRooms.Presentation.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
   </Folder>
   <Folder Name="/Src/Setup/">
     <Project Path="ChatRooms.KeycloakSetup/ChatRooms.KeycloakSetup.csproj" />
@@ -25,7 +33,9 @@
   <Folder Name="/Tests/">
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />
     <Project Path="ChatRooms.Domain.Tests/ChatRooms.Domain.Tests.csproj" />
-    <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj"/>
+    <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj">
+      <Build Solution="Debug|*" Project="false" />
+    </Project>
     <Project Path="ChatRooms.Presentation.Tests/ChatRooms.Presentation.Tests.csproj" />
   </Folder>
 </Solution>
