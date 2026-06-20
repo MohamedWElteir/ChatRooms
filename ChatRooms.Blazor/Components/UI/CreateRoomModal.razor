@@ -29,7 +29,7 @@
     [Inject] private NavigationManager Navigation { get; set; } = null!;
 
     private bool _show;
-    private string _name = "";
+    private string _name = string.Empty;
     private string _capacity = "10";
     private string? _nameError;
     private string? _capacityError;
@@ -40,7 +40,7 @@
 
     public void Open()
     {
-        _name = "";
+        _name = string.Empty;
         _capacity = "10";
         _nameError = null;
         _capacityError = null;
