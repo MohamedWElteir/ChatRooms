@@ -16,9 +16,9 @@ public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUn
         if (room is null) return RoomErrors.NotFound;
 
         if (!Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason))
-            return new Error("Room.InvalidDeletionReason", "Invalid deletion reason.");
+            return RoomErrors.InvalidDeletionReason;
 
-        var result = room.Delete(deletionReason, DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var result = room.Delete(deletionReason, dateTimeProvider.UtcNow);
         if (result.IsFailure) return result;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

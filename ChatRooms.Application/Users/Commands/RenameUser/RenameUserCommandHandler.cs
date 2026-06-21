@@ -3,7 +3,6 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Errors;
-using ChatRooms.Domain.Users.ValueObjects;
 
 namespace ChatRooms.Application.Users.Commands.RenameUser;
 
@@ -12,11 +11,10 @@ public sealed class RenameUserCommandHandler(IUserRepository userRepository, IUn
 {
     public async Task<Result<string>> Handle(RenameUserCommand command, CancellationToken cancellationToken)
     {
-        var userId = UserId.From(command.Id);
-        var user = await userRepository.GetById(userId, cancellationToken);
+        var user = await userRepository.GetById(command.Id, cancellationToken);
         if (user is null) return UserErrors.NotFound;
 
-        var renameResult = user.Rename(ChatRooms.Domain.Users.ValueObjects.Name.From(command.NewName), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var renameResult = user.Rename(command.NewName, dateTimeProvider.UtcNow);
         if (renameResult.IsFailure) return renameResult.Error!;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

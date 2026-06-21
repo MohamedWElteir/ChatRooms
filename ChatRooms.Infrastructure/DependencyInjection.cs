@@ -74,6 +74,13 @@ public static class DependencyInjection
                     RoleClaimType = "roles"
                 };
             });
+
+        services.AddAuthorizationBuilder()
+            .AddPolicy("BffServiceOnly", policy =>
+                policy
+                    .RequireAuthenticatedUser()
+                    .RequireClaim("azp", "chatrooms-bff"));
+
         return services;
     }
 }

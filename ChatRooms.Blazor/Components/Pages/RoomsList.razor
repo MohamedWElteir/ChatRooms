@@ -1,0 +1,134 @@
+@page "/rooms"
+@layout MainLayout
+@rendermode InteractiveServer
+@implements IDisposable
+@using ChatRooms.Blazor.Stores
+@inject RoomStore Store
+@inject NavigationManager Nav
+@inject IConfiguration Config
+
+<PageTitle>Rooms · ChatRooms</PageTitle>
+
+<div class="rl-page">
+    <nav class="rl-nav">
+        <span class="rl-brand">ChatRooms</span>
+    </nav>
+
+    <div class="rl-body">
+        <div class="rl">
+            <div class="rl-top">
+                <h1 class="rl-title">Rooms</h1>
+                <AppButton Variant="primary" Size="sm" OnClick="@(() => _createModal.Open())">
+                    New room
+                </AppButton>
+            </div>
+
+            <CreateRoomModal @ref="_createModal" />
+
+            @if (_loading)
+            {
+                <div class="rl-empty">Loading rooms...</div>
+            }
+            else if (_needsAuth)
+            {
+                <div class="rl-empty">
+                    <p class="rl-empty-title">Sign in to browse rooms</p>
+                    <p class="rl-empty-text">You need to be signed in to view rooms.</p>
+                    <AppButton Variant="primary" Size="sm" OnClick="@SignIn">Sign in</AppButton>
+                </div>
+            }
+            else if (_error is not null)
+            {
+                <div class="rl-error">
+                    <p>@_error</p>
+                    <AppButton Variant="secondary" Size="sm" OnClick="LoadRooms">Retry</AppButton>
+                </div>
+            }
+            else if (Store.Items.Count == 0)
+            {
+                <div class="rl-empty">
+                    <p class="rl-empty-title">No rooms yet</p>
+                    <p class="rl-empty-text">Create the first room to get started.</p>
+                    <AppButton Variant="primary" Size="sm" OnClick="@(() => _createModal.Open())">
+                        Create a room
+                    </AppButton>
+                </div>
+            }
+            else
+            {
+                <div class="rl-list">
+                    @foreach (var room in Store.Items)
+                    {
+                        <div class="rl-row" @onclick="@(() => Nav.NavigateTo($"/room/{room.Id}"))">
+                            <div class="rl-row-info">
+                                <span class="rl-row-name">@room.Name</span>
+                                <span class="rl-row-code">@room.Code</span>
+                            </div>
+                            <div class="rl-row-meta">
+                                <span class="rl-cap">@room.CurrentParticipantsCount/@room.Capacity</span>
+                                <AppBadge Variant="active">Active</AppBadge>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateRoomModal _createModal = default!;
+    private bool _loading = true;
+    private bool _needsAuth;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Store.StateChanged += OnStateChanged;
+
+        if (!Store.IsLoaded)
+            await LoadRooms();
+        else
+            _loading = false;
+    }
+
+    private async Task LoadRooms()
+    {
+        _loading = true;
+        _error = null;
+        _needsAuth = false;
+        try
+        {
+            await Store.LoadRoomsAsync();
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Found)
+        {
+            _needsAuth = true;
+        }
+        catch (Exception ex)
+        {
+            _error = "Could not load rooms. Please make sure the server is running.";
+            Console.WriteLine($"Failed to load rooms: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SignIn()
+    {
+        var bffUrl = Config["BffUrl"] ?? Config["services:chatrooms-bff:http:0"] ?? "http://localhost:5031";
+        Nav.NavigateTo($"{bffUrl}/bff/login", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        Store.StateChanged -= OnStateChanged;
+    }
+}

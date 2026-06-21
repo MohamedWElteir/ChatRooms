@@ -181,7 +181,7 @@ public sealed class RoomTests
         // Act
         var capacity = Capacity.From(capacityValue);
         // Assert
-        Assert.Equal(capacityValue, capacity);
+        Assert.Equal(capacityValue, capacity.Value);
     }
 
     [Fact]

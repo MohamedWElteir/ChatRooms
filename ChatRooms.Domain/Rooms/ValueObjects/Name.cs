@@ -19,4 +19,5 @@ public readonly record struct Name
 
     public static Name From(string value) => new(value);
     public static implicit operator string(Name name) => name.Value;
+    public static implicit operator Name(string name) => From(name);
 }

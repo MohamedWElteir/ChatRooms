@@ -1,7 +1,6 @@
 ﻿using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
-using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Errors;
 
@@ -15,7 +14,7 @@ public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUn
         var room = await roomRepository.GetById(command.Id, cancellationToken);
         if (room is null) return RoomErrors.NotFound;
 
-        var renameResult = room.Rename(Name.From(command.NewName), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var renameResult = room.Rename(command.NewName, dateTimeProvider.UtcNow);
         if (renameResult.IsFailure)
         {
             (_, Error? renameError) = renameResult;

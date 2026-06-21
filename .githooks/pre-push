@@ -1,0 +1,22 @@
+#!/usr/bin/env powershell
+$ErrorActionPreference = "Stop"
+
+$result = dotnet format --verify-no-changes 2>&1
+if ($LASTEXITCODE -ne 0)
+{
+    Write-Host "`ndotnet format found issues. Auto-formatting..." -ForegroundColor Yellow
+    dotnet format 2>&1 | Out-Null
+
+    $changed = git diff --stat
+    if ([string]::IsNullOrEmpty($changed))
+    {
+        Write-Host "Nothing to format after all." -ForegroundColor Green
+        exit 0
+    }
+
+    Write-Host "Formatted files:" -ForegroundColor Cyan
+    Write-Host $changed
+
+    git add -u
+    Write-Host "`nFormatted and staged. Push continues with formatting included." -ForegroundColor Green
+}

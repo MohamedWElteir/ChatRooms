@@ -3,7 +3,6 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Users;
-using ChatRooms.Domain.Users.ValueObjects;
 using ChatRooms.DTOs.Users;
 
 namespace ChatRooms.Application.Users.Commands.CreateUser;
@@ -14,11 +13,11 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository, IUn
     public async Task<Result<UserDto>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
         var createResult = User.Create(
-            name: Name.From(command.Name),
-            email: Email.From(command.Email),
+            name: command.Name,
+            email: command.Email,
             gender: command.Gender,
-            birthDate: BirthDate.From(command.BirthDate),
-            occurredAt: DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+            birthDate: command.BirthDate,
+            occurredAt: dateTimeProvider.UtcNow);
 
         if (createResult.IsFailure) return createResult.Error!;
 

@@ -1,3 +1,4 @@
+using ChatRooms.BFF.HttpClients;
 using ChatRooms.BFF.Services;
 using ChatRooms.BFF.Transforms;
 using ChatRooms.DTOs.Users;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
+using System.Net;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,7 @@ var keycloakBaseUrl = builder.Configuration["Keycloak:Authority"]
 builder.Services.AddHttpClient<IKeycloakAdminService, KeycloakAdminService>(client =>
 {
     client.BaseAddress = new Uri(keycloakBaseUrl);
+    client.Timeout = TimeSpan.FromMinutes(2);
 });
 
 builder.Services.AddHttpClient<KeycloakTokenService>(client =>
@@ -37,21 +40,10 @@ builder.Services.AddHttpClient<KeycloakTokenService>(client =>
     client.BaseAddress = new Uri(keycloakBaseUrl);
 });
 
-builder.Services
-    .AddHttpClient("keycloak-token", client =>
-    {
-        client.BaseAddress = new Uri(
-            builder.Configuration["Keycloak:Authority"]
-                ?.Replace("/realms/chatrooms", "")
-            ?? "http://localhost:8080");
-    });
-builder.Services.AddScoped<KeycloakTokenService>();
-
-builder.Services
-    .AddHttpClient("chatrooms-api", client =>
-    {
-        client.BaseAddress = new Uri("https+http://chatrooms-api");
-    });
+builder.Services.AddHttpClient<InternalApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https+http://chatrooms-api");
+});
 
 builder.Services
     .AddAuthentication(options =>
@@ -136,71 +128,72 @@ app.MapPost("/bff/register", async (
     RegisterBffRequest request,
     IKeycloakAdminService keycloakAdmin,
     KeycloakTokenService tokenService,
-    IHttpClientFactory httpClientFactory,
+    InternalApiClient apiClient,
     ILogger<Program> logger,
     CancellationToken ct) =>
 {
     try
     {
-        logger.LogInformation("Registration started: {Name} <{Email}>", request.Name, request.Email);
-
         var adminToken = await tokenService.GetServiceAccountTokenAsync(ct);
-        logger.LogDebug("Keycloak admin token acquired");
 
-        var keycloakUserId = await keycloakAdmin.CreateUserAsync(
-            request, adminToken, ct);
-        logger.LogInformation("Keycloak user created: {KcId}", keycloakUserId);
+        string keycloakUserId;
+        try
+        {
+            keycloakUserId = await keycloakAdmin.CreateUserAsync(
+                request, adminToken, default);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Results.Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
-        using var apiHttp = httpClientFactory.CreateClient("chatrooms-api");
-        var apiResponse = await apiHttp.PostAsJsonAsync("/api/users",
+        var apiResponse = await apiClient.PostAsync("/api/users/register",
             new
             {
                 request.Name,
                 request.Email,
+                request.Password,
                 request.Gender,
                 request.BirthDate
-            }, ct);
+            }, default);
 
         if (!apiResponse.IsSuccessStatusCode)
         {
-            var apiError = await apiResponse.Content.ReadAsStringAsync(ct);
+            var body = await apiResponse.Content.ReadAsStringAsync(default);
             logger.LogError(
-                "API user creation failed, rolling back Keycloak user. API: {Status} {Error}",
-                apiResponse.StatusCode, apiError);
+                "Domain user creation failed ({Status}): {Body}. Rolling back Keycloak user {KcId}",
+                apiResponse.StatusCode, body, keycloakUserId);
 
-            await keycloakAdmin.DeleteUserAsync(keycloakUserId, adminToken, ct);
-            logger.LogInformation("Keycloak user rolled back: {KcId}", keycloakUserId);
+            await keycloakAdmin.DeleteUserAsync(keycloakUserId, adminToken, default);
 
             return apiResponse.StatusCode switch
             {
-                System.Net.HttpStatusCode.Conflict =>
-                    Results.Problem(detail: "This email is already registered.", statusCode: StatusCodes.Status409Conflict),
-                System.Net.HttpStatusCode.BadRequest =>
-                    Results.Problem(detail: "Invalid user information.", statusCode: StatusCodes.Status400BadRequest),
+                HttpStatusCode.Conflict or HttpStatusCode.UnprocessableEntity =>
+                    Results.Problem(detail: "Please check your information and try again.",
+                        statusCode: (int)apiResponse.StatusCode),
                 _ => Results.Problem(
                     detail: "Failed to create user account. Please try again.",
-                    statusCode: StatusCodes.Status502BadGateway)
+                    statusCode: StatusCodes.Status500InternalServerError)
             };
         }
 
         var domainUser = await apiResponse.Content
-            .ReadFromJsonAsync<UserDto>(ct);
+            .ReadFromJsonAsync<UserDto>(default);
 
         await keycloakAdmin.SetUserAttributeAsync(
-            keycloakUserId, "systemuserid", domainUser!.Id.ToString(),
-            adminToken, ct);
-        logger.LogDebug("Keycloak user attribute set: systemuserid={Id}", domainUser.Id);
+            keycloakUserId,
+            "systemuserid",
+            domainUser!.Id.ToString(),
+            adminToken,
+            default);
 
         logger.LogInformation(
-            "Registration complete: {Name} <{Email}> → Kc:{KcId} Sys:{DomainId}",
-            request.Name, request.Email, keycloakUserId, domainUser.Id);
+            "Registration complete. Keycloak: {KcId} → Domain: {DomainId}",
+            keycloakUserId, domainUser.Id);
 
         return Results.Ok(new { message = "Account created. Please sign in." });
-    }
-    catch (InvalidOperationException ex)
-    {
-        logger.LogWarning("Registration rejected: {Message}", ex.Message);
-        return Results.Problem(detail: ex.Message, statusCode: StatusCodes.Status409Conflict);
     }
     catch (HttpRequestException ex)
     {
@@ -211,28 +204,32 @@ app.MapPost("/bff/register", async (
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Registration failed unexpectedly for {Name} <{Email}>",
-            request.Name, request.Email);
+        logger.LogError(ex, "Registration failed unexpectedly");
         return Results.Problem(
             detail: "Something went wrong. Please try again.",
             statusCode: StatusCodes.Status500InternalServerError);
     }
 }).RequireRateLimiting("auth");
 
-app.MapGet("/bff/login", async () => Results.Challenge(
-    new AuthenticationProperties
-    {
-        RedirectUri = "/rooms",
-        IsPersistent = true
-    },
-    [OpenIdConnectDefaults.AuthenticationScheme]))
-    .RequireRateLimiting("auth");
+app.MapGet("/bff/login", (IConfiguration config) =>
+{
+    var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
+    return Results.Challenge(
+        new AuthenticationProperties
+        {
+            RedirectUri = $"{blazorUrl}/rooms",
+            IsPersistent = true
+        },
+        [OpenIdConnectDefaults.AuthenticationScheme]);
+}).RequireRateLimiting("auth");
 
 app.MapGet("/bff/logout", async ctx =>
 {
+    var config = ctx.RequestServices.GetRequiredService<IConfiguration>();
+    var blazorUrl = config["BlazorAppUrl"] ?? "https://localhost:7219";
     await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     await ctx.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
-        new AuthenticationProperties { RedirectUri = "/" });
+        new AuthenticationProperties { RedirectUri = $"{blazorUrl}/" });
 }).RequireAuthorization();
 
 app.MapReverseProxy()

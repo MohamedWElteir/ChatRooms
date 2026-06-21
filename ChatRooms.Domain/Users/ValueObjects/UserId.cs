@@ -17,4 +17,5 @@ public readonly record struct UserId
 
     public override string ToString() => Value.ToString();
     public static implicit operator Guid(UserId userId) => userId.Value;
+    public static implicit operator UserId(Guid userId) => From(userId);
 }

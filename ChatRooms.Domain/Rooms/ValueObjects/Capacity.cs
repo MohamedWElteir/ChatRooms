@@ -17,4 +17,5 @@ public readonly record struct Capacity
 
     public static Capacity From(int value) => new(value);
     public static implicit operator int(Capacity capacity) => capacity.Value;
+    public static implicit operator Capacity(int capacity) => From(capacity);
 }

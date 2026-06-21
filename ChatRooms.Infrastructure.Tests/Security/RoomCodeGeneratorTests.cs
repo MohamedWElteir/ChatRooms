@@ -31,19 +31,19 @@ public class RoomCodeGeneratorTests
     }
 
     [Fact]
-     public void Generate_ShouldProduceUniqueCodes()
-     {
-         // Arrange
-         const int iterations = 100_000;
-         var generatedCodes = new HashSet<string>(iterations);
-     
-         // Act & Assert
-         for (int i = 0; i < iterations; i++)
-         {
-             var code = _sut.Generate().Value;
-             Assert.True(generatedCodes.Add(code));
-         }
-         
-         Assert.Equal(iterations, generatedCodes.Count);
-     }
+    public void Generate_ShouldProduceUniqueCodes()
+    {
+        // Arrange
+        const int iterations = 100_000;
+        var generatedCodes = new HashSet<string>(iterations);
+
+        // Act & Assert
+        for (int i = 0; i < iterations; i++)
+        {
+            var code = _sut.Generate().Value;
+            Assert.True(generatedCodes.Add(code));
+        }
+
+        Assert.Equal(iterations, generatedCodes.Count);
+    }
 }

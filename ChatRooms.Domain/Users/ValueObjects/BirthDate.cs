@@ -60,4 +60,6 @@ public readonly record struct BirthDate
     }
 
     public override string ToString() => Value.ToShortDateString();
+    public static implicit operator DateTime(BirthDate birthDate) => birthDate.Value;
+    public static implicit operator BirthDate(DateTime dateTime) => From(dateTime);
 }
