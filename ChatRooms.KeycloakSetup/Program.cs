@@ -81,17 +81,50 @@ patchResponse.EnsureSuccessStatusCode();
 if (logger.IsEnabled(LogLevel.Information))
     logger.LogInformation("BFF client updated. RedirectURIs now point to {Bff}", bffBaseUrl);
 
-var clientSecret = config["Keycloak:ClientSecret"]
-    ?? throw new InvalidOperationException("Keycloak:ClientSecret is not configured.");
+var existingMappers = await http.GetFromJsonAsync<JsonElement[]>(
+    $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}/protocol-mappers/models");
 
-var secretResponse = await http.PutAsJsonAsync(
-    $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}",
-    new { secret = clientSecret, clientAuthenticatorType = "client-secret" });
+var hasApiAudienceMapper = existingMappers is not null
+    && existingMappers.Any(m => m.TryGetProperty("name", out var n) && n.GetString() == "api-audience-mapper");
 
-secretResponse.EnsureSuccessStatusCode();
+if (!hasApiAudienceMapper)
+{
+    var audienceMapperPayload = new
+    {
+        name = "api-audience-mapper",
+        protocol = "openid-connect",
+        protocolMapper = "oidc-audience-mapper",
+        consentRequired = false,
+        config = new Dictionary<string, string>
+        {
+            ["access.token.claim"] = "true",
+            ["id.token.claim"] = "true",
+            ["userinfo.token.claim"] = "true",
+            ["included.client.audience"] = "chatrooms-api"
+        }
+    };
 
-if (logger.IsEnabled(LogLevel.Information))
-    logger.LogInformation("BFF client secret updated successfully.");
+    var mapperResponse = await http.PostAsJsonAsync(
+        $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}/protocol-mappers/models",
+        audienceMapperPayload);
+
+    if (mapperResponse.IsSuccessStatusCode)
+    {
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Added api-audience-mapper to chatrooms-bff client.");
+    }
+    else
+    {
+        var error = await mapperResponse.Content.ReadAsStringAsync();
+        if (logger.IsEnabled(LogLevel.Warning))
+            logger.LogWarning("Failed to add api-audience-mapper: {Error}", error);
+    }
+}
+else
+{
+    if (logger.IsEnabled(LogLevel.Information))
+        logger.LogInformation("api-audience-mapper already exists on chatrooms-bff client.");
+}
 
 var realmMgmtClients = await http.GetFromJsonAsync<JsonElement[]>(
     $"{keycloakBaseUrl}/admin/realms/{realm}/clients?clientId=realm-management");

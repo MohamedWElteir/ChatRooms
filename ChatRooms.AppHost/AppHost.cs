@@ -39,6 +39,7 @@ var bff = builder.AddProject<Projects.ChatRooms_BFF>("chatrooms-bff")
     .WithEnvironment("Keycloak__ClientSecret", keycloakSecret);
 
 var blazor = builder.AddProject<Projects.ChatRooms_Blazor>("chatrooms-blazor")
+    .WithReference(api)
     .WithReference(bff)
     .WaitFor(bff);
 
@@ -52,8 +53,7 @@ builder.AddProject<Projects.ChatRooms_KeycloakSetup>("chatrooms-keycloak-setup")
     .WithEnvironment("Keycloak__AdminUser", "admin")
     .WithEnvironment("Keycloak__AdminPassword", keycloakAdminPassword)
     .WithEnvironment("Keycloak__Realm", "chatrooms")
-    .WithEnvironment("Keycloak__BffClientId", "chatrooms-bff")
-    .WithEnvironment("Keycloak__ClientSecret", keycloakSecret);
+    .WithEnvironment("Keycloak__BffClientId", "chatrooms-bff");
 
 
 builder.Build().Run();

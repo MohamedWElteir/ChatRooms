@@ -9,6 +9,7 @@ using ChatRooms.DTOs.Users;
 using ChatRooms.Presentation.Common;
 using ChatRooms.Presentation.Users.Requests;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,6 +33,28 @@ public sealed class UserController(ISender sender) : ControllerBase
         if (result.IsFailure) return result.Error!.ToProblemDetails();
 
         return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
+    }
+
+    [HttpPost("register")]
+    [Authorize(Policy = "BffServiceOnly")]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new CreateUserCommand(
+                request.Name,
+                request.Email,
+                request.Gender,
+                request.BirthDate),
+            cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return CreatedAtAction(nameof(Register), new { id = result.Value!.Id }, result.Value);
     }
 
     [HttpGet("{id:guid}")]

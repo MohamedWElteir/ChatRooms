@@ -49,6 +49,7 @@
       "clientId": "chatrooms-bff",
       "name": "ChatRooms BFF",
       "enabled": true,
+      "secret": "chatrooms-bff-secret",
       "publicClient": false,
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
@@ -75,6 +76,18 @@
             "userinfo.token.claim": "true",
             "id.token.claim": "true",
             "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "api-audience-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "included.client.audience": "chatrooms-api"
           }
         },
         {
