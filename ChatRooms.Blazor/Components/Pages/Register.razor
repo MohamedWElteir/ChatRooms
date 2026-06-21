@@ -4,6 +4,8 @@
 @inject IConfiguration Config
 @inject IHttpClientFactory HttpClientFactory
 @inject ILogger<Register> Logger
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider Auth
 
 <PageTitle>Create account · ChatRooms</PageTitle>
 
@@ -144,6 +146,15 @@
     private string _passwordLabel = "Enter a password";
 
     private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await Auth.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated is true)
+        {
+            Nav.NavigateTo("/rooms", forceLoad: true);
+        }
+    }
 
     private string BffUrl
     {

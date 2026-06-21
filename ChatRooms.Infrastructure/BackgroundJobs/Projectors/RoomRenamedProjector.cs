@@ -26,7 +26,7 @@ public sealed class RoomRenamedProjector(
         var result = await readDbContext.Rooms.UpdateOneAsync(
             filter,
             Builders<RoomDto>.Update
-                .Set(r => r.Name, domainEvent.NewName)
+                .Set(r => r.Name, domainEvent.NewName.Value)
                 .Set(r => r.Version, domainEvent.AggregateVersion),
             cancellationToken: cancellationToken);
 

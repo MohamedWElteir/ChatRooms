@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject NavigationManager Nav
 @inject IConfiguration Config
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider Auth
 
 <div class="lp">
 
@@ -129,9 +131,13 @@
         }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Console.WriteLine($"BFF URL resolved to: {BffUrl}");
+        var state = await Auth.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            Nav.NavigateTo("/rooms", forceLoad: true);
+        }
     }
 
     private void SignIn()

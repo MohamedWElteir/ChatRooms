@@ -1,7 +1,6 @@
 ﻿using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
-using ChatRooms.Domain.Rooms.ValueObjects;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Errors;
 

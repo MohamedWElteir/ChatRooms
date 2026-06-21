@@ -11,5 +11,5 @@ public static class RoomErrors
     public static readonly Error ActiveRoomCannotBeDeletedDueToInactivity = new("Room.ActiveRoomCannotBeDeletedDueToInactivity", "Active rooms cannot be deleted due to inactivity.");
     public static readonly Error NewCapacityCannotBeLessThanCurrentParticipants = new("Room.NewCapacityCannotBeLessThanCurrentParticipants", "New capacity cannot be less than current participants count.");
     public static readonly Error OnlyArchivedCanBeRestored = new("Room.OnlyArchivedCanBeRestored", "Only archived rooms can be restored.");
-    public static readonly Error InvalidDeletionReason = new ("Room.InvalidDeletionReason", "Invalid deletion reason.")
+    public static readonly Error InvalidDeletionReason = new("Room.InvalidDeletionReason", "Invalid deletion reason.");
 }

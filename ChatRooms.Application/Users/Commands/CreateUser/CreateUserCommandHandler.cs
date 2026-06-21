@@ -3,7 +3,6 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Users;
-using ChatRooms.Domain.Users.ValueObjects;
 using ChatRooms.DTOs.Users;
 
 namespace ChatRooms.Application.Users.Commands.CreateUser;

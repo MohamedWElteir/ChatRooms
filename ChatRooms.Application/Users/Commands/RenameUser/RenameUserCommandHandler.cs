@@ -3,7 +3,6 @@ using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
 using ChatRooms.Domain.Shared.Errors;
-using ChatRooms.Domain.Users.ValueObjects;
 
 namespace ChatRooms.Application.Users.Commands.RenameUser;
 
