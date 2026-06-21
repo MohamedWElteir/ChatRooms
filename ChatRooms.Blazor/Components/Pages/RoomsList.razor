@@ -1,11 +1,11 @@
 @page "/rooms"
 @layout MainLayout
 @rendermode InteractiveServer
-@implements IAsyncDisposable
-@inject IRoomApiClient ApiClient
+@implements IDisposable
+@using ChatRooms.Blazor.Stores
+@inject RoomStore Store
 @inject NavigationManager Nav
 @inject IConfiguration Config
-@inject PersistentComponentState State
 
 <PageTitle>Rooms · ChatRooms</PageTitle>
 
@@ -23,7 +23,7 @@
                 </AppButton>
             </div>
 
-            <CreateRoomModal @ref="_createModal" OnCreated="LoadRooms" />
+            <CreateRoomModal @ref="_createModal" />
 
             @if (_loading)
             {
@@ -44,7 +44,7 @@
                     <AppButton Variant="secondary" Size="sm" OnClick="LoadRooms">Retry</AppButton>
                 </div>
             }
-            else if (_rooms.Count == 0)
+            else if (Store.Items.Count == 0)
             {
                 <div class="rl-empty">
                     <p class="rl-empty-title">No rooms yet</p>
@@ -57,7 +57,7 @@
             else
             {
                 <div class="rl-list">
-                    @foreach (var room in _rooms)
+                    @foreach (var room in Store.Items)
                     {
                         <div class="rl-row" @onclick="@(() => Nav.NavigateTo($"/room/{room.Id}"))">
                             <div class="rl-row-info">
@@ -78,25 +78,18 @@
 
 @code {
     private CreateRoomModal _createModal = default!;
-    private IReadOnlyList<ChatRooms.DTOs.Rooms.RoomListItem> _rooms = [];
     private bool _loading = true;
     private bool _needsAuth;
     private string? _error;
-    private PersistingComponentStateSubscription _subscription;
 
     protected override async Task OnInitializedAsync()
     {
-        _subscription = State.RegisterOnPersisting(PersistRooms);
+        Store.StateChanged += OnStateChanged;
 
-        if (State.TryTakeFromJson("rooms", out IReadOnlyList<ChatRooms.DTOs.Rooms.RoomListItem>? rooms))
-        {
-            _rooms = rooms ?? [];
-            _loading = false;
-        }
-        else
-        {
+        if (!Store.IsLoaded)
             await LoadRooms();
-        }
+        else
+            _loading = false;
     }
 
     private async Task LoadRooms()
@@ -106,7 +99,7 @@
         _needsAuth = false;
         try
         {
-            _rooms = await ApiClient.GetAllAsync();
+            await Store.LoadRoomsAsync();
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Found)
         {
@@ -123,10 +116,9 @@
         }
     }
 
-    private Task PersistRooms()
+    private void OnStateChanged()
     {
-        State.PersistAsJson("rooms", _rooms);
-        return Task.CompletedTask;
+        InvokeAsync(StateHasChanged);
     }
 
     private void SignIn()
@@ -135,8 +127,8 @@
         Nav.NavigateTo($"{bffUrl}/bff/login", forceLoad: true);
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        _subscription.Dispose();
+        Store.StateChanged -= OnStateChanged;
     }
 }
