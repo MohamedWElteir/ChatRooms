@@ -44,7 +44,7 @@ public readonly record struct DateTimeUtc
 
         return new DateTimeUtc(new DateTimeOffset(utc));
     }
-    
+
     public static DateTimeUtc FromLocal(DateTime local)
     {
         if (local.Kind != DateTimeKind.Local)
