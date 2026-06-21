@@ -14,7 +14,7 @@ public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomReposit
         var room = await roomRepository.GetById(request.RoomId, cancellationToken);
         if (room is null) return RoomErrors.NotFound;
 
-        var result = room.ChangeCapacity(Capacity.From(request.NewCapacity), DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        var result = room.ChangeCapacity(request.NewCapacity, dateTimeProvider.UtcNow);
         if (result.IsFailure) return result;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

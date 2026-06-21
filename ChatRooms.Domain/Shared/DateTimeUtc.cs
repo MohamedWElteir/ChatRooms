@@ -44,7 +44,7 @@ public readonly record struct DateTimeUtc
 
         return new DateTimeUtc(new DateTimeOffset(utc));
     }
-
+    
     public static DateTimeUtc FromLocal(DateTime local)
     {
         if (local.Kind != DateTimeKind.Local)
@@ -67,4 +67,6 @@ public readonly record struct DateTimeUtc
     public static bool operator >(DateTimeUtc left, DateTimeUtc right) => left.Value > right.Value;
     public static bool operator <=(DateTimeUtc left, DateTimeUtc right) => left.Value <= right.Value;
     public static bool operator >=(DateTimeUtc left, DateTimeUtc right) => left.Value >= right.Value;
+
+    public static implicit operator DateTimeUtc(DateTime utc) => DateTimeUtc.FromUtc(utc);
 }

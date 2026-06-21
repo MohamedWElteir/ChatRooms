@@ -18,7 +18,7 @@ public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWor
             name: Name.From(command.Name),
             capacity: Capacity.From(command.Capacity),
             roomCode: codeGenerator.Generate(),
-            dateTime: DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+            dateTime: dateTimeProvider.UtcNow);
 
         if (createResult.IsFailure) return createResult.Error!;
 

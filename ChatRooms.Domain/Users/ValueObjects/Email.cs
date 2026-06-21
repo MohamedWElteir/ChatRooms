@@ -15,6 +15,7 @@ public readonly partial record struct Email
     }
     public static Email From(string value) => new(value);
     public static implicit operator string(Email email) => email.Value;
+    public static implicit operator Email(string email) => From(email);
     private static bool IsValidEmail(string email)
     {
         return email.Length <= 254 && // RFC 5321 max length

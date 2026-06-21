@@ -14,11 +14,11 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository, IUn
     public async Task<Result<UserDto>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
         var createResult = User.Create(
-            name: Name.From(command.Name),
-            email: Email.From(command.Email),
+            name: command.Name,
+            email: command.Email,
             gender: command.Gender,
-            birthDate: BirthDate.From(command.BirthDate),
-            occurredAt: DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+            birthDate: command.BirthDate,
+            occurredAt: dateTimeProvider.UtcNow);
 
         if (createResult.IsFailure) return createResult.Error!;
 
