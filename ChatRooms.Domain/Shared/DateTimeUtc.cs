@@ -68,5 +68,5 @@ public readonly record struct DateTimeUtc
     public static bool operator <=(DateTimeUtc left, DateTimeUtc right) => left.Value <= right.Value;
     public static bool operator >=(DateTimeUtc left, DateTimeUtc right) => left.Value >= right.Value;
 
-    public static implicit operator DateTimeUtc(DateTime utc) => DateTimeUtc.FromUtc(utc);
+    public static implicit operator DateTimeUtc(DateTime utc) => FromUtc(utc);
 }
