@@ -1,5 +1,6 @@
 @page "/rooms"
 @layout MainLayout
+@attribute [Authorize]
 @rendermode InteractiveServer
 @implements IDisposable
 @using ChatRooms.Blazor.Stores
@@ -28,14 +29,6 @@
             @if (_loading)
             {
                 <div class="rl-empty">Loading rooms...</div>
-            }
-            else if (_needsAuth)
-            {
-                <div class="rl-empty">
-                    <p class="rl-empty-title">Sign in to browse rooms</p>
-                    <p class="rl-empty-text">You need to be signed in to view rooms.</p>
-                    <AppButton Variant="primary" Size="sm" OnClick="@SignIn">Sign in</AppButton>
-                </div>
             }
             else if (_error is not null)
             {
@@ -79,7 +72,6 @@
 @code {
     private CreateRoomModal _createModal = default!;
     private bool _loading = true;
-    private bool _needsAuth;
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -96,14 +88,9 @@
     {
         _loading = true;
         _error = null;
-        _needsAuth = false;
         try
         {
             await Store.LoadRoomsAsync();
-        }
-        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Found)
-        {
-            _needsAuth = true;
         }
         catch (Exception ex)
         {
@@ -119,12 +106,6 @@
     private void OnStateChanged()
     {
         InvokeAsync(StateHasChanged);
-    }
-
-    private void SignIn()
-    {
-        var bffUrl = Config["BffUrl"] ?? Config["services:chatrooms-bff:http:0"] ?? "http://localhost:5031";
-        Nav.NavigateTo($"{bffUrl}/bff/login", forceLoad: true);
     }
 
     public void Dispose()

@@ -12,6 +12,7 @@ builder.AddServiceDefaults();
 // Add services to the container
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorServices();
 builder.Services.AddScoped<AccessTokenStore>();
 builder.Services.AddTransient<AuthorizationDelegatingHandler>();

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChatRooms.Presentation.Users;
 
 [ApiController]
+[Authorize]
 [Route("api/users")]
 public sealed class UserController(ISender sender) : ControllerBase
 {

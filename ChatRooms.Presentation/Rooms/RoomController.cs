@@ -10,12 +10,14 @@ using ChatRooms.DTOs.Rooms;
 using ChatRooms.Presentation.Common;
 using ChatRooms.Presentation.Rooms.Requests;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatRooms.Presentation.Rooms;
 
 [ApiController]
+[Authorize]
 [Route("api/rooms")]
 public sealed class RoomController(ISender sender, IRoomQuery roomQuery) : ControllerBase
 {

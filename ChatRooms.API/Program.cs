@@ -4,6 +4,9 @@ using ChatRooms.Infrastructure;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Presentation;
 using ChatRooms.ServiceDefaults;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +21,7 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 
 builder.Services
-    .AddControllers()
+    .AddControllers(o => o.Filters.Add(new AuthorizeFilter()))
     .AddApplicationPart(typeof(PresentationAssemblyMarker).Assembly)
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
