@@ -2,7 +2,6 @@
 @layout MainLayout
 @rendermode InteractiveServer
 @inject NavigationManager Nav
-@inject IConfiguration Config
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider Auth
 
@@ -119,18 +118,6 @@
 </div>
 
 @code {
-    private string BffUrl
-    {
-        get
-        {
-            var cfg = Config["BffUrl"];
-            if (!string.IsNullOrEmpty(cfg)) return cfg;
-
-            var aspire = Config["services:chatrooms-bff:http:0"];
-            return !string.IsNullOrEmpty(aspire) ? aspire : "http://localhost:5031";
-        }
-    }
-
     protected override async Task OnInitializedAsync()
     {
         var state = await Auth.GetAuthenticationStateAsync();
@@ -142,8 +129,6 @@
 
     private void SignIn()
     {
-        var loginUrl = $"{BffUrl}/bff/login";
-        Console.WriteLine($"Navigating to: {loginUrl}");
-        Nav.NavigateTo(loginUrl, forceLoad: true);
+        Nav.NavigateTo("/login", forceLoad: true);
     }
 }

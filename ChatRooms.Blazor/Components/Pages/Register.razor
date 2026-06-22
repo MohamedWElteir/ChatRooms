@@ -1,7 +1,6 @@
 ﻿@page "/register"
 @layout MainLayout
 @inject NavigationManager Nav
-@inject IConfiguration Config
 @inject IHttpClientFactory HttpClientFactory
 @inject ILogger<Register> Logger
 @using Microsoft.AspNetCore.Components.Authorization
@@ -118,7 +117,7 @@
 
             <p class="auth-signin-link">
                 Already have an account?
-                <a href="#" @onclick="@(() => Nav.NavigateTo($"{BffUrl}/bff/login", forceLoad: true))"
+                <a href="#" @onclick="@(() => Nav.NavigateTo("/login", forceLoad: true))"
                    @onclick:preventDefault="false">Sign in</a>
             </p>
         </div>
@@ -153,18 +152,6 @@
         if (state.User.Identity?.IsAuthenticated is true)
         {
             Nav.NavigateTo("/rooms", forceLoad: true);
-        }
-    }
-
-    private string BffUrl
-    {
-        get
-        {
-            var cfg = Config["BffUrl"];
-            if (!string.IsNullOrEmpty(cfg)) return cfg;
-
-            var aspire = Config["services:chatrooms-bff:http:0"];
-            return !string.IsNullOrEmpty(aspire) ? aspire : "http://localhost:5031";
         }
     }
 
@@ -236,7 +223,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Nav.NavigateTo($"{BffUrl}/bff/login", forceLoad: true);
+                Nav.NavigateTo("/login", forceLoad: true);
             }
             else
             {

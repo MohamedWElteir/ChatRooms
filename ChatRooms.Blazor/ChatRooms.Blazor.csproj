@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ChatRooms.DTOs\ChatRooms.DTOs.csproj" />
     <ProjectReference Include="..\ChatRooms.ServiceDefaults\ChatRooms.ServiceDefaults.csproj" />
   </ItemGroup>

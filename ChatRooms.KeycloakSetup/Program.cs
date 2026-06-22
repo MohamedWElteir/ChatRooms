@@ -16,6 +16,10 @@ var keycloakBaseUrl = config["services:keycloak:http:0"]
 var bffBaseUrl = config["services:chatrooms-bff:http:0"]
     ?? throw new InvalidOperationException("BFF service URL not found.");
 
+var blazorUrl = config["services:chatrooms-blazor:http:0"]
+    ?? config["services:chatrooms-blazor:https:0"]
+    ?? throw new InvalidOperationException("Blazor service URL not found.");
+
 var adminUser = config["Keycloak:AdminUser"] ?? "admin";
 var adminPass = config["Keycloak:AdminPassword"] ?? "admin";
 var realm = config["Keycloak:Realm"] ?? "chatrooms";
@@ -63,12 +67,14 @@ var patch = new
     redirectUris = new[]
     {
         $"{bffBaseUrl}/signin-oidc",
-        $"{bffBaseUrl}/*"
+        $"{bffBaseUrl}/*",
+        $"{blazorUrl}/signin-oidc",
+        $"{blazorUrl}/*"
     },
-    webOrigins = new[] { bffBaseUrl },
+    webOrigins = new[] { bffBaseUrl, blazorUrl },
     attributes = new Dictionary<string, string>
     {
-        ["post.logout.redirect.uris"] = $"{bffBaseUrl}/signout-callback-oidc##{bffBaseUrl}/*"
+        ["post.logout.redirect.uris"] = $"{bffBaseUrl}/signout-callback-oidc##{bffBaseUrl}/*##{blazorUrl}/*"
     }
 };
 

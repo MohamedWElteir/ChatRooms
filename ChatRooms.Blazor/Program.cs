@@ -4,6 +4,8 @@ using ChatRooms.Blazor.HttpClients;
 using ChatRooms.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +20,26 @@ builder.Services.AddScoped<AccessTokenStore>();
 builder.Services.AddTransient<AuthorizationDelegatingHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie()
+    .AddOpenIdConnect("oidc", options =>
+    {
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.Authority = builder.Configuration["Keycloak:Authority"];
+        options.MetadataAddress = builder.Configuration["Keycloak:MetadataAddress"];
+        options.ClientId = builder.Configuration["Keycloak:ClientId"];
+        options.ClientSecret = builder.Configuration["Keycloak:ClientSecret"];
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.UsePkce = true;
+        options.SaveTokens = true;
+        options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+        options.GetClaimsFromUserInfoEndpoint = true;
+        options.MapInboundClaims = false;
+        options.Scope.Add("profile");
+        options.Scope.Add("email");
+        options.Scope.Add("roles");
+        options.TokenValidationParameters.ValidateIssuer = true;
+    });
 
 var app = builder.Build();
 
@@ -28,7 +49,6 @@ app.MapDefaultEndpoints();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
@@ -47,6 +67,17 @@ app.Use(async (context, next) =>
     }
     await next();
 });
+
+app.MapGet("/login", () => Results.Challenge(
+    new AuthenticationProperties { RedirectUri = "/rooms" },
+    [OpenIdConnectDefaults.AuthenticationScheme]));
+
+app.MapGet("/logout", async (HttpContext ctx) =>
+{
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    await ctx.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme,
+        new AuthenticationProperties { RedirectUri = "/" });
+}).RequireAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
