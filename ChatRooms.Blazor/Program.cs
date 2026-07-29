@@ -16,12 +16,13 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorServices();
-builder.Services.AddScoped<AccessTokenStore>();
+builder.Services.AddSingleton<TokenStore>();
+builder.Services.AddScoped<UserContext>();
 builder.Services.AddTransient<AuthorizationDelegatingHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie()
-    .AddOpenIdConnect("oidc", options =>
+    .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
     {
         options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.Authority = builder.Configuration["Keycloak:Authority"];
@@ -60,10 +61,15 @@ app.UseAuthorization();
 
 app.Use(async (context, next) =>
 {
-    if (!context.Request.Path.StartsWithSegments("/_blazor"))
+    var sub = context.User.FindFirst("sub")?.Value;
+    if (sub is not null)
     {
-        var store = context.RequestServices.GetRequiredService<AccessTokenStore>();
-        store.Token = await context.GetTokenAsync("access_token");
+        var token = await context.GetTokenAsync("access_token");
+        if (token is not null)
+        {
+            var store = context.RequestServices.GetRequiredService<TokenStore>();
+            store.Set(sub, token);
+        }
     }
     await next();
 });

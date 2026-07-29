@@ -16,9 +16,18 @@ var keycloakBaseUrl = config["services:keycloak:http:0"]
 var bffBaseUrl = config["services:chatrooms-bff:http:0"]
     ?? throw new InvalidOperationException("BFF service URL not found.");
 
-var blazorUrl = config["services:chatrooms-blazor:http:0"]
-    ?? config["services:chatrooms-blazor:https:0"]
-    ?? throw new InvalidOperationException("Blazor service URL not found.");
+var blazorUrlHttps = config["services:chatrooms-blazor:https:0"];
+var blazorUrlHttp = config["services:chatrooms-blazor:http:0"];
+if (blazorUrlHttps is null && blazorUrlHttp is null)
+    throw new InvalidOperationException("Blazor service URL not found.");
+
+var blazorUrls = new[] { blazorUrlHttps, blazorUrlHttp }
+    .Where(u => u is not null)
+    .Select(u => u!.TrimEnd('/'))
+    .Distinct()
+    .ToArray();
+
+var blazorUrl = blazorUrlHttps ?? blazorUrlHttp!;
 
 var adminUser = config["Keycloak:AdminUser"] ?? "admin";
 var adminPass = config["Keycloak:AdminPassword"] ?? "admin";
@@ -31,15 +40,30 @@ if (logger.IsEnabled(LogLevel.Information))
 var httpFactory = app.Services.GetRequiredService<IHttpClientFactory>();
 using var http = httpFactory.CreateClient();
 
-var tokenResponse = await http.PostAsync(
-    $"{keycloakBaseUrl}/realms/master/protocol/openid-connect/token",
-    new FormUrlEncodedContent(new Dictionary<string, string>
+HttpResponseMessage tokenResponse = null!;
+for (var attempt = 1; attempt <= 10; attempt++)
+{
+    tokenResponse = await http.PostAsync(
+        $"{keycloakBaseUrl}/realms/master/protocol/openid-connect/token",
+        new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["grant_type"] = "password",
+            ["client_id"] = "admin-cli",
+            ["username"] = adminUser,
+            ["password"] = adminPass
+        }));
+
+    if (tokenResponse.IsSuccessStatusCode)
+        break;
+
+    if (logger.IsEnabled(LogLevel.Warning))
     {
-        ["grant_type"] = "password",
-        ["client_id"] = "admin-cli",
-        ["username"] = adminUser,
-        ["password"] = adminPass
-    }));
+        var body = await tokenResponse.Content.ReadAsStringAsync();
+        logger.LogWarning("Admin token attempt {Attempt}/10 failed: {Status}. Body: {Body}", attempt, tokenResponse.StatusCode, body);
+    }
+
+    await Task.Delay(TimeSpan.FromSeconds(3));
+}
 
 tokenResponse.EnsureSuccessStatusCode();
 var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
@@ -62,19 +86,30 @@ var clientInternalId = clientsResponse[0].GetProperty("id").GetString()!;
 if (logger.IsEnabled(LogLevel.Information))
     logger.LogInformation("Found BFF client internal ID: {Id}", clientInternalId);
 
+var uris = new List<string>
+{
+    $"{bffBaseUrl}/signin-oidc",
+    $"{bffBaseUrl}/*"
+};
+uris.AddRange(blazorUrls.SelectMany(u => new[] { $"{u}/signin-oidc", $"{u}/*" }));
+
+var origins = new List<string> { bffBaseUrl };
+origins.AddRange(blazorUrls);
+
+var logoutRedirects = new List<string>
+{
+    $"{bffBaseUrl}/signout-callback-oidc",
+    $"{bffBaseUrl}/*"
+};
+logoutRedirects.AddRange(blazorUrls.Select(u => $"{u}/*"));
+
 var patch = new
 {
-    redirectUris = new[]
-    {
-        $"{bffBaseUrl}/signin-oidc",
-        $"{bffBaseUrl}/*",
-        $"{blazorUrl}/signin-oidc",
-        $"{blazorUrl}/*"
-    },
-    webOrigins = new[] { bffBaseUrl, blazorUrl },
+    redirectUris = uris.Distinct().ToArray(),
+    webOrigins = origins.Distinct().ToArray(),
     attributes = new Dictionary<string, string>
     {
-        ["post.logout.redirect.uris"] = $"{bffBaseUrl}/signout-callback-oidc##{bffBaseUrl}/*##{blazorUrl}/*"
+        ["post.logout.redirect.uris"] = string.Join("##", logoutRedirects.Distinct())
     }
 };
 
