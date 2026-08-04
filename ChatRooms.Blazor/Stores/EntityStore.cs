@@ -39,15 +39,20 @@ public abstract class EntityStore<TItem>
 
     protected void RemoveWhere(Func<TItem, bool> predicate)
     {
+        var anyRemoved = false;
         lock (_lock)
         {
-            _items.RemoveAll(p => predicate(p));
+           var removedCount = _items.RemoveAll(p => predicate(p));
+            anyRemoved = removedCount > 0;
         }
-        NotifyStateChanged();
+
+        if(anyRemoved)
+            NotifyStateChanged();
     }
 
     protected void UpdateWhere(Func<TItem, bool> predicate, Func<TItem, TItem> update)
     {
+        var changed = false;
         lock (_lock)
         {
             for (var i = 0; i < _items.Count; i++)
@@ -55,10 +60,13 @@ public abstract class EntityStore<TItem>
                 if (predicate(_items[i]))
                 {
                     _items[i] = update(_items[i]);
+                    changed = true;
                 }
             }
         }
-        NotifyStateChanged();
+
+        if(changed)
+            NotifyStateChanged();
     }
 
     public void Invalidate()
