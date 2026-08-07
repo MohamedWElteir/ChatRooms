@@ -36,7 +36,7 @@ public sealed class ConcurrencyBehaviorTests
     public async Task Handle_DbUpdateConcurrencyException_ShouldThrowConcurrencyConflictException()
     {
         var command = new ConcurrencyTestCommand();
-       static Task<string> next(CancellationToken _ = default) => throw new DbUpdateConcurrencyException();
+        static Task<string> next(CancellationToken _ = default) => throw new DbUpdateConcurrencyException();
 
         var ex = await Assert.ThrowsAsync<ConcurrencyConflictException>(() =>
             _behavior.Handle(command, next, CancellationToken.None));

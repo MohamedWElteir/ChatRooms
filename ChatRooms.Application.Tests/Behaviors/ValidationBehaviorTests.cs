@@ -58,7 +58,7 @@ public sealed class ValidationBehaviorTests
 
         var behavior = new ValidationBehavior<ValidationTestCommand, string>([validatorMock.Object]);
         var command = new ValidationTestCommand();
-       static Task<string> next(CancellationToken _ = default) => Task.FromResult("success");
+        static Task<string> next(CancellationToken _ = default) => Task.FromResult("success");
 
         var ex = await Assert.ThrowsAsync<ValidationException>(() =>
             behavior.Handle(command, next, CancellationToken.None));

@@ -42,11 +42,11 @@ public abstract class EntityStore<TItem>
         var anyRemoved = false;
         lock (_lock)
         {
-           var removedCount = _items.RemoveAll(p => predicate(p));
+            var removedCount = _items.RemoveAll(p => predicate(p));
             anyRemoved = removedCount > 0;
         }
 
-        if(anyRemoved)
+        if (anyRemoved)
             NotifyStateChanged();
     }
 
@@ -65,7 +65,7 @@ public abstract class EntityStore<TItem>
             }
         }
 
-        if(changed)
+        if (changed)
             NotifyStateChanged();
     }
 
