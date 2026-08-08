@@ -47,4 +47,32 @@ public sealed class OutboxRepository(
 
         return messages;
     }
+
+    public async Task<int> RenewLeaseAsync(
+        IReadOnlyList<Guid> messageIds,
+        string workerId,
+        TimeSpan leaseDuration,
+        CancellationToken cancellationToken)
+    {
+        if (messageIds.Count == 0)
+            return 0;
+
+        var now = DateTimeUtc.FromUtc(DateTime.UtcNow);
+        var leaseUntil =
+            DateTimeUtc.FromUtc(DateTime.UtcNow.Add(leaseDuration));
+
+        var ids = messageIds.ToArray();
+
+        return await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             UPDATE "OutboxMessages"
+             SET "ProcessingLeaseUntil" = {leaseUntil}
+             WHERE "Id" = ANY({ids})
+               AND "ProcessingBy" = {workerId}
+               AND "ProcessingLeaseUntil" > {now}
+               AND "IsProcessed" = false
+               AND "IsDeadLetter" = false
+             """,
+            cancellationToken);
+    }
 }

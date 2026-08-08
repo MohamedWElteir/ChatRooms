@@ -16,9 +16,16 @@ var keycloakBaseUrl = config["services:keycloak:http:0"]
 var bffBaseUrl = config["services:chatrooms-bff:http:0"]
     ?? throw new InvalidOperationException("BFF service URL not found.");
 
-var blazorUrl = config["services:chatrooms-blazor:http:0"]
-    ?? config["services:chatrooms-blazor:https:0"]
-    ?? throw new InvalidOperationException("Blazor service URL not found.");
+var blazorUrlHttps = config["services:chatrooms-blazor:https:0"];
+var blazorUrlHttp = config["services:chatrooms-blazor:http:0"];
+if (blazorUrlHttps is null && blazorUrlHttp is null)
+    throw new InvalidOperationException("Blazor service URL not found.");
+
+var blazorUrls = new[] { blazorUrlHttps, blazorUrlHttp }
+    .Where(u => u is not null)
+    .Select(u => u!.TrimEnd('/'))
+    .Distinct()
+    .ToArray();
 
 var adminUser = config["Keycloak:AdminUser"] ?? "admin";
 var adminPass = config["Keycloak:AdminPassword"] ?? "admin";
@@ -31,19 +38,37 @@ if (logger.IsEnabled(LogLevel.Information))
 var httpFactory = app.Services.GetRequiredService<IHttpClientFactory>();
 using var http = httpFactory.CreateClient();
 
-var tokenResponse = await http.PostAsync(
-    $"{keycloakBaseUrl}/realms/master/protocol/openid-connect/token",
-    new FormUrlEncodedContent(new Dictionary<string, string>
-    {
-        ["grant_type"] = "password",
-        ["client_id"] = "admin-cli",
-        ["username"] = adminUser,
-        ["password"] = adminPass
-    }));
+string? adminToken = null;
+for (var attempt = 1; attempt <= 10; attempt++)
+{
+    using var tokenResponse = await http.PostAsync(
+        $"{keycloakBaseUrl}/realms/master/protocol/openid-connect/token",
+        new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["grant_type"] = "password",
+            ["client_id"] = "admin-cli",
+            ["username"] = adminUser,
+            ["password"] = adminPass
+        }), app.Lifetime.ApplicationStopping);
 
-tokenResponse.EnsureSuccessStatusCode();
-var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
-var adminToken = tokenJson.GetProperty("access_token").GetString()!;
+    if (tokenResponse.IsSuccessStatusCode)
+    {
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>(
+            app.Lifetime.ApplicationStopping);
+        adminToken = tokenJson.GetProperty("access_token").GetString();
+        break;
+    }
+
+    if (logger.IsEnabled(LogLevel.Warning))
+        logger.LogWarning("Admin token attempt {Attempt}/10 failed with status {Status}.",
+            attempt, tokenResponse.StatusCode);
+
+    if (attempt < 10)
+        await Task.Delay(TimeSpan.FromSeconds(3), app.Lifetime.ApplicationStopping);
+}
+
+if (adminToken is null)
+    throw new InvalidOperationException("Unable to acquire a Keycloak admin token after 10 attempts.");
 
 http.DefaultRequestHeaders.Authorization =
     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
@@ -62,23 +87,27 @@ var clientInternalId = clientsResponse[0].GetProperty("id").GetString()!;
 if (logger.IsEnabled(LogLevel.Information))
     logger.LogInformation("Found BFF client internal ID: {Id}", clientInternalId);
 
+var redirectUris = new[] { $"{bffBaseUrl}/signin-oidc" }
+    .Concat(blazorUrls.Select(url => $"{url}/signin-oidc"))
+    .Distinct()
+    .ToArray();
+
+var logoutRedirectUris = new[] { $"{bffBaseUrl}/signout-callback-oidc" }
+    .Concat(blazorUrls.Select(url => $"{url}/signout-callback-oidc"))
+    .Distinct()
+    .ToArray();
+
 var patch = new
 {
-    redirectUris = new[]
-    {
-        $"{bffBaseUrl}/signin-oidc",
-        $"{bffBaseUrl}/*",
-        $"{blazorUrl}/signin-oidc",
-        $"{blazorUrl}/*"
-    },
-    webOrigins = new[] { bffBaseUrl, blazorUrl },
+    redirectUris,
+    webOrigins = blazorUrls.Append(bffBaseUrl).Distinct().ToArray(),
     attributes = new Dictionary<string, string>
     {
-        ["post.logout.redirect.uris"] = $"{bffBaseUrl}/signout-callback-oidc##{bffBaseUrl}/*##{blazorUrl}/*"
+        ["post.logout.redirect.uris"] = string.Join("##", logoutRedirectUris)
     }
 };
 
-var patchResponse = await http.PutAsJsonAsync(
+using var patchResponse = await http.PutAsJsonAsync(
     $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}",
     patch);
 
@@ -110,7 +139,7 @@ if (!hasApiAudienceMapper)
         }
     };
 
-    var mapperResponse = await http.PostAsJsonAsync(
+    using var mapperResponse = await http.PostAsJsonAsync(
         $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}/protocol-mappers/models",
         audienceMapperPayload);
 
@@ -121,9 +150,9 @@ if (!hasApiAudienceMapper)
     }
     else
     {
-        var error = await mapperResponse.Content.ReadAsStringAsync();
         if (logger.IsEnabled(LogLevel.Warning))
-            logger.LogWarning("Failed to add api-audience-mapper: {Error}", error);
+            logger.LogWarning("Failed to add api-audience-mapper with status {Status}.",
+                mapperResponse.StatusCode);
     }
 }
 else
@@ -173,7 +202,7 @@ if (realmMgmtClients is not null && realmMgmtClients.Length > 0)
             new { id = manageUsersRoleId, name = "manage-users" }
         };
 
-        var roleMappingResponse = await http.PostAsJsonAsync(
+        using var roleMappingResponse = await http.PostAsJsonAsync(
             $"{keycloakBaseUrl}/admin/realms/{realm}/users/{serviceAccountUserId}/role-mappings/clients/{realmMgmtClientId}",
             roleMappingPayload);
 
@@ -184,9 +213,9 @@ if (realmMgmtClients is not null && realmMgmtClients.Length > 0)
         }
         else
         {
-            var error = await roleMappingResponse.Content.ReadAsStringAsync();
             if (logger.IsEnabled(LogLevel.Warning))
-                logger.LogWarning("Failed to grant manage-users role: {Error}", error);
+                logger.LogWarning("Failed to grant manage-users role with status {Status}.",
+                    roleMappingResponse.StatusCode);
         }
     }
     else
@@ -284,7 +313,7 @@ if (userProfileComponents is not null && userProfileComponents.Length > 0)
 
     var updateJson = JsonSerializer.Serialize(updateComponent, new JsonSerializerOptions { WriteIndented = false });
 
-    var userProfileResponse = await http.PutAsync(
+    using var userProfileResponse = await http.PutAsync(
         $"{keycloakBaseUrl}/admin/realms/{realm}/components/{componentId}",
         new StringContent(updateJson, System.Text.Encoding.UTF8, "application/json"));
 
@@ -295,9 +324,9 @@ if (userProfileComponents is not null && userProfileComponents.Length > 0)
     }
     else
     {
-        var error = await userProfileResponse.Content.ReadAsStringAsync();
         if (logger.IsEnabled(LogLevel.Warning))
-            logger.LogWarning("Failed to update user profile: {Error}", error);
+            logger.LogWarning("Failed to update user profile with status {Status}.",
+                userProfileResponse.StatusCode);
     }
 }
 else

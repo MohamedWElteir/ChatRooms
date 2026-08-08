@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddSingleton(JsonOptionsFactory.Create());
         services.AddSingleton<IOutboxMessageFactory, OutboxMessageFactory>();
         services.AddSingleton<IOutboxMessageProcessor, OutboxMessageProcessor>();
+        services.AddSingleton<OutboxBatchProcessor>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddDbContext<WriteDbContext>(options =>
         {
@@ -69,7 +70,9 @@ public static class DependencyInjection
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = configuration["Keycloak:Authority"],
                     ValidateAudience = true,
+                    ValidAudience = "chatrooms-api",
                     ValidateLifetime = true,
                     NameClaimType = "preferred_username",
                     RoleClaimType = "roles"

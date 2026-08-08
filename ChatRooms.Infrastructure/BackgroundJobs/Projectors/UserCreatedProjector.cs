@@ -2,6 +2,7 @@ using ChatRooms.Domain.Users.Events;
 using ChatRooms.DTOs.Users;
 using ChatRooms.Infrastructure.Persistence.DB.Read;
 using System.Text.Json;
+using MongoDB.Driver;
 
 namespace ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 
@@ -19,6 +20,13 @@ public sealed class UserCreatedProjector(ReadDbContext readDbContext, JsonSerial
             Gender: domainEvent.Gender.ToString(),
             Version: domainEvent.AggregateVersion);
 
-        await readDbContext.Users.InsertOneAsync(newUserDto, cancellationToken: cancellationToken);
+        await readDbContext.Users.ReplaceOneAsync(
+            u => u.Id == newUserDto.Id,
+            newUserDto,
+            new ReplaceOptions
+            {
+                IsUpsert = true
+            },
+            cancellationToken: cancellationToken);
     }
 }

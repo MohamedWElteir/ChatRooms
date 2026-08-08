@@ -24,6 +24,7 @@
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="ChatRooms.Application.Tests/ChatRooms.Application.Tests.csproj" />
+    <Project Path="ChatRooms.Blazor.Tests/ChatRooms.Blazor.Tests.csproj" />
     <Project Path="ChatRooms.Domain.Tests/ChatRooms.Domain.Tests.csproj" />
     <Project Path="ChatRooms.Infrastructure.Tests/ChatRooms.Infrastructure.Tests.csproj" />
     <Project Path="ChatRooms.Presentation.Tests/ChatRooms.Presentation.Tests.csproj" />

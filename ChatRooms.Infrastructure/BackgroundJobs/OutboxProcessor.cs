@@ -11,7 +11,7 @@ namespace ChatRooms.Infrastructure.BackgroundJobs;
 
 public sealed class OutboxProcessor(
     IServiceScopeFactory scopeFactory,
-    IOutboxMessageProcessor messageProcessor,
+    OutboxBatchProcessor batchProcessor,
     ILogger<OutboxProcessor> logger,
     IOptions<OutboxOptions> options) : BackgroundService
 {
@@ -73,18 +73,14 @@ public sealed class OutboxProcessor(
         if (messages.Count == 0)
             return;
 
-        foreach (var message in messages)
-        {
-            var projector =
+        await batchProcessor.ProcessBatchAsync(
+            messages,
+            outboxRepository,
+            _workerId,
+            messageType =>
                 scope.ServiceProvider
-                    .GetKeyedService<IEventProjector>(
-                        message.Type);
-
-            await messageProcessor.ProcessAsync(
-                message,
-                projector,
-                cancellationToken);
-        }
+                    .GetKeyedService<IEventProjector>(messageType),
+            cancellationToken);
 
         await writeDbContext.SaveChangesAsync(
             cancellationToken);

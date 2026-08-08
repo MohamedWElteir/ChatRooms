@@ -2,16 +2,25 @@ using System.Net.Http.Headers;
 
 namespace ChatRooms.Blazor.HttpClients;
 
-public sealed class AuthorizationDelegatingHandler(AccessTokenStore store)
-    : DelegatingHandler
+public sealed class AuthorizationDelegatingHandler(
+    UserContext userContext,
+    AccessTokenRefresher accessTokenRefresher) : DelegatingHandler
 {
-    protected override Task<HttpResponseMessage> SendAsync(
+    protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (store.Token is not null)
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", store.Token);
+        var accessToken = await accessTokenRefresher.GetValidAccessTokenAsync(
+            userContext, cancellationToken);
 
-        return base.SendAsync(request, cancellationToken);
+        if (accessToken is null)
+        {
+            userContext.MarkSessionExpired();
+            throw new UnauthorizedAccessException(
+                "The user session is expired. Authenticate again before calling the API.");
+        }
+
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Bearer", accessToken);
+        return await base.SendAsync(request, cancellationToken);
     }
 }
