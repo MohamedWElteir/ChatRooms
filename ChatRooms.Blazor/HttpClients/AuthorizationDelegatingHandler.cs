@@ -2,24 +2,16 @@ using System.Net.Http.Headers;
 
 namespace ChatRooms.Blazor.HttpClients;
 
-public sealed class AuthorizationDelegatingHandler(
-    IHttpContextAccessor httpContextAccessor,
-    UserContext userContext,
-    TokenStore tokenStore)
+public sealed class AuthorizationDelegatingHandler(UserContext userContext)
     : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var sub = httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value
-               ?? userContext.Sub;
-
-        if (sub is not null)
+        if (userContext.HasValidAccessToken)
         {
-            var token = tokenStore.Get(sub);
-            if (token is not null)
-                request.Headers.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
+            request.Headers.Authorization = new AuthenticationHeaderValue(
+                "Bearer", userContext.AccessToken);
         }
 
         return base.SendAsync(request, cancellationToken);

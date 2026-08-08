@@ -5,6 +5,7 @@ using ChatRooms.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorServices();
-builder.Services.AddSingleton<TokenStore>();
 builder.Services.AddScoped<UserContext>();
+builder.Services.AddScoped<CircuitHandler, UserContextCircuitHandler>();
 builder.Services.AddTransient<AuthorizationDelegatingHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -32,6 +33,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.UsePkce = true;
         options.SaveTokens = true;
+        options.UseTokenLifetime = true;
         options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
         options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
         options.GetClaimsFromUserInfoEndpoint = true;
@@ -58,21 +60,6 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.Use(async (context, next) =>
-{
-    var sub = context.User.FindFirst("sub")?.Value;
-    if (sub is not null)
-    {
-        var token = await context.GetTokenAsync("access_token");
-        if (token is not null)
-        {
-            var store = context.RequestServices.GetRequiredService<TokenStore>();
-            store.Set(sub, token);
-        }
-    }
-    await next();
-});
 
 app.MapGet("/login", () => Results.Challenge(
     new AuthenticationProperties { RedirectUri = "/rooms" },

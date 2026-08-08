@@ -27,8 +27,6 @@ var blazorUrls = new[] { blazorUrlHttps, blazorUrlHttp }
     .Distinct()
     .ToArray();
 
-var blazorUrl = blazorUrlHttps ?? blazorUrlHttp!;
-
 var adminUser = config["Keycloak:AdminUser"] ?? "admin";
 var adminPass = config["Keycloak:AdminPassword"] ?? "admin";
 var realm = config["Keycloak:Realm"] ?? "chatrooms";
@@ -40,10 +38,10 @@ if (logger.IsEnabled(LogLevel.Information))
 var httpFactory = app.Services.GetRequiredService<IHttpClientFactory>();
 using var http = httpFactory.CreateClient();
 
-HttpResponseMessage tokenResponse = null!;
+string? adminToken = null;
 for (var attempt = 1; attempt <= 10; attempt++)
 {
-    tokenResponse = await http.PostAsync(
+    using var tokenResponse = await http.PostAsync(
         $"{keycloakBaseUrl}/realms/master/protocol/openid-connect/token",
         new FormUrlEncodedContent(new Dictionary<string, string>
         {
@@ -51,23 +49,26 @@ for (var attempt = 1; attempt <= 10; attempt++)
             ["client_id"] = "admin-cli",
             ["username"] = adminUser,
             ["password"] = adminPass
-        }));
+        }), app.Lifetime.ApplicationStopping);
 
     if (tokenResponse.IsSuccessStatusCode)
-        break;
-
-    if (logger.IsEnabled(LogLevel.Warning))
     {
-        var body = await tokenResponse.Content.ReadAsStringAsync();
-        logger.LogWarning("Admin token attempt {Attempt}/10 failed: {Status}. Body: {Body}", attempt, tokenResponse.StatusCode, body);
+        var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>(
+            app.Lifetime.ApplicationStopping);
+        adminToken = tokenJson.GetProperty("access_token").GetString();
+        break;
     }
 
-    await Task.Delay(TimeSpan.FromSeconds(3));
+    if (logger.IsEnabled(LogLevel.Warning))
+        logger.LogWarning("Admin token attempt {Attempt}/10 failed with status {Status}.",
+            attempt, tokenResponse.StatusCode);
+
+    if (attempt < 10)
+        await Task.Delay(TimeSpan.FromSeconds(3), app.Lifetime.ApplicationStopping);
 }
 
-tokenResponse.EnsureSuccessStatusCode();
-var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
-var adminToken = tokenJson.GetProperty("access_token").GetString()!;
+if (adminToken is null)
+    throw new InvalidOperationException("Unable to acquire a Keycloak admin token after 10 attempts.");
 
 http.DefaultRequestHeaders.Authorization =
     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminToken);
@@ -86,34 +87,27 @@ var clientInternalId = clientsResponse[0].GetProperty("id").GetString()!;
 if (logger.IsEnabled(LogLevel.Information))
     logger.LogInformation("Found BFF client internal ID: {Id}", clientInternalId);
 
-var uris = new List<string>
-{
-    $"{bffBaseUrl}/signin-oidc",
-    $"{bffBaseUrl}/*"
-};
-uris.AddRange(blazorUrls.SelectMany(u => new[] { $"{u}/signin-oidc", $"{u}/*" }));
+var redirectUris = new[] { $"{bffBaseUrl}/signin-oidc" }
+    .Concat(blazorUrls.Select(url => $"{url}/signin-oidc"))
+    .Distinct()
+    .ToArray();
 
-var origins = new List<string> { bffBaseUrl };
-origins.AddRange(blazorUrls);
-
-var logoutRedirects = new List<string>
-{
-    $"{bffBaseUrl}/signout-callback-oidc",
-    $"{bffBaseUrl}/*"
-};
-logoutRedirects.AddRange(blazorUrls.Select(u => $"{u}/*"));
+var logoutRedirectUris = new[] { $"{bffBaseUrl}/signout-callback-oidc" }
+    .Concat(blazorUrls.Select(url => $"{url}/signout-callback-oidc"))
+    .Distinct()
+    .ToArray();
 
 var patch = new
 {
-    redirectUris = uris.Distinct().ToArray(),
-    webOrigins = origins.Distinct().ToArray(),
+    redirectUris,
+    webOrigins = blazorUrls.Append(bffBaseUrl).Distinct().ToArray(),
     attributes = new Dictionary<string, string>
     {
-        ["post.logout.redirect.uris"] = string.Join("##", logoutRedirects.Distinct())
+        ["post.logout.redirect.uris"] = string.Join("##", logoutRedirectUris)
     }
 };
 
-var patchResponse = await http.PutAsJsonAsync(
+using var patchResponse = await http.PutAsJsonAsync(
     $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}",
     patch);
 
@@ -145,7 +139,7 @@ if (!hasApiAudienceMapper)
         }
     };
 
-    var mapperResponse = await http.PostAsJsonAsync(
+    using var mapperResponse = await http.PostAsJsonAsync(
         $"{keycloakBaseUrl}/admin/realms/{realm}/clients/{clientInternalId}/protocol-mappers/models",
         audienceMapperPayload);
 
@@ -156,9 +150,9 @@ if (!hasApiAudienceMapper)
     }
     else
     {
-        var error = await mapperResponse.Content.ReadAsStringAsync();
         if (logger.IsEnabled(LogLevel.Warning))
-            logger.LogWarning("Failed to add api-audience-mapper: {Error}", error);
+            logger.LogWarning("Failed to add api-audience-mapper with status {Status}.",
+                mapperResponse.StatusCode);
     }
 }
 else
@@ -208,7 +202,7 @@ if (realmMgmtClients is not null && realmMgmtClients.Length > 0)
             new { id = manageUsersRoleId, name = "manage-users" }
         };
 
-        var roleMappingResponse = await http.PostAsJsonAsync(
+        using var roleMappingResponse = await http.PostAsJsonAsync(
             $"{keycloakBaseUrl}/admin/realms/{realm}/users/{serviceAccountUserId}/role-mappings/clients/{realmMgmtClientId}",
             roleMappingPayload);
 
@@ -219,9 +213,9 @@ if (realmMgmtClients is not null && realmMgmtClients.Length > 0)
         }
         else
         {
-            var error = await roleMappingResponse.Content.ReadAsStringAsync();
             if (logger.IsEnabled(LogLevel.Warning))
-                logger.LogWarning("Failed to grant manage-users role: {Error}", error);
+                logger.LogWarning("Failed to grant manage-users role with status {Status}.",
+                    roleMappingResponse.StatusCode);
         }
     }
     else
@@ -319,7 +313,7 @@ if (userProfileComponents is not null && userProfileComponents.Length > 0)
 
     var updateJson = JsonSerializer.Serialize(updateComponent, new JsonSerializerOptions { WriteIndented = false });
 
-    var userProfileResponse = await http.PutAsync(
+    using var userProfileResponse = await http.PutAsync(
         $"{keycloakBaseUrl}/admin/realms/{realm}/components/{componentId}",
         new StringContent(updateJson, System.Text.Encoding.UTF8, "application/json"));
 
@@ -330,9 +324,9 @@ if (userProfileComponents is not null && userProfileComponents.Length > 0)
     }
     else
     {
-        var error = await userProfileResponse.Content.ReadAsStringAsync();
         if (logger.IsEnabled(LogLevel.Warning))
-            logger.LogWarning("Failed to update user profile: {Error}", error);
+            logger.LogWarning("Failed to update user profile with status {Status}.",
+                userProfileResponse.StatusCode);
     }
 }
 else

@@ -7,8 +7,6 @@
 @inject RoomStore Store
 @inject NavigationManager Nav
 @inject IConfiguration Config
-@inject UserContext CurrentUser
-@inject AuthenticationStateProvider Auth
 
 <PageTitle>Rooms · ChatRooms</PageTitle>
 
@@ -79,9 +77,6 @@
     protected override async Task OnInitializedAsync()
     {
         Store.StateChanged += OnStateChanged;
-
-        var state = await Auth.GetAuthenticationStateAsync();
-        CurrentUser.Sub = state.User.FindFirst("sub")?.Value;
 
         if (!Store.IsLoaded)
             await LoadRooms();
