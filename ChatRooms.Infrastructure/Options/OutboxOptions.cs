@@ -7,4 +7,5 @@ public sealed class OutboxOptions
     public int MaxRetryCount { get; init; } = 5;
     public int BatchSize { get; init; } = 20;
     public int PollingIntervalSeconds { get; init; } = 3;
+    public int ProcessingLeaseDurationMinutes { get; init; } = 2;
 }

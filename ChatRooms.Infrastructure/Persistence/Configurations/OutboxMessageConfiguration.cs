@@ -42,7 +42,19 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
 
         builder.Property(o => o.IsProcessed)
             .IsRequired();
+        
+        builder.Property(x => x.ProcessingLeaseUntil)
+            .HasColumnType("timestamp with time zone");
 
-        builder.HasIndex(o => new { o.IsProcessed, o.IsDeadLetter, o.OccurredOn });
+        builder.Property(x => x.ProcessingBy)
+            .HasMaxLength(200);
+        
+        builder.HasIndex(o => new
+        {
+            o.IsProcessed, 
+            o.IsDeadLetter, 
+            o.ProcessingLeaseUntil,
+            o.OccurredOn
+        });
     }
 }

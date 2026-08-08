@@ -11,6 +11,8 @@ public sealed class OutboxMessage
 
     public string? ErrorMessage { get; private set; }
     public DateTimeUtc? ProcessedOn { get; private set; }
+    public DateTimeUtc? ProcessingLeaseUntil { get; private set; }
+    public string? ProcessingBy { get; private set; }
     public int RetryCount { get; private set; }
     public bool IsProcessed { get; private set; }
     public bool IsDeadLetter { get; private set; }
@@ -29,17 +31,30 @@ public sealed class OutboxMessage
             RetryCount = 0
         };
     }
+    
+    public void Claim(
+        string workerId,
+        DateTimeUtc leaseUntil)
+    {
+        ProcessingBy = workerId;
+        ProcessingLeaseUntil = leaseUntil;
+    }
+    
     public void MarkAsProcessed(DateTimeUtc processedOn)
     {
         ProcessedOn = processedOn;
         IsProcessed = true;
         ErrorMessage = null;
+        ProcessingBy = null;
+        ProcessingLeaseUntil = null;
     }
 
     public void RecordFailure(string error)
     {
         ErrorMessage = error;
         RetryCount++;
+        ProcessingBy = null;
+        ProcessingLeaseUntil = null;
     }
     public void MarkAsDeadLetter(DateTimeUtc deadLetteredOn, string finalError)
     {
@@ -47,5 +62,7 @@ public sealed class OutboxMessage
         IsProcessed = false;
         IsDeadLetter = true;
         ErrorMessage = $"[DEAD LETTER] {finalError}";
+        ProcessingBy = null;
+        ProcessingLeaseUntil = null;
     }
 }

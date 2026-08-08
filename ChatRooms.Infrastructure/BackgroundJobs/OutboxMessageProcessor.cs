@@ -27,7 +27,15 @@ public sealed class OutboxMessageProcessor(
 
         if (projector is null)
         {
-            logger.LogWarning("No projector found for event type {EventType}", message.Type);
+            logger.LogCritical(
+                "No projector found for event type {EventType}. " +
+                "Moving message {MessageId} to Dead Letter Queue.",
+                message.Type,
+                message.Id);
+
+            message.MarkAsDeadLetter(
+                DateTimeUtc.FromUtc(dateTimeProvider.UtcNow),
+                $"No projector registered for event type '{message.Type}'.");
             return;
         }
 
