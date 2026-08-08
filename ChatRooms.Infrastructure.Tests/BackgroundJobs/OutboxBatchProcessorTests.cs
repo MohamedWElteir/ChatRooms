@@ -65,9 +65,50 @@ public class OutboxBatchProcessorTests
         }
     }
 
+    /// <summary>
+    /// Simulates a message whose lease has already expired: even though the
+    /// worker still owns it (<c>ProcessingBy</c> matches), the renewal guard
+    /// (<c>ProcessingLeaseUntil &gt; now</c>) rejects it with zero rows.
+    /// </summary>
+    private sealed class ExpiredLeaseOutboxRepository : IOutboxRepository
+    {
+        public Task<List<OutboxMessage>> ClaimBatchAsync(
+            int batchSize,
+            string workerId,
+            TimeSpan leaseDuration,
+            CancellationToken cancellationToken)
+            => Task.FromResult(new List<OutboxMessage>());
+
+        public Task<int> RenewLeaseAsync(
+            IReadOnlyList<Guid> messageIds,
+            string workerId,
+            TimeSpan leaseDuration,
+            CancellationToken cancellationToken)
+            => Task.FromResult(0);
+    }
+
+    [Fact]
+    public async Task ProcessBatchAsync_WhenLeaseExpiredForSameWorker_AbandonsBatch()
+    {
+        var messageProcessor = new FakeOutboxMessageProcessor();
+        var sut = CreateProcessor(messageProcessor);
+        var repo = new ExpiredLeaseOutboxRepository();
+        var messages = new[]
+        {
+            CreateMessage(),
+            CreateMessage(),
+            CreateMessage()
+        };
+
+        await sut.ProcessBatchAsync(
+            messages, repo, "worker-1", _ => new FakeProjector(), CancellationToken.None);
+
+        Assert.Empty(messageProcessor.Processed);
+    }
+
     private static OutboxBatchProcessor CreateProcessor(FakeOutboxMessageProcessor messageProcessor) => new(
         messageProcessor,
-        Microsoft.Extensions.Options.Options.Create(new ChatRooms.Infrastructure.Options.OutboxOptions()),
+        Microsoft.Extensions.Options.Options.Create(new Options.OutboxOptions()),
         NullLogger<OutboxBatchProcessor>.Instance);
 
     private static OutboxMessage CreateMessage() =>

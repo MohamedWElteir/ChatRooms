@@ -57,6 +57,7 @@ public sealed class OutboxRepository(
         if (messageIds.Count == 0)
             return 0;
 
+        var now = DateTimeUtc.FromUtc(DateTime.UtcNow);
         var leaseUntil =
             DateTimeUtc.FromUtc(DateTime.UtcNow.Add(leaseDuration));
 
@@ -68,7 +69,7 @@ public sealed class OutboxRepository(
              SET "ProcessingLeaseUntil" = {leaseUntil}
              WHERE "Id" = ANY({ids})
                AND "ProcessingBy" = {workerId}
-               AND "ProcessingLeaseUntil" IS NOT NULL
+               AND "ProcessingLeaseUntil" > {now}
                AND "IsProcessed" = false
                AND "IsDeadLetter" = false
              """,

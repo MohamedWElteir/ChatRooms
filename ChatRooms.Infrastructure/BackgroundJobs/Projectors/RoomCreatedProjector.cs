@@ -34,16 +34,18 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
             newRoomDto,
             cancellationToken: cancellationToken);
 
-        if (result.MatchedCount == 0)
-        {
-            var exists = await readDbContext.Rooms
-                .Find(r => r.Id == newRoomDto.Id)
-                .AnyAsync(cancellationToken);
-
-            if (!exists)
-                await readDbContext.Rooms.InsertOneAsync(
-                    newRoomDto,
-                    cancellationToken: cancellationToken);
-        }
+        if (result.MatchedCount != 0)  return;
+        
+        await readDbContext.Rooms.UpdateOneAsync(
+            Builders<RoomDto>.Filter.Eq(r => r.Id, newRoomDto.Id),
+            Builders<RoomDto>.Update
+                .SetOnInsert(r => r.Name, newRoomDto.Name)
+                .SetOnInsert(r => r.Code, newRoomDto.Code)
+                .SetOnInsert(r => r.Capacity, newRoomDto.Capacity)
+                .SetOnInsert(r => r.CurrentParticipantsCount, newRoomDto.CurrentParticipantsCount)
+                .SetOnInsert(r => r.Status, newRoomDto.Status)
+                .SetOnInsert(r => r.Version, newRoomDto.Version),
+            new UpdateOptions { IsUpsert = true },
+            cancellationToken: cancellationToken);
     }
 }
