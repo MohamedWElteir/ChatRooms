@@ -1,5 +1,6 @@
 ﻿using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
+using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,13 +12,13 @@ namespace ChatRooms.Infrastructure.BackgroundJobs;
 public sealed class OutboxProcessor(
     IServiceScopeFactory scopeFactory,
     IOutboxMessageProcessor messageProcessor,
-    IOutboxRepository outboxRepository,
     ILogger<OutboxProcessor> logger,
     IOptions<OutboxOptions> options) : BackgroundService
 {
     private readonly OutboxOptions _options = options.Value;
 
-    private readonly string _workerId =  $"{Environment.MachineName}:{Guid.NewGuid():N}";
+    private readonly string _workerId =
+        $"{Environment.MachineName}:{Environment.ProcessId}:{Guid.NewGuid():N}";
 
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
@@ -51,17 +52,26 @@ public sealed class OutboxProcessor(
     private async Task ProcessOutboxMessagesAsync(
         CancellationToken cancellationToken)
     {
+        await using var scope =
+            scopeFactory.CreateAsyncScope();
+
+        var outboxRepository =
+            scope.ServiceProvider
+                .GetRequiredService<IOutboxRepository>();
+
+        var writeDbContext =
+            scope.ServiceProvider
+                .GetRequiredService<WriteDbContext>();
+
         var messages = await outboxRepository.ClaimBatchAsync(
             _options.BatchSize,
             _workerId,
-            TimeSpan.FromMinutes(_options.ProcessingLeaseDurationMinutes),
+            TimeSpan.FromMinutes(
+                _options.ProcessingLeaseDurationMinutes),
             cancellationToken);
 
         if (messages.Count == 0)
             return;
-
-        await using var scope =
-            scopeFactory.CreateAsyncScope();
 
         foreach (var message in messages)
         {
@@ -75,5 +85,8 @@ public sealed class OutboxProcessor(
                 projector,
                 cancellationToken);
         }
+
+        await writeDbContext.SaveChangesAsync(
+            cancellationToken);
     }
 }

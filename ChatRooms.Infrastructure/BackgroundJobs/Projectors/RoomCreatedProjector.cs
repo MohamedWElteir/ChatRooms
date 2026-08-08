@@ -12,7 +12,7 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
     public async Task ProjectAsync(string eventContent, CancellationToken cancellationToken)
     {
         var domainEvent = JsonSerializer.Deserialize<RoomCreatedDomainEvent>(eventContent, jsonOptions);
-        if (domainEvent is null) 
+        if (domainEvent is null)
             throw new JsonException(
             "Unable to deserialize RoomCreatedDomainEvent.");
 

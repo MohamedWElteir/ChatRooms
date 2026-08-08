@@ -31,7 +31,7 @@ public sealed class OutboxMessage
             RetryCount = 0
         };
     }
-    
+
     public void Claim(
         string workerId,
         DateTimeUtc leaseUntil)
@@ -39,7 +39,7 @@ public sealed class OutboxMessage
         ProcessingBy = workerId;
         ProcessingLeaseUntil = leaseUntil;
     }
-    
+
     public void MarkAsProcessed(DateTimeUtc processedOn)
     {
         ProcessedOn = processedOn;

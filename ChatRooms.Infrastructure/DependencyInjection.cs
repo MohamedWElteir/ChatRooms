@@ -42,6 +42,7 @@ public static class DependencyInjection
         services.AddSingleton(JsonOptionsFactory.Create());
         services.AddSingleton<IOutboxMessageFactory, OutboxMessageFactory>();
         services.AddSingleton<IOutboxMessageProcessor, OutboxMessageProcessor>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddDbContext<WriteDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
