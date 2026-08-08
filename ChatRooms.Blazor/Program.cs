@@ -19,6 +19,15 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorServices();
 builder.Services.AddScoped<UserContext>();
 builder.Services.AddScoped<CircuitHandler, UserContextCircuitHandler>();
+builder.Services.AddScoped<AccessTokenRefresher>();
+builder.Services.AddHttpClient("keycloak", client =>
+{
+    var authority = builder.Configuration["Keycloak:Authority"];
+    client.BaseAddress = new Uri(
+        authority is null
+            ? throw new InvalidOperationException("Keycloak:Authority is not configured.")
+            : new Uri(authority).GetLeftPart(UriPartial.Authority));
+});
 builder.Services.AddTransient<AuthorizationDelegatingHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
