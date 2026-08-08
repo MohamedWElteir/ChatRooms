@@ -69,7 +69,9 @@ public static class DependencyInjection
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = configuration["Keycloak:Authority"],
                     ValidateAudience = true,
+                    ValidAudience = "chatrooms-api",
                     ValidateLifetime = true,
                     NameClaimType = "preferred_username",
                     RoleClaimType = "roles"

@@ -2,7 +2,6 @@ using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Behaviors;
 using FluentValidation;
 using FluentValidation.Results;
-using MediatR;
 using Moq;
 
 namespace ChatRooms.Application.Tests.Behaviors;
