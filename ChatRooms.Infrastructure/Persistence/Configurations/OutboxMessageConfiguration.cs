@@ -44,7 +44,9 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
             .IsRequired();
 
         builder.Property(x => x.ProcessingLeaseUntil)
-            .HasColumnType("timestamp with time zone");
+            .HasConversion(
+                utc => utc.HasValue ? utc.Value.DateTime : (DateTime?)null,
+                value => value.HasValue ? DateTimeUtc.FromUtc(value.Value) : null);
 
         builder.Property(x => x.ProcessingBy)
             .HasMaxLength(200);
