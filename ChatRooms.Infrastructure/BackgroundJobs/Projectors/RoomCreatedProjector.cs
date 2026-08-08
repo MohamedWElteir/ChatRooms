@@ -34,8 +34,8 @@ public sealed class RoomCreatedProjector(ReadDbContext readDbContext, JsonSerial
             newRoomDto,
             cancellationToken: cancellationToken);
 
-        if (result.MatchedCount != 0)  return;
-        
+        if (result.MatchedCount != 0) return;
+
         await readDbContext.Rooms.UpdateOneAsync(
             Builders<RoomDto>.Filter.Eq(r => r.Id, newRoomDto.Id),
             Builders<RoomDto>.Update
