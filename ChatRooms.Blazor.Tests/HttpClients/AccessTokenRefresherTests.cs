@@ -196,7 +196,7 @@ public class AccessTokenRefresherTests
 
         var refresher = CreateRefresher(handler, userContext);
 
-        var captured = new byte[0];
+        var captured = Array.Empty<byte>();
         var inner = new StubHttpMessageHandler(request =>
         {
             captured = request.Headers.Authorization?.Parameter is null

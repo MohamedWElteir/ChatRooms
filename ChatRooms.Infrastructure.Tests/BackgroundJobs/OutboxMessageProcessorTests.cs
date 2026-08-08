@@ -4,7 +4,6 @@ using ChatRooms.Infrastructure.BackgroundJobs;
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Persistence.Outbox;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 
 namespace ChatRooms.Infrastructure.Tests.BackgroundJobs;
 

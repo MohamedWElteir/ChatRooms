@@ -1,5 +1,4 @@
-﻿using ChatRooms.Infrastructure.BackgroundJobs;
-using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
+﻿using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Infrastructure.Persistence.Outbox;
