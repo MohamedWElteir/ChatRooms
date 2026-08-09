@@ -12,7 +12,7 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
 {
     public RoomId RoomId { get; private set; }
     public UserId UserId { get; private set; }
-    public DateTimeUtc JoinedAt { get; private set; } = DateTimeUtc.NowUtc();
+    public DateTimeUtc JoinedAt { get; private set; }
     public DateTimeUtc? LeftAt { get; private set; }
 
     private RoomParticipant() { }
