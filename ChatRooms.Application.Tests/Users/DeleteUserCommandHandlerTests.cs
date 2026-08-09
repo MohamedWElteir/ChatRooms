@@ -35,7 +35,7 @@ public sealed class DeleteUserCommandHandlerTests
         _existingUser = createResult.Value!;
         _userId = _existingUser.Id;
 
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingUser);
 
         _handler = new DeleteUserCommandHandler(
@@ -58,7 +58,7 @@ public sealed class DeleteUserCommandHandlerTests
     [Fact]
     public async Task Handle_UserNotFound_ShouldReturnNotFoundError()
     {
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var command = new DeleteUserCommand(Guid.NewGuid(), DeletionReason.DeletedByUser);

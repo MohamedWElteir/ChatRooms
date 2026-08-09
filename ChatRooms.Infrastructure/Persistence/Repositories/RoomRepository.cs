@@ -8,22 +8,22 @@ namespace ChatRooms.Infrastructure.Persistence.Repositories;
 
 public sealed class RoomRepository(WriteDbContext dbContext) : IRoomRepository
 {
-    public async Task Add(Room room, CancellationToken cancellationToken)
+    public async Task AddAsync(Room room, CancellationToken cancellationToken)
     {
         await dbContext.Rooms.AddAsync(room, cancellationToken);
     }
 
-    public async Task<bool> Exists(RoomCode code, CancellationToken cancellationToken)
+    public async Task<bool> ExistsAsync(RoomCode code, CancellationToken cancellationToken)
     {
         return await dbContext.Rooms.AnyAsync(r => r.Code == code, cancellationToken);
     }
 
-    public async Task<Room?> GetByCode(RoomCode code, CancellationToken cancellationToken)
+    public async Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken)
     {
         return await dbContext.Rooms.FirstOrDefaultAsync(r => r.Code == code, cancellationToken);
     }
 
-    public async Task<Room?> GetById(RoomId id, CancellationToken cancellationToken)
+    public async Task<Room?> GetByIdAsync(RoomId id, CancellationToken cancellationToken)
     {
         return await dbContext.Rooms.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }

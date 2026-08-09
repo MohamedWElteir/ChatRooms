@@ -1,4 +1,5 @@
 ﻿using ChatRooms.Application.Abstractions.Persistence;
+using ChatRooms.Domain.RoomParticipants;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Users;
@@ -12,7 +13,7 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options, IOu
     public DbSet<Room> Rooms { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
-
+    public DbSet<RoomParticipant> RoomParticipants { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(WriteDbContext).Assembly);

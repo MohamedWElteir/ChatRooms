@@ -11,7 +11,7 @@ public sealed class RenameRoomCommandHandler(IRoomRepository roomRepository, IUn
 {
     public async Task<Result<string>> Handle(RenameRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.Id, cancellationToken);
+        var room = await roomRepository.GetByIdAsync(command.Id, cancellationToken);
         if (room is null) return RoomErrors.NotFound;
 
         var renameResult = room.Rename(command.NewName, dateTimeProvider.UtcNow);

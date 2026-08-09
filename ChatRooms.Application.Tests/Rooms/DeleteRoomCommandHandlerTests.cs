@@ -34,7 +34,7 @@ public sealed class DeleteRoomCommandHandlerTests
         _existingRoom = createResult.Value!;
         _roomId = _existingRoom.Id;
 
-        _roomRepositoryMock.Setup(x => x.GetById(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
+        _roomRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingRoom);
 
         _handler = new DeleteRoomCommandHandler(
@@ -57,7 +57,7 @@ public sealed class DeleteRoomCommandHandlerTests
     [Fact]
     public async Task Handle_RoomNotFound_ShouldReturnNotFoundError()
     {
-        _roomRepositoryMock.Setup(x => x.GetById(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
+        _roomRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Room?)null);
 
         var command = new DeleteRoomCommand(RoomId.From(Guid.NewGuid()), "Manual");

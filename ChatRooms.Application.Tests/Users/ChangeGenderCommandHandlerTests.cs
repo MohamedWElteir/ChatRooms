@@ -36,7 +36,7 @@ public sealed class ChangeGenderCommandHandlerTests
         _existingUser = createResult.Value!;
         _userId = _existingUser.Id;
 
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingUser);
 
         _handler = new ChangeGenderCommandHandler(
@@ -59,7 +59,7 @@ public sealed class ChangeGenderCommandHandlerTests
     [Fact]
     public async Task Handle_UserNotFound_ShouldReturnNotFoundError()
     {
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var command = new ChangeGenderCommand(Guid.NewGuid(), Gender.Female);

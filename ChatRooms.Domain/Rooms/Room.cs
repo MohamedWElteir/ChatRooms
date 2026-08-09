@@ -35,7 +35,7 @@ public sealed class Room : AggregateRoot<RoomId>
             case RoomCapacityChangedDomainEvent e:
                 Apply(e);
                 break;
-            case RoomParticipantJoinedDomainEvent e:
+            case RoomParticipantCountIncrementedDomainEvent e:
                 Apply(e);
                 break;
             case RoomParticipantLeftDomainEvent e:
@@ -69,7 +69,7 @@ public sealed class Room : AggregateRoot<RoomId>
         if (CurrentParticipantsCount >= Capacity.Value)
             return RoomErrors.CapacityReached;
 
-        Raise(new RoomParticipantJoinedDomainEvent(Id, occurredAt));
+        Raise(new RoomParticipantCountIncrementedDomainEvent(Id, occurredAt));
         return Result.Success();
     }
     public Result Leave(DateTimeUtc occurredAt)
@@ -180,7 +180,7 @@ public sealed class Room : AggregateRoot<RoomId>
         UpdatedAt = @event.OccurredAt;
     }
 
-    private void Apply(RoomParticipantJoinedDomainEvent @event)
+    private void Apply(RoomParticipantCountIncrementedDomainEvent @event)
     {
         CurrentParticipantsCount++;
         UpdatedAt = @event.OccurredAt;

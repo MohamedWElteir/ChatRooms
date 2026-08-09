@@ -1,11 +1,10 @@
+using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Domain.Users;
 using ChatRooms.Domain.Users.ValueObjects;
 
 namespace ChatRooms.Application.Users.Commands;
 
-public interface IUserRepository
+public interface IUserRepository : IRepository<User, UserId>
 {
-    Task<User?> GetById(UserId id, CancellationToken cancellationToken);
     Task<User?> GetByEmail(Email email, CancellationToken cancellationToken);
-    Task Add(User user, CancellationToken cancellationToken);
 }

@@ -11,7 +11,7 @@ public sealed class RenameUserCommandHandler(IUserRepository userRepository, IUn
 {
     public async Task<Result<string>> Handle(RenameUserCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(command.Id, cancellationToken);
+        var user = await userRepository.GetByIdAsync(command.Id, cancellationToken);
         if (user is null) return UserErrors.NotFound;
 
         var renameResult = user.Rename(command.NewName, dateTimeProvider.UtcNow);

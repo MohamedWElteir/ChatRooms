@@ -35,7 +35,7 @@ public sealed class RenameUserCommandHandlerTests
         _existingUser = createResult.Value!;
         _userId = _existingUser.Id;
 
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingUser);
 
         _handler = new RenameUserCommandHandler(
@@ -59,7 +59,7 @@ public sealed class RenameUserCommandHandlerTests
     [Fact]
     public async Task Handle_UserNotFound_ShouldReturnNotFoundError()
     {
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         var command = new RenameUserCommand(Guid.NewGuid(), "NewName");

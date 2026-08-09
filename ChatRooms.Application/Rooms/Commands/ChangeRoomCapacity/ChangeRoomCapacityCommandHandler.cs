@@ -11,7 +11,7 @@ public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomReposit
 {
     public async Task<Result> Handle(ChangeRoomCapacityCommand request, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(request.RoomId, cancellationToken);
+        var room = await roomRepository.GetByIdAsync(request.RoomId, cancellationToken);
         if (room is null) return RoomErrors.NotFound;
 
         var result = room.ChangeCapacity(request.NewCapacity, dateTimeProvider.UtcNow);

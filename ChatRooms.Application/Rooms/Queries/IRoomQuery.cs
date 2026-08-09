@@ -1,10 +1,10 @@
-﻿using ChatRooms.DTOs.Rooms;
+﻿using ChatRooms.Application.Abstractions.Persistence;
+using ChatRooms.DTOs.Rooms;
 
 namespace ChatRooms.Application.Rooms.Queries;
 
-public interface IRoomQuery
+public interface IRoomQuery : IQueryService<RoomDto?>
 {
-    Task<RoomDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<RoomDto?> GetByCodeAsync(string code, CancellationToken cancellationToken);
     Task<IReadOnlyList<RoomListItem>> GetAllAsync(CancellationToken cancellationToken);
 }

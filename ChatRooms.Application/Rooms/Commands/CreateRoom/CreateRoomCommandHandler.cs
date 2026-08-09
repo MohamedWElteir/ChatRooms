@@ -23,7 +23,7 @@ public class CreateRoomCommandHandler(IRoomRepository roomRepository, IUnitOfWor
         if (createResult.IsFailure) return createResult.Error!;
 
         var room = createResult.Value!;
-        await roomRepository.Add(room, cancellationToken);
+        await roomRepository.AddAsync(room, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return new RoomDto(
             Id: room.Id,

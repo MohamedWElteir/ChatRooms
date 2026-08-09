@@ -12,7 +12,7 @@ public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUn
 {
     public async Task<Result> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.RoomId, cancellationToken);
+        var room = await roomRepository.GetByIdAsync(command.RoomId, cancellationToken);
         if (room is null) return RoomErrors.NotFound;
 
         if (!Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason))

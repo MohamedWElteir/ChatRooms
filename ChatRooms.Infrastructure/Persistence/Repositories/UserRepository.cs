@@ -8,7 +8,7 @@ namespace ChatRooms.Infrastructure.Persistence.Repositories;
 
 public sealed class UserRepository(WriteDbContext dbContext) : IUserRepository
 {
-    public async Task Add(User user, CancellationToken cancellationToken)
+    public async Task AddAsync(User user, CancellationToken cancellationToken)
     {
         await dbContext.Users.AddAsync(user, cancellationToken);
     }
@@ -18,7 +18,7 @@ public sealed class UserRepository(WriteDbContext dbContext) : IUserRepository
         return await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
-    public async Task<User?> GetById(UserId id, CancellationToken cancellationToken)
+    public async Task<User?> GetByIdAsync(UserId id, CancellationToken cancellationToken)
     {
         return await dbContext.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }

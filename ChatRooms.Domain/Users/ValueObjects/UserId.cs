@@ -2,7 +2,7 @@
 
 public readonly record struct UserId
 {
-    public Guid Value { get; }
+    public readonly Guid Value { get; }
 
     private UserId(Guid value)
     {

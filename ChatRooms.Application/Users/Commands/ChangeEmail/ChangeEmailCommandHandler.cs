@@ -11,7 +11,7 @@ public sealed class ChangeEmailCommandHandler(IUserRepository userRepository, IU
 {
     public async Task<Result> Handle(ChangeEmailCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(command.Id, cancellationToken);
+        var user = await userRepository.GetByIdAsync(command.Id, cancellationToken);
         if (user is null) return UserErrors.NotFound;
 
         var result = user.ChangeEmail(command.NewEmail, dateTimeProvider.UtcNow);
