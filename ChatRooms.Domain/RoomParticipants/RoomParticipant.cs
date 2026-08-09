@@ -18,12 +18,12 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
     private RoomParticipant() { }
     public override void Apply(IDomainEvent @event)
     {
-        switch(@event)
+        switch (@event)
         {
             case RoomParticipantCreatedDomainEvent e:
                 Apply(e);
                 break;
-        }   
+        }
     }
 
     public static Result<RoomParticipant> Create(RoomId roomId, UserId userId, DateTimeUtc joinedAt)
@@ -33,9 +33,9 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
             return RoomParticipantErrors.NotTransient;
 
         roomMember.Raise(new RoomParticipantCreatedDomainEvent(
-            RoomParticipantId.New(), 
-            roomId, 
-            userId, 
+            RoomParticipantId.New(),
+            roomId,
+            userId,
             joinedAt));
         return roomMember;
     }
