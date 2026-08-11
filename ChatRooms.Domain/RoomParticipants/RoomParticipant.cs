@@ -23,6 +23,9 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
             case RoomParticipantCreatedDomainEvent e:
                 Apply(e);
                 break;
+            case RoomParticipantLeftDomainEvent e: 
+                Apply(e); 
+                break;
         }
     }
 
@@ -40,6 +43,14 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
         return roomMember;
     }
 
+    public Result Leave(DateTimeUtc leftAt)
+    {
+        if (LeftAt.HasValue)
+            return RoomParticipantErrors.AlreadyLeft;
+        Raise(new RoomParticipantLeftDomainEvent(Id, RoomId, UserId, leftAt));
+        return Result.Success();
+    }
+
     #region Event Appliers
     private void Apply(RoomParticipantCreatedDomainEvent @event)
     {
@@ -47,6 +58,11 @@ public sealed class RoomParticipant : AggregateRoot<RoomParticipantId>
         RoomId = @event.RoomId;
         UserId = @event.UserId;
         JoinedAt = @event.JoinedAt;
+    }
+
+    private void Apply(RoomParticipantLeftDomainEvent @event)
+    {
+        LeftAt = @event.LeftAt;
     }
     #endregion
 }

@@ -9,4 +9,5 @@ namespace ChatRooms.Application.RoomParticipants.Commands;
 public interface IRoomParticipantRepository : IRepository<RoomParticipant, RoomParticipantId>
 {
     Task<bool> ExistsAsync(RoomId roomId, UserId userId, CancellationToken cancellationToken);
+    Task<RoomParticipant> GetByIdAsync(RoomId roomId, UserId userId, CancellationToken cancellationToken);
 }

@@ -58,4 +58,4 @@ builder.AddProject<Projects.ChatRooms_KeycloakSetup>("chatrooms-keycloak-setup")
     .WithEnvironment("Keycloak__BffClientId", "chatrooms-bff");
 
 
-builder.Build().Run();
+await builder.Build().RunAsync();

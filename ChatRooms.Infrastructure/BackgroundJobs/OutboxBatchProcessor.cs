@@ -1,6 +1,7 @@
 using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.Outbox;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -26,15 +27,19 @@ public sealed class OutboxBatchProcessor(
         Func<string, IEventProjector?> projectorResolver,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (messages.Count == 0) return;
+
         var leaseDuration = TimeSpan.FromMinutes(
             _options.ProcessingLeaseDurationMinutes);
 
+        var allMessageIds = messages.Select(m => m.Id).ToArray();
+
         for (var index = 0; index < messages.Count; index++)
         {
-            var remainingIds = messages
-                .Skip(index)
-                .Select(m => m.Id)
-                .ToArray();
+            cancellationToken.ThrowIfCancellationRequested();
+            var remainingIds = allMessageIds.AsSpan(index).ToArray();
 
             var renewed = await outboxRepository.RenewLeaseAsync(
                 remainingIds,
@@ -45,12 +50,14 @@ public sealed class OutboxBatchProcessor(
             if (renewed != remainingIds.Length)
             {
                 if (logger.IsEnabled(LogLevel.Warning))
+                {
                     logger.LogWarning(
                         "Outbox worker {WorkerId} lost its lease on {Lost} of {Total} " +
                         "remaining message(s); abandoning the rest of the batch.",
                         workerId,
                         remainingIds.Length - renewed,
                         remainingIds.Length);
+                }
 
                 return;
             }

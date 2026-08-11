@@ -38,7 +38,7 @@ public sealed class Room : AggregateRoot<RoomId>
             case RoomParticipantCountIncrementedDomainEvent e:
                 Apply(e);
                 break;
-            case RoomParticipantLeftDomainEvent e:
+            case RoomParticipantCountDecrementedDomainEvent e:
                 Apply(e);
                 break;
             case RoomUnArchivedDomainEvent e:
@@ -80,7 +80,7 @@ public sealed class Room : AggregateRoot<RoomId>
         if (CurrentParticipantsCount <= 0)
             return RoomErrors.NoParticipantsToLeave;
 
-        Raise(new RoomParticipantLeftDomainEvent(Id, occurredAt));
+        Raise(new RoomParticipantCountDecrementedDomainEvent(Id, occurredAt));
         return Result.Success();
     }
     public Result Rename(Name newName, DateTimeUtc occurredAt)
@@ -185,7 +185,7 @@ public sealed class Room : AggregateRoot<RoomId>
         CurrentParticipantsCount++;
         UpdatedAt = @event.OccurredAt;
     }
-    private void Apply(RoomParticipantLeftDomainEvent @event)
+    private void Apply(RoomParticipantCountDecrementedDomainEvent @event)
     {
         CurrentParticipantsCount--;
         UpdatedAt = @event.OccurredAt;
