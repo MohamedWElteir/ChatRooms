@@ -1,5 +1,7 @@
 # ChatRooms
 
+[![wakatime](https://wakatime.com/badge/user/8a84d55b-e339-4aae-af7e-e53592801c34/project/7e973a6e-40e4-4a30-a84e-e046741bac2e.svg)](https://wakatime.com/badge/user/8a84d55b-e339-4aae-af7e-e53592801c34/project/7e973a6e-40e4-4a30-a84e-e046741bac2e)
+
 An enterprise-grade, highly scalable chat application built with modern .NET utilizing Clean Architecture, CQRS (Command Query Responsibility Segregation), and Domain-Driven Design (DDD).
 
 ## Architecture
