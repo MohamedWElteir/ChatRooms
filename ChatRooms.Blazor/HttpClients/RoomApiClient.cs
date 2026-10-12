@@ -1,4 +1,4 @@
-﻿using ChatRooms.DTOs.Rooms;
+using ChatRooms.DTOs.Rooms;
 
 namespace ChatRooms.Blazor.HttpClients;
 
@@ -38,6 +38,30 @@ public sealed class RoomApiClient(HttpClient http) : IRoomApiClient
             Content = JsonContent.Create(new { Reason = reason })
         };
         var response = await http.SendAsync(request, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task JoinAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await http.PostAsync($"api/rooms/{id}/join", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task LeaveAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await http.PostAsync($"api/rooms/{id}/leave", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task ArchiveAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await http.PostAsync($"api/rooms/{id}/archive", null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task RestoreAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var response = await http.PostAsync($"api/rooms/{id}/restore", null, cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 }

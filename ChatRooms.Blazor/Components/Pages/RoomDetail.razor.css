@@ -1,0 +1,149 @@
+.rd-page {
+    min-height: 100vh;
+    background: #F7F4EF;
+    color: #111;
+    font-family: 'Geist', 'Inter', system-ui, sans-serif;
+}
+
+.rd-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 48px;
+    border-bottom: 1px solid #E5E0D8;
+}
+
+.rd-brand {
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: #111;
+}
+
+.rd-btn-back {
+    font-size: 13px;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 5px;
+    transition: color 0.15s;
+}
+
+.rd-btn-back:hover {
+    color: #111;
+}
+
+.rd-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.rd-card {
+    background: #fff;
+    border: 1px solid #E5E0D8;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.rd-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #F0EDE8;
+}
+
+.rd-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.rd-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111;
+    letter-spacing: -0.03em;
+    margin: 0;
+}
+
+.rd-code {
+    font-size: 13px;
+    color: #888;
+    font-family: 'Geist Mono', 'Fira Code', monospace;
+}
+
+.rd-occupancy {
+    text-align: right;
+}
+
+.rd-occupancy-num {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111;
+}
+
+.rd-occupancy-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.rd-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 20px;
+}
+
+.rd-inline-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background: #FAFAFA;
+    border: 1px solid #E5E0D8;
+    border-radius: 8px;
+}
+
+.rd-delete-form {
+    background: #FEF2F2;
+    border-color: #FECACA;
+}
+
+.rd-delete-warning {
+    font-size: 13px;
+    color: #991B1B;
+    font-weight: 500;
+}
+
+.rd-input {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #CCC;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+}
+
+.rd-input:focus {
+    border-color: #111;
+}
+
+.rd-empty, .rd-error {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.rd-error {
+    color: #DC2626;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+}

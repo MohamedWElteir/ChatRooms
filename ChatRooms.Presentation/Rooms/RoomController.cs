@@ -1,8 +1,13 @@
-﻿using ChatRooms.Application.Rooms.Commands.ChangeRoomCapacity;
+using ChatRooms.Application.Rooms.Commands.ArchiveRoom;
+using ChatRooms.Application.Rooms.Commands.ChangeRoomCapacity;
 using ChatRooms.Application.Rooms.Commands.CreateRoom;
 using ChatRooms.Application.Rooms.Commands.DeleteRoom;
+using ChatRooms.Application.Rooms.Commands.JoinRoom;
+using ChatRooms.Application.Rooms.Commands.LeaveRoom;
 using ChatRooms.Application.Rooms.Commands.RenameRoom;
+using ChatRooms.Application.Rooms.Commands.RestoreRoom;
 using ChatRooms.Application.Rooms.Queries;
+using ChatRooms.Application.Rooms.Queries.GetAllRooms;
 using ChatRooms.Application.Rooms.Queries.GetRoomByCode;
 using ChatRooms.Application.Rooms.Queries.GetRoomById;
 using ChatRooms.Domain.Rooms.ValueObjects;
@@ -19,13 +24,15 @@ namespace ChatRooms.Presentation.Rooms;
 [ApiController]
 [Authorize]
 [Route("api/rooms")]
-public sealed class RoomController(ISender sender, IRoomQuery roomQuery) : ControllerBase
+public sealed class RoomController(ISender sender) : ControllerBase
 {
+    public RoomController(ISender sender, IRoomQuery? _) : this(sender) { }
+
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<RoomListItem>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var rooms = await roomQuery.GetAllAsync(cancellationToken);
+        var rooms = await sender.Send(new GetAllRoomsQuery(), cancellationToken);
         return Ok(rooms);
     }
 
@@ -120,6 +127,82 @@ public sealed class RoomController(ISender sender, IRoomQuery roomQuery) : Contr
     {
         var result = await sender.Send(
             new DeleteRoomCommand(RoomId.From(id), request.Reason),
+            cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/join")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Join(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new JoinRoomCommand(RoomId.From(id)),
+            cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/leave")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Leave(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new LeaveRoomCommand(RoomId.From(id)),
+            cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/archive")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Archive(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new ArchiveRoomCommand(RoomId.From(id)),
+            cancellationToken);
+
+        if (result.IsFailure) return result.Error!.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/restore")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> Restore(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new RestoreRoomCommand(RoomId.From(id)),
             cancellationToken);
 
         if (result.IsFailure) return result.Error!.ToProblemDetails();

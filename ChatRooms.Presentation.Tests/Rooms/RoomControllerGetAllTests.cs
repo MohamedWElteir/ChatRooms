@@ -1,4 +1,4 @@
-using ChatRooms.Application.Rooms.Queries;
+using ChatRooms.Application.Rooms.Queries.GetAllRooms;
 using ChatRooms.DTOs.Rooms;
 using ChatRooms.Presentation.Rooms;
 using MediatR;
@@ -9,13 +9,13 @@ namespace ChatRooms.Presentation.Tests.Rooms;
 
 public sealed class RoomControllerGetAllTests
 {
-    private readonly Mock<IRoomQuery> _queryMock;
+    private readonly Mock<ISender> _senderMock;
     private readonly RoomController _controller;
 
     public RoomControllerGetAllTests()
     {
-        _queryMock = new Mock<IRoomQuery>();
-        _controller = new RoomController(Mock.Of<ISender>(), _queryMock.Object);
+        _senderMock = new Mock<ISender>();
+        _controller = new RoomController(_senderMock.Object);
     }
 
     [Fact]
@@ -27,9 +27,9 @@ public sealed class RoomControllerGetAllTests
             new(Guid.NewGuid(), "TechTalk", "XYZ78901", 100, 42)
         };
 
-        _queryMock
-            .Setup(q => q.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((IReadOnlyList<RoomListItem>)rooms);
+        _senderMock
+            .Setup(s => s.Send(It.IsAny<GetAllRoomsQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(rooms);
 
         var result = await _controller.GetAll(CancellationToken.None);
 
@@ -41,9 +41,9 @@ public sealed class RoomControllerGetAllTests
     [Fact]
     public async Task GetAll_WhenNoRooms_ShouldReturn200OkWithEmptyList()
     {
-        _queryMock
-            .Setup(q => q.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((IReadOnlyList<RoomListItem>)[]);
+        _senderMock
+            .Setup(s => s.Send(It.IsAny<GetAllRoomsQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<RoomListItem>());
 
         var result = await _controller.GetAll(CancellationToken.None);
 
@@ -53,14 +53,14 @@ public sealed class RoomControllerGetAllTests
     }
 
     [Fact]
-    public async Task GetAll_ShouldCallQueryService()
+    public async Task GetAll_ShouldSendQuery()
     {
-        _queryMock
-            .Setup(q => q.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((IReadOnlyList<RoomListItem>)[]);
+        _senderMock
+            .Setup(s => s.Send(It.IsAny<GetAllRoomsQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<RoomListItem>());
 
         await _controller.GetAll(CancellationToken.None);
 
-        _queryMock.Verify(q => q.GetAllAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _senderMock.Verify(s => s.Send(It.IsAny<GetAllRoomsQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -1,4 +1,4 @@
-﻿using ChatRooms.DTOs.Rooms;
+using ChatRooms.DTOs.Rooms;
 
 namespace ChatRooms.Blazor.HttpClients;
 
@@ -10,6 +10,10 @@ public interface IRoomApiClient
     Task RenameAsync(Guid id, string newName, CancellationToken cancellationToken = default);
     Task ChangeCapacityAsync(Guid id, int newCapacity, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, string reason, CancellationToken cancellationToken = default);
+    Task JoinAsync(Guid id, CancellationToken cancellationToken = default);
+    Task LeaveAsync(Guid id, CancellationToken cancellationToken = default);
+    Task ArchiveAsync(Guid id, CancellationToken cancellationToken = default);
+    Task RestoreAsync(Guid id, CancellationToken cancellationToken = default);
 }
 
 public sealed record CreateRoomRequest(string Name, int Capacity);

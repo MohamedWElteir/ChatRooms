@@ -41,11 +41,17 @@ public sealed class OutboxMessageProcessor(
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Processing outbox message {MessageId} of type {EventType}.", message.Id, message.Type);
 
             await projector.ProjectAsync(message.Content, cancellationToken);
             message.MarkAsProcessed(DateTimeUtc.FromUtc(dateTimeProvider.UtcNow));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

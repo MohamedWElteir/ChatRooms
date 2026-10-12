@@ -19,11 +19,26 @@ public sealed class OutboxBatchProcessor(
 {
     private readonly OutboxOptions _options = options.Value;
 
+    public Task ProcessBatchAsync(
+        IReadOnlyList<OutboxMessage> messages,
+        IOutboxRepository outboxRepository,
+        string workerId,
+        Func<string, IEventProjector?> projectorResolver,
+        CancellationToken cancellationToken)
+        => ProcessBatchAsync(
+            messages,
+            outboxRepository,
+            workerId,
+            projectorResolver,
+            onMessageProcessedAsync: null,
+            cancellationToken);
+
     public async Task ProcessBatchAsync(
         IReadOnlyList<OutboxMessage> messages,
         IOutboxRepository outboxRepository,
         string workerId,
         Func<string, IEventProjector?> projectorResolver,
+        Func<CancellationToken, Task>? onMessageProcessedAsync,
         CancellationToken cancellationToken)
     {
         var leaseDuration = TimeSpan.FromMinutes(
@@ -61,6 +76,11 @@ public sealed class OutboxBatchProcessor(
                 message,
                 projectorResolver(message.Type),
                 cancellationToken);
+
+            if (onMessageProcessedAsync is not null)
+            {
+                await onMessageProcessedAsync(cancellationToken);
+            }
         }
     }
 }

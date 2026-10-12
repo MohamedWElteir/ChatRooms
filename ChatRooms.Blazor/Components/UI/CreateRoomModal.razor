@@ -65,7 +65,7 @@
         }
         catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized)
         {
-            Navigation.NavigateTo("/bff/login", forceLoad: true);
+            Navigation.NavigateTo("/login", forceLoad: true);
         }
         catch (Exception ex)
         {

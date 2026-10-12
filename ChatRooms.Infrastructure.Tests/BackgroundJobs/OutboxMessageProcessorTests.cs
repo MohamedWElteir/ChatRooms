@@ -116,4 +116,19 @@ public class OutboxMessageProcessorTests
         Assert.Null(message.ProcessingBy);
         Assert.Null(message.ProcessingLeaseUntil);
     }
+
+    [Fact]
+    public async Task ProcessAsync_WhenCancellationRequested_RethrowsAndDoesNotRecordFailure()
+    {
+        var sut = CreateSut();
+        var message = CreateMessage();
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            sut.ProcessAsync(message, new SuccessProjector(), cts.Token));
+
+        Assert.Equal(0, message.RetryCount);
+        Assert.False(message.IsProcessed);
+    }
 }

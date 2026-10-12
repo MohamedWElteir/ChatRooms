@@ -1,4 +1,4 @@
-﻿using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
+using ChatRooms.Infrastructure.BackgroundJobs.Projectors;
 using ChatRooms.Infrastructure.Options;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
 using ChatRooms.Infrastructure.Persistence.Outbox;
@@ -80,9 +80,7 @@ public sealed class OutboxProcessor(
             messageType =>
                 scope.ServiceProvider
                     .GetKeyedService<IEventProjector>(messageType),
-            cancellationToken);
-
-        await writeDbContext.SaveChangesAsync(
+            async ct => await writeDbContext.SaveChangesAsync(ct),
             cancellationToken);
     }
 }

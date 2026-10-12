@@ -1,4 +1,4 @@
-﻿using ChatRooms.Application.Abstractions.Common;
+using ChatRooms.Application.Abstractions.Common;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Application.Policies.Room;
@@ -58,7 +58,18 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddKeyedScoped<IEventProjector, RoomCreatedProjector>(nameof(RoomCreatedDomainEvent));
         services.AddKeyedScoped<IEventProjector, RoomRenamedProjector>(nameof(RoomRenamedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomDeletedProjector>(nameof(RoomDeletedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomArchivedProjector>(nameof(RoomArchivedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomUnArchivedProjector>(nameof(RoomUnArchivedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomCapacityChangedProjector>(nameof(RoomCapacityChangedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomParticipantJoinedProjector>(nameof(RoomParticipantJoinedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomParticipantLeftProjector>(nameof(RoomParticipantLeftDomainEvent));
+        services.AddKeyedScoped<IEventProjector, RoomClosedProjector>(nameof(RoomClosedDomainEvent));
         services.AddKeyedScoped<IEventProjector, UserCreatedProjector>(nameof(UserCreatedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, UserRenamedProjector>(nameof(UserRenamedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, UserEmailChangedProjector>(nameof(UserEmailChangedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, UserGenderChangedProjector>(nameof(UserGenderChangedDomainEvent));
+        services.AddKeyedScoped<IEventProjector, UserDeletedProjector>(nameof(UserDeletedDomainEvent));
         services.AddHostedService<OutboxProcessor>();
         services.AddSingleton<IRoomCapacityPolicy, DefaultRoomCapacityPolicy>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

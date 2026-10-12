@@ -289,11 +289,13 @@ public class UserTests
     }
 
     [Theory]
-    [InlineData("2020-10-10", 5)]
-    [InlineData("2000-01-01", 26)]
-    public void AgeCalculation_Should_ReturnCorrectAge(string birthDateString, int expectedYears)
+    [InlineData("2020-10-10", "2025-10-11", 5)]
+    [InlineData("2020-10-10", "2026-10-11", 6)]
+    [InlineData("2000-01-01", "2026-01-01", 26)]
+    public void AgeCalculation_Should_ReturnCorrectAge(string birthDateString, string asOfString, int expectedYears)
     {
         var birthDate = BirthDate.From(DateTime.Parse(birthDateString));
+        var asOf = DateTime.Parse(asOfString);
         var userResult = User.Create(Name.From("Test"),
                                      Email.From("test@test.com"),
                                      Gender.Male,
@@ -301,7 +303,7 @@ public class UserTests
                                      DateTimeUtc.FromUtc(DateTime.UtcNow));
         var user = userResult.Value!;
 
-        var age = user.Age;
+        var age = user.BirthDate.CalculateAge(asOf);
 
         Assert.Equal(expectedYears, age.Years);
     }

@@ -55,7 +55,7 @@ public sealed class UserController(ISender sender) : ControllerBase
 
         if (result.IsFailure) return result.Error!.ToProblemDetails();
 
-        return CreatedAtAction(nameof(Register), new { id = result.Value!.Id }, result.Value);
+        return CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value);
     }
 
     [HttpGet("{id:guid}")]

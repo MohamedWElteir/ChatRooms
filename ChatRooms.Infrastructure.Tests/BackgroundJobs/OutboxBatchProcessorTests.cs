@@ -191,4 +191,33 @@ public class OutboxBatchProcessorTests
         Assert.Empty(messageProcessor.Processed);
         Assert.Equal(0, repo.RenewCalls);
     }
+
+    [Fact]
+    public async Task ProcessBatchAsync_InvokesOnMessageProcessedCallbackForEachMessage()
+    {
+        var messageProcessor = new FakeOutboxMessageProcessor();
+        var sut = CreateProcessor(messageProcessor);
+        var repo = new SequenceFakeOutboxRepository(firstRenewal: 2, subsequentRenewals: 2);
+        var messages = new[]
+        {
+            CreateMessage(),
+            CreateMessage()
+        };
+
+        var callbackCount = 0;
+        await sut.ProcessBatchAsync(
+            messages,
+            repo,
+            "worker-1",
+            _ => new FakeProjector(),
+            _ =>
+            {
+                callbackCount++;
+                return Task.CompletedTask;
+            },
+            CancellationToken.None);
+
+        Assert.Equal(2, messageProcessor.Processed.Count);
+        Assert.Equal(2, callbackCount);
+    }
 }

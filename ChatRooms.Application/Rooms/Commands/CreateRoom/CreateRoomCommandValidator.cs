@@ -1,4 +1,4 @@
-﻿using ChatRooms.Domain.Rooms.Contracts;
+using ChatRooms.Domain.Rooms.Contracts;
 using ChatRooms.Domain.Rooms.ValueObjects;
 using FluentValidation;
 
@@ -11,7 +11,7 @@ public sealed class CreateRoomCommandValidator : AbstractValidator<CreateRoomCom
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Room name is required.")
             .MaximumLength(Name.MaxLength).WithMessage($"Room name cannot exceed {Name.MaxLength} characters.")
-            .Must(name => char.IsLetter(name[0])).WithMessage("Room name must start with a letter.");
+            .Must(name => !string.IsNullOrWhiteSpace(name) && char.IsLetter(name[0])).WithMessage("Room name must start with a letter.");
 
         RuleFor(x => x.Capacity)
             .GreaterThanOrEqualTo(roomCapacityPolicy.MinCapacity).WithMessage($"Capacity must be at least {roomCapacityPolicy.MinCapacity}.")

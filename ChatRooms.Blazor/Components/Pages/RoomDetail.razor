@@ -1,0 +1,266 @@
+@page "/room/{Id:guid}"
+@layout MainLayout
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using ChatRooms.Blazor.HttpClients
+@using ChatRooms.Blazor.Services
+@using ChatRooms.DTOs.Rooms
+@inject IRoomApiClient RoomApi
+@inject NavigationManager Nav
+@inject ToastService Toast
+
+<PageTitle>@(_room?.Name ?? "Room") · ChatRooms</PageTitle>
+
+<div class="rd-page">
+    <nav class="rd-nav">
+        <span class="rd-brand" @onclick="@(() => Nav.NavigateTo("/rooms"))" style="cursor: pointer;">ChatRooms</span>
+        <button class="rd-btn-back" @onclick="@(() => Nav.NavigateTo("/rooms"))">← All rooms</button>
+    </nav>
+
+    <div class="rd-body">
+        @if (_loading)
+        {
+            <div class="rd-empty">Loading room details...</div>
+        }
+        else if (_error is not null)
+        {
+            <div class="rd-error">
+                <p>@_error</p>
+                <AppButton Variant="secondary" Size="sm" OnClick="LoadRoom">Retry</AppButton>
+            </div>
+        }
+        else if (_room is not null)
+        {
+            <div class="rd-card">
+                <div class="rd-header">
+                    <div>
+                        <div class="rd-title-row">
+                            <h1 class="rd-title">@_room.Name</h1>
+                            <AppBadge Variant="@GetStatusVariant(_room.Status)">@_room.Status</AppBadge>
+                        </div>
+                        <span class="rd-code">Code: @_room.Code</span>
+                    </div>
+                    <div class="rd-occupancy">
+                        <span class="rd-occupancy-num">@_room.CurrentParticipantsCount / @_room.Capacity</span>
+                        <span class="rd-occupancy-label">Participants</span>
+                    </div>
+                </div>
+
+                <div class="rd-actions-bar">
+                    @if (_room.Status == "Active")
+                    {
+                        <AppButton Variant="primary" Size="sm" Loading="_actionLoading" OnClick="JoinRoom">
+                            Join Room
+                        </AppButton>
+                        <AppButton Variant="secondary" Size="sm" Loading="_actionLoading" OnClick="LeaveRoom" Disabled="@(_room.CurrentParticipantsCount == 0)">
+                            Leave Room
+                        </AppButton>
+                        <AppButton Variant="secondary" Size="sm" OnClick="@(() => _showRename = !_showRename)">
+                            Rename
+                        </AppButton>
+                        <AppButton Variant="secondary" Size="sm" OnClick="@(() => _showChangeCap = !_showChangeCap)">
+                            Capacity
+                        </AppButton>
+                        <AppButton Variant="secondary" Size="sm" Loading="_actionLoading" OnClick="ArchiveRoom">
+                            Archive
+                        </AppButton>
+                    }
+                    else if (_room.Status == "Archived")
+                    {
+                        <AppButton Variant="primary" Size="sm" Loading="_actionLoading" OnClick="RestoreRoom">
+                            Restore Room
+                        </AppButton>
+                    }
+
+                    <AppButton Variant="danger" Size="sm" OnClick="@(() => _showDelete = !_showDelete)">
+                        Delete
+                    </AppButton>
+                </div>
+
+                @if (_showRename)
+                {
+                    <div class="rd-inline-form">
+                        <input class="rd-input" @bind="_newName" placeholder="New room name" />
+                        <AppButton Variant="primary" Size="sm" Loading="_actionLoading" OnClick="RenameRoom">Save</AppButton>
+                        <AppButton Variant="ghost" Size="sm" OnClick="@(() => _showRename = false)">Cancel</AppButton>
+                    </div>
+                }
+
+                @if (_showChangeCap)
+                {
+                    <div class="rd-inline-form">
+                        <input class="rd-input" type="number" @bind="_newCapacity" placeholder="New capacity" min="1" max="1000" />
+                        <AppButton Variant="primary" Size="sm" Loading="_actionLoading" OnClick="ChangeCapacity">Save</AppButton>
+                        <AppButton Variant="ghost" Size="sm" OnClick="@(() => _showChangeCap = false)">Cancel</AppButton>
+                    </div>
+                }
+
+                @if (_showDelete)
+                {
+                    <div class="rd-inline-form rd-delete-form">
+                        <span class="rd-delete-warning">Reason:</span>
+                        <select class="rd-input" @bind="_deleteReason">
+                            <option value="Manual">Manual</option>
+                            <option value="Inactivity">Inactivity</option>
+                            <option value="Violation">Violation</option>
+                        </select>
+                        <AppButton Variant="danger" Size="sm" Loading="_actionLoading" OnClick="DeleteRoom">Confirm Delete</AppButton>
+                        <AppButton Variant="ghost" Size="sm" OnClick="@(() => _showDelete = false)">Cancel</AppButton>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private RoomDto? _room;
+    private bool _loading = true;
+    private bool _actionLoading = false;
+    private string? _error;
+
+    private bool _showRename = false;
+    private string _newName = string.Empty;
+
+    private bool _showChangeCap = false;
+    private int _newCapacity;
+
+    private bool _showDelete = false;
+    private string _deleteReason = "Manual";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRoom();
+    }
+
+    private async Task LoadRoom()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _room = await RoomApi.GetByIdAsync(Id);
+            if (_room is null)
+            {
+                _error = "Room not found.";
+            }
+            else
+            {
+                _newName = _room.Name;
+                _newCapacity = _room.Capacity;
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = "Failed to load room details.";
+            Console.WriteLine($"Error loading room {Id}: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task JoinRoom()
+    {
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.JoinAsync(Id);
+            Toast.Success("Joined Room", "You joined the room successfully.");
+            await LoadRoom();
+        }, "Failed to join room.");
+    }
+
+    private async Task LeaveRoom()
+    {
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.LeaveAsync(Id);
+            Toast.Success("Left Room", "You left the room.");
+            await LoadRoom();
+        }, "Failed to leave room.");
+    }
+
+    private async Task RenameRoom()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.RenameAsync(Id, _newName.Trim());
+            _showRename = false;
+            Toast.Success("Renamed", "Room renamed successfully.");
+            await LoadRoom();
+        }, "Failed to rename room.");
+    }
+
+    private async Task ChangeCapacity()
+    {
+        if (_newCapacity <= 0) return;
+
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.ChangeCapacityAsync(Id, _newCapacity);
+            _showChangeCap = false;
+            Toast.Success("Capacity Updated", $"Capacity set to {_newCapacity}.");
+            await LoadRoom();
+        }, "Failed to change capacity.");
+    }
+
+    private async Task ArchiveRoom()
+    {
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.ArchiveAsync(Id);
+            Toast.Success("Archived", "Room has been archived.");
+            await LoadRoom();
+        }, "Failed to archive room.");
+    }
+
+    private async Task RestoreRoom()
+    {
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.RestoreAsync(Id);
+            Toast.Success("Restored", "Room has been restored.");
+            await LoadRoom();
+        }, "Failed to restore room.");
+    }
+
+    private async Task DeleteRoom()
+    {
+        await ExecuteAction(async () =>
+        {
+            await RoomApi.DeleteAsync(Id, _deleteReason);
+            Toast.Success("Deleted", "Room deleted successfully.");
+            Nav.NavigateTo("/rooms");
+        }, "Failed to delete room.");
+    }
+
+    private async Task ExecuteAction(Func<Task> action, string defaultErrorMessage)
+    {
+        _actionLoading = true;
+        try
+        {
+            await action();
+        }
+        catch (Exception ex)
+        {
+            Toast.Error("Error", ex.Message.Length > 0 ? ex.Message : defaultErrorMessage);
+        }
+        finally
+        {
+            _actionLoading = false;
+        }
+    }
+
+    private static string GetStatusVariant(string status) => status switch
+    {
+        "Active" => "active",
+        "Archived" => "archived",
+        "Deleted" => "deleted",
+        _ => "default"
+    };
+}

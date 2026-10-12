@@ -39,4 +39,26 @@ public sealed class RoomStore(IRoomApiClient api) : EntityStore<RoomListItem>
         await api.DeleteAsync(id, reason, ct);
         RemoveWhere(r => r.Id == id);
     }
+
+    public async Task JoinAsync(Guid id, CancellationToken ct = default)
+    {
+        await api.JoinAsync(id, ct);
+        UpdateWhere(r => r.Id == id, r => r with { CurrentParticipantsCount = r.CurrentParticipantsCount + 1 });
+    }
+
+    public async Task LeaveAsync(Guid id, CancellationToken ct = default)
+    {
+        await api.LeaveAsync(id, ct);
+        UpdateWhere(r => r.Id == id, r => r with { CurrentParticipantsCount = Math.Max(0, r.CurrentParticipantsCount - 1) });
+    }
+
+    public async Task ArchiveAsync(Guid id, CancellationToken ct = default)
+    {
+        await api.ArchiveAsync(id, ct);
+    }
+
+    public async Task RestoreAsync(Guid id, CancellationToken ct = default)
+    {
+        await api.RestoreAsync(id, ct);
+    }
 }
