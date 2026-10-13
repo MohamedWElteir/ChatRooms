@@ -35,7 +35,7 @@ public sealed class ChangeEmailCommandHandlerTests
         _existingUser = createResult.Value!;
         _userId = _existingUser.Id;
 
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+        _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingUser);
 
         _handler = new ChangeEmailCommandHandler(
@@ -56,17 +56,14 @@ public sealed class ChangeEmailCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_UserNotFound_ShouldReturnNotFoundError()
+    public async Task Handle_UserNotFound_ShouldThrowKeyNotFoundException()
     {
-        _userRepositoryMock.Setup(x => x.GetById(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null);
+        _userRepositoryMock.Setup(x => x.GetAsync(It.IsAny<UserId>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new KeyNotFoundException("User not found"));
 
         var command = new ChangeEmailCommand(Guid.NewGuid(), "new@test.com");
 
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        Assert.True(result.IsFailure);
-        Assert.Equal("User.NotFound", result.Error!.Code);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]

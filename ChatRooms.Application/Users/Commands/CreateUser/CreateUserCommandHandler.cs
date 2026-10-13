@@ -22,7 +22,7 @@ public sealed class CreateUserCommandHandler(IUserRepository userRepository, IUn
         if (createResult.IsFailure) return createResult.Error!;
 
         var user = createResult.Value!;
-        await userRepository.Add(user, cancellationToken);
+        await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return new UserDto(
             Id: user.Id,

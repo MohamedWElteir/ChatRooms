@@ -11,8 +11,7 @@ public sealed class ChangeGenderCommandHandler(IUserRepository userRepository, I
 {
     public async Task<Result> Handle(ChangeGenderCommand command, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetById(command.Id, cancellationToken);
-        if (user is null) return UserErrors.NotFound;
+        var user = await userRepository.GetAsync(command.Id, cancellationToken);
 
         var result = user.ChangeGender(command.NewGender, dateTimeProvider.UtcNow);
         if (result.IsFailure) return result;

@@ -18,7 +18,7 @@ public sealed class RoomClosedProjector(
         if (domainEvent is null) return;
 
         var filter = Builders<RoomDto>.Filter.And(
-            Builders<RoomDto>.Filter.Eq(r => r.Id, domainEvent.RoomId),
+            Builders<RoomDto>.Filter.Eq(r => r.Id, domainEvent.RoomId.Value),
             Builders<RoomDto>.Filter.Lt(r => r.Version, domainEvent.AggregateVersion)
         );
 

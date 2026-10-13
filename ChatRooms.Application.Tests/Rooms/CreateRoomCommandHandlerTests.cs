@@ -47,7 +47,7 @@ public sealed class CreateRoomCommandHandlerTests
         Assert.Equal("VALID123", result.Value.Code);
         Assert.Equal("Active", result.Value.Status);
 
-        _roomRepositoryMock.Verify(x => x.Add(It.IsAny<Room>(), It.IsAny<CancellationToken>()), Times.Once);
+        _roomRepositoryMock.Verify(x => x.AddAsync(It.IsAny<Room>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

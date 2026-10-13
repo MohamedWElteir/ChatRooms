@@ -1,4 +1,4 @@
-﻿using ChatRooms.Application.Abstractions.Messaging;
+using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Shared;
@@ -12,8 +12,7 @@ public sealed class DeleteRoomCommandHandler(IRoomRepository roomRepository, IUn
 {
     public async Task<Result> Handle(DeleteRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.RoomId, cancellationToken);
-        if (room is null) return RoomErrors.NotFound;
+        var room = await roomRepository.GetAsync(command.RoomId, cancellationToken);
 
         if (!Enum.TryParse<DeletionReason>(command.DeletionReason, ignoreCase: true, out var deletionReason))
             return RoomErrors.InvalidDeletionReason;

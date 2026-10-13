@@ -14,9 +14,7 @@ public sealed class JoinRoomCommandHandler(
 {
     public async Task<Result> Handle(JoinRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.RoomId, cancellationToken);
-        if (room is null)
-            return RoomErrors.NotFound;
+        var room = await roomRepository.GetAsync(command.RoomId, cancellationToken);
 
         var result = room.Join(dateTimeProvider.UtcNow);
         if (result.IsFailure)

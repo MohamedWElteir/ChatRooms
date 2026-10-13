@@ -1,4 +1,4 @@
-﻿using ChatRooms.Domain.Rooms.Events;
+using ChatRooms.Domain.Rooms.Events;
 using ChatRooms.DTOs.Rooms;
 using ChatRooms.Infrastructure.Persistence.DB.Read;
 
@@ -19,7 +19,7 @@ public sealed class RoomRenamedProjector(
         if (domainEvent is null) return;
 
         var filter = Builders<RoomDto>.Filter.And(
-            Builders<RoomDto>.Filter.Eq(r => r.Id, domainEvent.RoomId),
+            Builders<RoomDto>.Filter.Eq(r => r.Id, domainEvent.RoomId.Value),
             Builders<RoomDto>.Filter.Lt(r => r.Version, domainEvent.AggregateVersion)
         );
 
@@ -33,7 +33,7 @@ public sealed class RoomRenamedProjector(
         if (result.MatchedCount == 0)
         {
             var exists = await readDbContext.Rooms
-                .Find(r => r.Id == domainEvent.RoomId)
+                .Find(r => r.Id == domainEvent.RoomId.Value)
                 .AnyAsync(cancellationToken);
 
             if (!exists)

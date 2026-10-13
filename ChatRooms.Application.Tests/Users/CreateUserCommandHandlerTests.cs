@@ -41,7 +41,7 @@ public sealed class CreateUserCommandHandlerTests
         Assert.Equal("john@test.com", result.Value.Email);
         Assert.Equal("Male", result.Value.Gender);
 
-        _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
+        _userRepositoryMock.Verify(x => x.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

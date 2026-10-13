@@ -1,21 +1,6 @@
-﻿namespace ChatRooms.Domain.Users.ValueObjects;
+using ChatRooms.Domain.Shared;
 
-public readonly record struct UserId
-{
-    public Guid Value { get; }
+namespace ChatRooms.Domain.Users.ValueObjects;
 
-    private UserId(Guid value)
-    {
-        if (value == Guid.Empty)
-            throw new ArgumentException("UserId cannot be empty.");
-
-        Value = value;
-    }
-
-    public static UserId New() => new(Guid.NewGuid());
-    public static UserId From(Guid value) => new(value);
-
-    public override string ToString() => Value.ToString();
-    public static implicit operator Guid(UserId userId) => userId.Value;
-    public static implicit operator UserId(Guid userId) => From(userId);
-}
+[StronglyTypedId]
+public readonly partial record struct UserId;

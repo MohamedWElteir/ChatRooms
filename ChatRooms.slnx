@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/Shared/">
     <Project Path="ChatRooms.DTOs/ChatRooms.DTOs.csproj" />
+    <Project Path="ChatRooms.Generators/ChatRooms.Generators.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

@@ -33,7 +33,7 @@ public sealed class JoinRoomCommandHandlerTests
         _existingRoom = createResult.Value!;
         _roomId = _existingRoom.Id;
 
-        _roomRepositoryMock.Setup(x => x.GetById(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
+        _roomRepositoryMock.Setup(x => x.GetAsync(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_existingRoom);
 
         _handler = new JoinRoomCommandHandler(
@@ -55,17 +55,14 @@ public sealed class JoinRoomCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_RoomNotFound_ShouldReturnNotFoundError()
+    public async Task Handle_RoomNotFound_ShouldThrowKeyNotFoundException()
     {
-        _roomRepositoryMock.Setup(x => x.GetById(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Room?)null);
+        _roomRepositoryMock.Setup(x => x.GetAsync(It.IsAny<RoomId>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new KeyNotFoundException("Room not found"));
 
         var command = new JoinRoomCommand(RoomId.From(Guid.NewGuid()));
 
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        Assert.True(result.IsFailure);
-        Assert.Equal("Room.NotFound", result.Error!.Code);
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]

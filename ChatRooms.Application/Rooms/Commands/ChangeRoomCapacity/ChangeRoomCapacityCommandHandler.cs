@@ -1,4 +1,4 @@
-﻿using ChatRooms.Application.Abstractions.Messaging;
+using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Abstractions.Persistence;
 using ChatRooms.Application.Abstractions.Time;
 using ChatRooms.Domain.Rooms.ValueObjects;
@@ -11,8 +11,7 @@ public sealed class ChangeRoomCapacityCommandHandler(IRoomRepository roomReposit
 {
     public async Task<Result> Handle(ChangeRoomCapacityCommand request, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(request.RoomId, cancellationToken);
-        if (room is null) return RoomErrors.NotFound;
+        var room = await roomRepository.GetAsync(request.RoomId, cancellationToken);
 
         var result = room.ChangeCapacity(request.NewCapacity, dateTimeProvider.UtcNow);
         if (result.IsFailure) return result;

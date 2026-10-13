@@ -14,9 +14,7 @@ public sealed class RestoreRoomCommandHandler(
 {
     public async Task<Result> Handle(RestoreRoomCommand command, CancellationToken cancellationToken)
     {
-        var room = await roomRepository.GetById(command.RoomId, cancellationToken);
-        if (room is null)
-            return RoomErrors.NotFound;
+        var room = await roomRepository.GetAsync(command.RoomId, cancellationToken);
 
         var result = room.Restore(dateTimeProvider.UtcNow);
         if (result.IsFailure)
