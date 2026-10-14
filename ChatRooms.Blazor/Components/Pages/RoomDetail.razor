@@ -14,7 +14,10 @@
 <div class="rd-page">
     <nav class="rd-nav">
         <span class="rd-brand" @onclick="@(() => Nav.NavigateTo("/rooms"))" style="cursor: pointer;">ChatRooms</span>
-        <button class="rd-btn-back" @onclick="@(() => Nav.NavigateTo("/rooms"))">← All rooms</button>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="rd-btn-back" @onclick="@(() => Nav.NavigateTo("/rooms"))">← All rooms</button>
+            <a href="/logout" class="rd-btn-back">Sign out</a>
+        </div>
     </nav>
 
     <div class="rd-body">

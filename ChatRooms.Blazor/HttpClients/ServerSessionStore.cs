@@ -12,21 +12,39 @@ public sealed class ServerSessionStore
 
     public void Store(string sub, string accessToken, string? refreshToken, DateTimeOffset? expiresAt)
     {
+        CleanupExpired();
         _sessions[sub] = new UserSessionTokens(accessToken, refreshToken, expiresAt);
     }
 
     public UserSessionTokens? Get(string sub)
     {
-        return _sessions.TryGetValue(sub, out var tokens) ? tokens : null;
+        if (_sessions.TryGetValue(sub, out var tokens))
+        {
+            if (tokens.ExpiresAt.HasValue && tokens.ExpiresAt.Value < DateTimeOffset.UtcNow)
+            {
+                _sessions.TryRemove(sub, out _);
+                return null;
+            }
+            return tokens;
+        }
+
+        return null;
     }
 
     public void Remove(string sub)
     {
         _sessions.TryRemove(sub, out _);
     }
-}
 
-public sealed record UserSessionTokens(
-    string AccessToken,
-    string? RefreshToken,
-    DateTimeOffset? ExpiresAt);
+    public void CleanupExpired()
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var (key, tokens) in _sessions)
+        {
+            if (tokens.ExpiresAt.HasValue && tokens.ExpiresAt.Value < now)
+            {
+                _sessions.TryRemove(key, out _);
+            }
+        }
+    }
+}

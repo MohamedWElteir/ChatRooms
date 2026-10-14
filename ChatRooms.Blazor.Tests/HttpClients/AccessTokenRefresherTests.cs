@@ -22,6 +22,7 @@ public class AccessTokenRefresherTests
                     ["Keycloak:Authority"] = "https://keycloak.local/realms/chatrooms"
                 })
                 .Build(),
+            sessionStore: null,
             NullLogger<AccessTokenRefresher>.Instance);
     }
 

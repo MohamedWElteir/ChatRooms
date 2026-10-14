@@ -14,14 +14,6 @@ public sealed class AccessTokenRefresher(
     ServerSessionStore? sessionStore,
     ILogger<AccessTokenRefresher> logger)
 {
-    public AccessTokenRefresher(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
-        ILogger<AccessTokenRefresher> logger)
-        : this(httpClientFactory, configuration, null, logger)
-    {
-    }
-
     private const string KeycloakHttpClientName = "keycloak";
     private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -128,8 +120,3 @@ public sealed class AccessTokenRefresher(
             DateTimeOffset.UtcNow.AddSeconds(Math.Max(expiresIn - 30, 0)));
     }
 }
-
-internal sealed record RefreshedTokenResult(
-    string AccessToken,
-    string? RefreshToken,
-    DateTimeOffset AccessTokenExpiresAt);

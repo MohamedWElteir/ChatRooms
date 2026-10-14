@@ -6,6 +6,6 @@ namespace ChatRooms.Application.Rooms.Commands;
 
 public interface IRoomRepository : IRepository<Room, RoomId>
 {
-    Task<Room?> GetByCode(RoomCode code, CancellationToken cancellationToken);
-    Task<bool> Exists(RoomCode code, CancellationToken cancellationToken);
+    Task<Room?> GetByCodeAsync(RoomCode code, CancellationToken cancellationToken);
+    Task<bool> ExistsAsync(RoomCode code, CancellationToken cancellationToken);
 }

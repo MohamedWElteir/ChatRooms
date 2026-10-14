@@ -6,5 +6,5 @@ namespace ChatRooms.Application.Users.Commands;
 
 public interface IUserRepository : IRepository<User, UserId>
 {
-    Task<User?> GetByEmail(Email email, CancellationToken cancellationToken);
+    Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken);
 }

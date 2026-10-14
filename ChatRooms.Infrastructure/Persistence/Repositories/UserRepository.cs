@@ -9,7 +9,7 @@ namespace ChatRooms.Infrastructure.Persistence.Repositories;
 public sealed class UserRepository(WriteDbContext dbContext)
     : GenericRepository<User, UserId>(dbContext), IUserRepository
 {
-    public async Task<User?> GetByEmail(Email email, CancellationToken cancellationToken)
+    public async Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken)
     {
         return await DbSet.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }

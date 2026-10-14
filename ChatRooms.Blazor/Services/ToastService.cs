@@ -1,8 +1,4 @@
-﻿namespace ChatRooms.Blazor.Services;
-
-public enum ToastVariant { Success, Error, Info }
-
-public sealed record Toast(Guid Id, string Title, string? Message, ToastVariant Variant);
+namespace ChatRooms.Blazor.Services;
 
 public sealed class ToastService(ILogger<ToastService> logger)
 {

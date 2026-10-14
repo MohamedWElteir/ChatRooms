@@ -1,24 +1,21 @@
 using ChatRooms.Application.Abstractions.Messaging;
-using ChatRooms.Application.Behaviors;
 using ChatRooms.Application.Exceptions;
-using MediatR;
+using ChatRooms.Infrastructure.Behaviors;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 
-namespace ChatRooms.Application.Tests.Behaviors;
+namespace ChatRooms.Infrastructure.Tests.Behaviors;
 
 public sealed record ConcurrencyTestCommand : ICommand<string>;
 
 public sealed class ConcurrencyBehaviorTests
 {
-    private readonly Mock<ILogger<ConcurrencyBehavior<ConcurrencyTestCommand, string>>> _loggerMock;
     private readonly ConcurrencyBehavior<ConcurrencyTestCommand, string> _behavior;
 
     public ConcurrencyBehaviorTests()
     {
-        _loggerMock = new Mock<ILogger<ConcurrencyBehavior<ConcurrencyTestCommand, string>>>();
-        _behavior = new ConcurrencyBehavior<ConcurrencyTestCommand, string>(_loggerMock.Object);
+        _behavior = new ConcurrencyBehavior<ConcurrencyTestCommand, string>(
+            NullLogger<ConcurrencyBehavior<ConcurrencyTestCommand, string>>.Instance);
     }
 
     [Fact]

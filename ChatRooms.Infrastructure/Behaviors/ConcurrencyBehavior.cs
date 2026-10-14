@@ -1,10 +1,10 @@
-﻿using ChatRooms.Application.Abstractions.Messaging;
+using ChatRooms.Application.Abstractions.Messaging;
 using ChatRooms.Application.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace ChatRooms.Application.Behaviors;
+namespace ChatRooms.Infrastructure.Behaviors;
 
 public sealed class ConcurrencyBehavior<TRequest, TResponse>(
     ILogger<ConcurrencyBehavior<TRequest, TResponse>> logger)

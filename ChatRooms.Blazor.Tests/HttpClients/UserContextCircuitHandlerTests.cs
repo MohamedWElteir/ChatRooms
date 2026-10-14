@@ -34,7 +34,11 @@ public class UserContextCircuitHandlerTests
     {
         var accessor = new HttpContextAccessor { HttpContext = httpContext };
         var userContext = new UserContext();
+        var emptyAuthStateProvider = new TestAuthStateProvider(new ClaimsPrincipal(new ClaimsIdentity()));
+        var sessionStore = new ServerSessionStore();
         var handler = new UserContextCircuitHandler(
+            emptyAuthStateProvider,
+            sessionStore,
             accessor,
             userContext,
             NullLogger<UserContextCircuitHandler>.Instance);

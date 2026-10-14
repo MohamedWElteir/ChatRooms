@@ -1,4 +1,4 @@
-﻿using ChatRooms.Domain.Shared;
+using ChatRooms.Domain.Shared;
 using ChatRooms.Infrastructure.Persistence.DB.Write;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,7 +29,7 @@ public sealed class OutboxRepository(
                                     AND "IsDeadLetter" = false
                                     AND (
                                           "ProcessingLeaseUntil" IS NULL
-                                          OR "ProcessingLeaseUntil" < {now}
+                                          OR "ProcessingLeaseUntil" < {now.DateTime}
                                         )
                                   ORDER BY "OccurredOn"
                                   FOR UPDATE SKIP LOCKED
@@ -66,10 +66,10 @@ public sealed class OutboxRepository(
         return await dbContext.Database.ExecuteSqlInterpolatedAsync(
             $"""
              UPDATE "OutboxMessages"
-             SET "ProcessingLeaseUntil" = {leaseUntil}
+             SET "ProcessingLeaseUntil" = {leaseUntil.DateTime}
              WHERE "Id" = ANY({ids})
                AND "ProcessingBy" = {workerId}
-               AND "ProcessingLeaseUntil" > {now}
+               AND "ProcessingLeaseUntil" > {now.DateTime}
                AND "IsProcessed" = false
                AND "IsDeadLetter" = false
              """,

@@ -1,4 +1,5 @@
-﻿using ChatRooms.Application.Abstractions.Persistence;
+using ChatRooms.Application.Abstractions.Persistence;
+using ChatRooms.Application.Exceptions;
 using ChatRooms.Domain.Rooms;
 using ChatRooms.Domain.Shared.Contracts;
 using ChatRooms.Domain.Users;
@@ -21,16 +22,25 @@ public sealed class WriteDbContext(DbContextOptions<WriteDbContext> options, IOu
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var aggregates = ChangeTracker
-            .Entries<IAggregateRoot>()
-            .Select(x => x.Entity)
-            .Where(aggregate => aggregate.DomainEvents.Count != 0)
-            .ToList();
+        try
+        {
+            var aggregates = ChangeTracker
+                .Entries<IAggregateRoot>()
+                .Select(x => x.Entity)
+                .Where(aggregate => aggregate.DomainEvents.Count != 0)
+                .ToList();
 
-        var messages = outboxMessageFactory.CreateOutboxMessages(aggregates);
-        OutboxMessages.AddRange(messages);
+            var messages = outboxMessageFactory.CreateOutboxMessages(aggregates);
+            OutboxMessages.AddRange(messages);
 
-        return await base.SaveChangesAsync(cancellationToken);
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConcurrencyConflictException(
+                "The resource was modified by another request. " +
+                "Please refresh and try again.");
+        }
     }
 
     Task<int> IUnitOfWork.SaveChangesAsync(CancellationToken cancellationToken)

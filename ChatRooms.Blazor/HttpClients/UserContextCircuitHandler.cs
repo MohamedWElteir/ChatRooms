@@ -13,14 +13,6 @@ public sealed class UserContextCircuitHandler(
     UserContext userContext,
     ILogger<UserContextCircuitHandler> logger) : CircuitHandler
 {
-    public UserContextCircuitHandler(
-        IHttpContextAccessor httpContextAccessor,
-        UserContext userContext,
-        ILogger<UserContextCircuitHandler> logger)
-        : this(new DummyAuthenticationStateProvider(), new ServerSessionStore(), httpContextAccessor, userContext, logger)
-    {
-    }
-
     public override async Task OnCircuitOpenedAsync(
         Circuit circuit, CancellationToken cancellationToken)
     {
@@ -103,10 +95,4 @@ public sealed class UserContextCircuitHandler(
 
     private static DateTimeOffset? TryParseAccessTokenExpiresAt(string? expiresAt)
         => DateTimeOffset.TryParse(expiresAt, out var parsed) ? parsed : null;
-
-    private sealed class DummyAuthenticationStateProvider : AuthenticationStateProvider
-    {
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
-            => Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
-    }
 }

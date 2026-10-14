@@ -15,5 +15,3 @@ public interface IRoomApiClient
     Task ArchiveAsync(Guid id, CancellationToken cancellationToken = default);
     Task RestoreAsync(Guid id, CancellationToken cancellationToken = default);
 }
-
-public sealed record CreateRoomRequest(string Name, int Capacity);
