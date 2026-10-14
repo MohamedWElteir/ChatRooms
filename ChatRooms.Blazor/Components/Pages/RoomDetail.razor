@@ -26,7 +26,14 @@
         {
             <div class="rd-error">
                 <p>@_error</p>
-                <AppButton Variant="secondary" Size="sm" OnClick="LoadRoom">Retry</AppButton>
+                @if (_isUnauthorized)
+                {
+                    <a href="/login" class="btn btn-primary btn-sm">Sign in again</a>
+                }
+                else
+                {
+                    <AppButton Variant="secondary" Size="sm" OnClick="LoadRoom">Retry</AppButton>
+                }
             </div>
         }
         else if (_room is not null)
@@ -119,6 +126,7 @@
     private RoomDto? _room;
     private bool _loading = true;
     private bool _actionLoading = false;
+    private bool _isUnauthorized = false;
     private string? _error;
 
     private bool _showRename = false;
@@ -139,6 +147,7 @@
     {
         _loading = true;
         _error = null;
+        _isUnauthorized = false;
         try
         {
             _room = await RoomApi.GetByIdAsync(Id);
@@ -151,6 +160,11 @@
                 _newName = _room.Name;
                 _newCapacity = _room.Capacity;
             }
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || (ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }))
+        {
+            _isUnauthorized = true;
+            _error = "Your session has expired. Please sign in again.";
         }
         catch (Exception ex)
         {
@@ -245,6 +259,10 @@
         try
         {
             await action();
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || (ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }))
+        {
+            Nav.NavigateTo("/login", forceLoad: true);
         }
         catch (Exception ex)
         {

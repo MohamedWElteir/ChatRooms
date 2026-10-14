@@ -11,8 +11,17 @@ namespace ChatRooms.Blazor.HttpClients;
 public sealed class AccessTokenRefresher(
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration,
+    ServerSessionStore? sessionStore,
     ILogger<AccessTokenRefresher> logger)
 {
+    public AccessTokenRefresher(
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration,
+        ILogger<AccessTokenRefresher> logger)
+        : this(httpClientFactory, configuration, null, logger)
+    {
+    }
+
     private const string KeycloakHttpClientName = "keycloak";
     private readonly SemaphoreSlim _lock = new(1, 1);
 
@@ -51,6 +60,15 @@ public sealed class AccessTokenRefresher(
                 refreshed.RefreshToken ?? refreshToken,
                 refreshed.AccessTokenExpiresAt);
 
+            if (!string.IsNullOrEmpty(userContext.Sub))
+            {
+                sessionStore?.Store(
+                    userContext.Sub,
+                    refreshed.AccessToken,
+                    refreshed.RefreshToken ?? refreshToken,
+                    refreshed.AccessTokenExpiresAt);
+            }
+
             return refreshed.AccessToken;
         }
         finally
@@ -83,8 +101,9 @@ public sealed class AccessTokenRefresher(
 
         if (!response.IsSuccessStatusCode)
         {
+            var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
             if (logger.IsEnabled(LogLevel.Warning))
-                logger.LogWarning("Access token refresh failed with status {Status}.", response.StatusCode);
+                logger.LogWarning("Access token refresh failed with status {Status}: {Body}", response.StatusCode, errorBody);
             return null;
         }
 

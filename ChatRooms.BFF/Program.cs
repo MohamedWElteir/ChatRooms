@@ -42,7 +42,7 @@ builder.Services.AddHttpClient<KeycloakTokenService>(client =>
 
 builder.Services.AddHttpClient<InternalApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https+http://chatrooms-api");
+    client.BaseAddress = new Uri("http://chatrooms-api");
 });
 
 builder.Services

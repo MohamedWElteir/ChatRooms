@@ -1,6 +1,7 @@
 using System.Net;
 using ChatRooms.Blazor.HttpClients;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ChatRooms.Blazor.Tests.HttpClients;
@@ -22,6 +23,52 @@ public class AccessTokenRefresherTests
                 })
                 .Build(),
             NullLogger<AccessTokenRefresher>.Instance);
+    }
+
+    private static CircuitServicesAccessor CreateAccessor(
+        UserContext userContext, AccessTokenRefresher refresher)
+    {
+        var services = new ServiceCollection()
+            .AddSingleton(userContext)
+            .AddSingleton(refresher)
+            .BuildServiceProvider();
+        return new CircuitServicesAccessor { Services = services };
+    }
+
+    [Fact]
+    public async Task AuthorizationDelegatingHandler_ResolvedFromSeparateScope_UsesCircuitUserContext()
+    {
+        // Reproduces the IHttpClientFactory gotcha: the handler lives in its own DI scope,
+        // so it must read the circuit's UserContext via CircuitServicesAccessor.
+        var keycloak = new StubHttpMessageHandler(_ => Task.FromResult(KeycloakResponses.Failure()));
+
+        var services = new ServiceCollection();
+        services.AddScoped<UserContext>();
+        services.AddScoped(sp => CreateRefresher(keycloak, sp.GetRequiredService<UserContext>()));
+        services.AddSingleton<CircuitServicesAccessor>();
+        services.AddTransient<AuthorizationDelegatingHandler>();
+        using var root = services.BuildServiceProvider();
+
+        using var circuitScope = root.CreateScope();
+        circuitScope.ServiceProvider.GetRequiredService<UserContext>()
+            .Initialize("sub-1", "circuit-token", "refresh-1", DateTimeOffset.UtcNow.AddMinutes(5));
+
+        var accessor = root.GetRequiredService<CircuitServicesAccessor>();
+        accessor.Services = circuitScope.ServiceProvider;
+
+        using var handlerScope = root.CreateScope();
+        string? sentToken = null;
+        var delegating = handlerScope.ServiceProvider.GetRequiredService<AuthorizationDelegatingHandler>();
+        delegating.InnerHandler = new StubHttpMessageHandler(request =>
+        {
+            sentToken = request.Headers.Authorization?.Parameter;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        });
+
+        await new HttpClient(delegating).GetAsync("http://api.local/rooms");
+
+        Assert.Equal("circuit-token", sentToken);
+        accessor.Services = null;
     }
 
     [Fact]
@@ -205,7 +252,7 @@ public class AccessTokenRefresherTests
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
         });
 
-        var delegating = new AuthorizationDelegatingHandler(userContext, refresher)
+        var delegating = new AuthorizationDelegatingHandler(CreateAccessor(userContext, refresher))
         {
             InnerHandler = inner
         };
@@ -233,7 +280,7 @@ public class AccessTokenRefresherTests
 
         var refresher = CreateRefresher(handler, userContext);
 
-        var delegating = new AuthorizationDelegatingHandler(userContext, refresher)
+        var delegating = new AuthorizationDelegatingHandler(CreateAccessor(userContext, refresher))
         {
             InnerHandler = new StubHttpMessageHandler(
                 _ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)))
@@ -247,5 +294,37 @@ public class AccessTokenRefresherTests
         Assert.False(userContext.HasValidAccessToken);
         Assert.Null(userContext.RefreshToken);
         Assert.Null(userContext.Sub);
+    }
+
+    [Fact]
+    public async Task GetValidAccessTokenAsync_WhenSessionStoreProvided_UpdatesStoreOnRefresh()
+    {
+        var handler = new StubHttpMessageHandler(
+            _ => Task.FromResult(KeycloakResponses.Success("new-access-token", "new-refresh-token")));
+
+        var userContext = new UserContext();
+        userContext.Initialize("sub-refresh", "expired", "old-refresh", DateTimeOffset.UtcNow.AddMinutes(-5));
+
+        var sessionStore = new ServerSessionStore();
+        var refresher = new AccessTokenRefresher(
+            new StubHttpClientFactory(handler),
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Keycloak:Realm"] = "chatrooms",
+                    ["Keycloak:ClientId"] = "chatrooms-bff",
+                    ["Keycloak:ClientSecret"] = "test-secret"
+                })
+                .Build(),
+            sessionStore,
+            NullLogger<AccessTokenRefresher>.Instance);
+
+        var token = await refresher.GetValidAccessTokenAsync(userContext, CancellationToken.None);
+
+        Assert.Equal("new-access-token", token);
+        var stored = sessionStore.Get("sub-refresh");
+        Assert.NotNull(stored);
+        Assert.Equal("new-access-token", stored.AccessToken);
+        Assert.Equal("new-refresh-token", stored.RefreshToken);
     }
 }

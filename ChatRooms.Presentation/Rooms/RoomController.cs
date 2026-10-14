@@ -26,8 +26,6 @@ namespace ChatRooms.Presentation.Rooms;
 [Route("api/rooms")]
 public sealed class RoomController(ISender sender) : ControllerBase
 {
-    public RoomController(ISender sender, IRoomQuery? _) : this(sender) { }
-
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<RoomListItem>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)

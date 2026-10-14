@@ -15,7 +15,7 @@ public sealed class RoomControllerGetByCodeTests
     public RoomControllerGetByCodeTests()
     {
         _senderMock = new Mock<ISender>();
-        _controller = new RoomController(_senderMock.Object, Mock.Of<Application.Rooms.Queries.IRoomQuery>());
+        _controller = new RoomController(_senderMock.Object);
     }
 
     [Fact]

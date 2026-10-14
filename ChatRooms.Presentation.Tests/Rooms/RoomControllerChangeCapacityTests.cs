@@ -19,7 +19,7 @@ public sealed class RoomControllerChangeCapacityTests
     public RoomControllerChangeCapacityTests()
     {
         _senderMock = new Mock<ISender>();
-        _controller = new RoomController(_senderMock.Object, Mock.Of<Application.Rooms.Queries.IRoomQuery>());
+        _controller = new RoomController(_senderMock.Object);
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-﻿<CascadingAuthenticationState>
+<CascadingAuthenticationState>
     <Router AppAssembly="typeof(Program).Assembly"
             NotFoundPage="typeof(Pages.NotFound)">
         <Found Context="routeData">
@@ -6,7 +6,8 @@
                 <NotAuthorized>
                     <div class="rl-empty" style="text-align:center;padding:4rem 2rem;">
                         <p style="font-size:1.25rem;font-weight:600;margin-bottom:0.5rem;">Sign in to continue</p>
-                        <p style="color:#888;">You need to be signed in to access this page.</p>
+                        <p style="color:#888;margin-bottom:1rem;">You need to be signed in to access this page.</p>
+                        <a href="/login" class="app-btn app-btn--primary app-btn--sm" style="display:inline-block;text-decoration:none;">Sign in →</a>
                     </div>
                 </NotAuthorized>
             </AuthorizeRouteView>

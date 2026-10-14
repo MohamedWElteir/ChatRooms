@@ -1,4 +1,4 @@
-﻿using ChatRooms.Application.Exceptions;
+using ChatRooms.Application.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 

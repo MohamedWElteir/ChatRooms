@@ -1,4 +1,4 @@
-﻿using ChatRooms.DTOs.Rooms;
+using ChatRooms.DTOs.Rooms;
 using ChatRooms.DTOs.Users;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;

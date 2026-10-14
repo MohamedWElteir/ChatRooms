@@ -41,7 +41,10 @@ var bff = builder.AddProject<Projects.ChatRooms_BFF>("chatrooms-bff")
 var blazor = builder.AddProject<Projects.ChatRooms_Blazor>("chatrooms-blazor")
     .WithReference(api)
     .WithReference(bff)
+    .WithReference(keycloak)
+    .WaitFor(api)
     .WaitFor(bff)
+    .WaitFor(keycloak)
     .WithEnvironment("Keycloak__ClientSecret", keycloakSecret);
 
 bff.WithEnvironment("BlazorAppUrl", blazor.GetEndpoint("https"));

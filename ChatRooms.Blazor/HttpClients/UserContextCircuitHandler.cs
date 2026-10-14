@@ -1,61 +1,112 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
-using System.Security.Claims;
 
 namespace ChatRooms.Blazor.HttpClients;
 
 public sealed class UserContextCircuitHandler(
+    AuthenticationStateProvider authenticationStateProvider,
+    ServerSessionStore sessionStore,
     IHttpContextAccessor httpContextAccessor,
     UserContext userContext,
     ILogger<UserContextCircuitHandler> logger) : CircuitHandler
 {
+    public UserContextCircuitHandler(
+        IHttpContextAccessor httpContextAccessor,
+        UserContext userContext,
+        ILogger<UserContextCircuitHandler> logger)
+        : this(new DummyAuthenticationStateProvider(), new ServerSessionStore(), httpContextAccessor, userContext, logger)
+    {
+    }
+
     public override async Task OnCircuitOpenedAsync(
         Circuit circuit, CancellationToken cancellationToken)
     {
-        // The access/refresh tokens live in the authentication cookie's
-        // AuthenticationProperties (SaveTokens). They are only readable while an
-        // HTTP request is being processed, so circuit establishment — which runs
-        // inside the initial connection request — is the last guaranteed point at
-        // which they can be captured. After this point the circuit must not depend
-        // on HttpContext (it is null for regular circuit activity). If that request
-        // context is unavailable here, the circuit session fails explicitly instead
-        // of silently degrading to anonymous API calls.
+        string? sub = null;
+
+        try
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                sub = authState.User.FindFirst("sub")?.Value
+                    ?? authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug(ex, "Error getting authentication state from AuthenticationStateProvider");
+        }
+
         var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext is null)
+        if (string.IsNullOrEmpty(sub) && httpContext is not null)
+        {
+            var authentication = await httpContext.AuthenticateAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+            if (authentication.Succeeded && authentication.Principal?.Identity?.IsAuthenticated == true)
+            {
+                sub = authentication.Principal.FindFirst("sub")?.Value
+                    ?? authentication.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+        }
+
+        if (string.IsNullOrEmpty(sub))
         {
             if (logger.IsEnabled(LogLevel.Warning))
-                logger.LogWarning(
-                    "Cannot initialize circuit user session: no HTTP request context available at circuit open.");
+                logger.LogWarning("Cannot initialize circuit user session: request or circuit is not authenticated.");
 
             userContext.MarkSessionExpired();
             return;
         }
 
-        var authentication = await httpContext.AuthenticateAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme);
-        if (!authentication.Succeeded
-            || authentication.Principal?.Identity?.IsAuthenticated != true)
+        var sessionTokens = sessionStore.Get(sub);
+        if (sessionTokens is not null)
         {
-            if (logger.IsEnabled(LogLevel.Warning))
-                logger.LogWarning(
-                    "Cannot initialize circuit user session: request is not authenticated.");
-
-            userContext.MarkSessionExpired();
+            userContext.Initialize(
+                sub,
+                sessionTokens.AccessToken,
+                sessionTokens.RefreshToken,
+                sessionTokens.ExpiresAt);
             return;
         }
 
-        var sub = authentication.Principal.FindFirst("sub")?.Value
-            ?? authentication.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (httpContext is not null)
+        {
+            var authentication = await httpContext.AuthenticateAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme);
+            if (authentication.Succeeded)
+            {
+                var properties = authentication.Properties;
+                var accessToken = properties?.GetTokenValue("access_token");
+                var refreshToken = properties?.GetTokenValue("refresh_token");
+                var expiresAt = TryParseAccessTokenExpiresAt(properties?.GetTokenValue("expires_at"));
 
-        var properties = authentication.Properties;
-        userContext.Initialize(
-            sub,
-            properties?.GetTokenValue("access_token"),
-            properties?.GetTokenValue("refresh_token"),
-            TryParseAccessTokenExpiresAt(properties?.GetTokenValue("expires_at")));
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    sessionStore.Store(sub, accessToken, refreshToken, expiresAt);
+                    userContext.Initialize(sub, accessToken, refreshToken, expiresAt);
+                    return;
+                }
+            }
+        }
+
+        if (logger.IsEnabled(LogLevel.Warning))
+        {
+            logger.LogWarning("Authenticated user {Sub} has no access token in session store or cookie properties.", sub);
+        }
+
+        userContext.Initialize(sub, null, null, null);
     }
 
     private static DateTimeOffset? TryParseAccessTokenExpiresAt(string? expiresAt)
         => DateTimeOffset.TryParse(expiresAt, out var parsed) ? parsed : null;
+
+    private sealed class DummyAuthenticationStateProvider : AuthenticationStateProvider
+    {
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+            => Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+    }
 }

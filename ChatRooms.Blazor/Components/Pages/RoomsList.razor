@@ -34,7 +34,14 @@
             {
                 <div class="rl-error">
                     <p>@_error</p>
-                    <AppButton Variant="secondary" Size="sm" OnClick="LoadRooms">Retry</AppButton>
+                    @if (_isUnauthorized)
+                    {
+                        <a href="/login" class="btn btn-primary btn-sm">Sign in again</a>
+                    }
+                    else
+                    {
+                        <AppButton Variant="secondary" Size="sm" OnClick="LoadRooms">Retry</AppButton>
+                    }
                 </div>
             }
             else if (Store.Items.Count == 0)
@@ -72,6 +79,7 @@
 @code {
     private CreateRoomModal _createModal = default!;
     private bool _loading = true;
+    private bool _isUnauthorized = false;
     private string? _error;
 
     protected override async Task OnInitializedAsync()
@@ -88,9 +96,15 @@
     {
         _loading = true;
         _error = null;
+        _isUnauthorized = false;
         try
         {
             await Store.LoadRoomsAsync();
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException || (ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }))
+        {
+            _isUnauthorized = true;
+            _error = "Your session has expired. Please sign in again.";
         }
         catch (Exception ex)
         {

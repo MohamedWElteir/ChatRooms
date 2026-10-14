@@ -63,7 +63,7 @@
             await Store.CreateAsync(new CreateRoomRequest(_name.Trim(), cap));
             _show = false;
         }
-        catch (HttpRequestException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized)
+        catch (Exception ex) when (ex is UnauthorizedAccessException || (ex is HttpRequestException { StatusCode: System.Net.HttpStatusCode.Unauthorized }))
         {
             Navigation.NavigateTo("/login", forceLoad: true);
         }

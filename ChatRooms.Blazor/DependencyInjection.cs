@@ -1,4 +1,4 @@
-﻿using ChatRooms.Blazor.HttpClients;
+using ChatRooms.Blazor.HttpClients;
 using ChatRooms.Blazor.Services;
 using ChatRooms.Blazor.Stores;
 
@@ -10,7 +10,7 @@ public static class DependencyInjection
     {
         services.AddHttpClient<IRoomApiClient, RoomApiClient>(client =>
         {
-            client.BaseAddress = new Uri("https+http://chatrooms-api");
+            client.BaseAddress = new Uri("http://chatrooms-api");
         })
         .AddHttpMessageHandler<AuthorizationDelegatingHandler>();
 
